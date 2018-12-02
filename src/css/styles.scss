@@ -1,0 +1,63 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    --lh: 25px;
+    --ch: 1ch;
+    height: auto;
+    background: #333;
+    color: #eee;
+    font-size: 20px;
+    padding: 25px;
+    line-height: var(--lh);
+}
+
+::selection {
+    background: #e33;
+}
+
+textarea {
+    width: 100%;
+    line-height: inherit;
+    font-size: inherit;
+    color: inherit;
+    height: auto;
+    background: inherit;
+    border: 0;
+    height: calc(var(--lh) * var(--height));
+    overflow: hidden;
+}
+
+pre {
+    margin: 0;
+}
+
+.editor {
+    position: relative;
+}
+
+.portal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: calc(var(--height) * var(--lh));
+    width: calc(var(--width) * var(--ch));
+    transform: translate(
+        calc(var(--left) * var(--ch)),
+        calc(var(--top) * var(--lh))
+    );
+    overflow: hidden;
+    box-shadow: 6.25px 6.25px 25px 12.5px rgba(0, 100, 255, 1);
+    background: #333;
+}
