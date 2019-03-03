@@ -2,21 +2,16 @@ import xs, { Stream } from 'xstream';
 import { VNodeStyle } from 'snabbdom/modules/style';
 import { BaseSources, BaseSinks } from '../interfaces';
 import sampleCombine from 'xstream/extra/sampleCombine';
-import { VNode, DOMSource, li, textarea } from '@cycle/dom';
-import { StateSource, makeCollection, Instances } from 'cycle-onionify';
-import { Sonnets } from 'shakespeare-data/lib/data/sonnets';
-import { isRegExp } from 'util';
-import { NONAME } from 'dns';
-
-const sonnets = new Sonnets();
+import { VNode, DOMSource } from '@cycle/dom';
+import { StateSource } from 'cycle-onionify';
 
 export function Editor({ DOM, onion, selection }: Sources): Sinks {
     const action$: Stream<Reducer> = intent(DOM);
     const vdom$: Stream<VNode> = view(onion.state$);
 
     const selection$ = selection.selections();
-    const range$ = selection.selections().filter(x => x.type === 'Range');
-    const caret$ = selection.selections().filter(x => x.type === 'Caret');
+    // const range$ = selection.selections().filter(x => x.type === 'Range');
+    // const caret$ = selection.selections().filter(x => x.type === 'Caret');
 
     function startDragging(target: string) {
         return DOM.select(target)

@@ -1,12 +1,11 @@
 import xs, { Stream } from 'xstream';
-import { VNode, DOMSource } from '@cycle/dom';
 import { StateSource } from 'cycle-onionify';
 import isolate from '@cycle/isolate';
 import { extractSinks } from 'cyclejs-utils';
 
 import { driverNames } from '../drivers';
 import { BaseSources, BaseSinks } from '../interfaces';
-import { RouteValue, routes, initialRoute } from '../routes';
+import { RouteValue, routes } from '../routes';
 
 import { State as PortalsState } from './editor';
 

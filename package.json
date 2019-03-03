@@ -13,7 +13,8 @@
         "lint-staged": "^7.0.3",
         "prettier": "^1.14.3",
         "progress-bar-webpack-plugin": "^1.11.0",
-        "snabbdom-to-html": "^5.1.0"
+        "snabbdom-to-html": "^5.1.0",
+        "tslint": "^5.13.1"
     },
     "dependencies": {
         "@cycle/dom": "^20.2.0",
