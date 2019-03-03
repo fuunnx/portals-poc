@@ -30,7 +30,7 @@ export const buildDrivers = (fn: DriverThunkMapper) =>
         .reduce((a, c) => Object.assign(a, c), {});
 
 export const driverNames = driverThunks
-    .map(([n, t]) => n)
+    .map(([n]) => n)
     .concat(['onion', 'router']);
 
 export function wrapMain(main: Component): Component {

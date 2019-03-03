@@ -2,11 +2,11 @@ import xs, { Stream } from 'xstream';
 import { VNodeStyle } from 'snabbdom/modules/style';
 import { BaseSources, BaseSinks } from '../interfaces';
 import sampleCombine from 'xstream/extra/sampleCombine';
-import { VNode, DOMSource } from '@cycle/dom';
+import { VNode } from '@cycle/dom';
 import { StateSource } from 'cycle-onionify';
 
 export function Editor({ DOM, onion, selection }: Sources): Sinks {
-    const action$: Stream<Reducer> = intent(DOM);
+    const action$: Stream<Reducer> = intent(/* DOM */);
     const vdom$: Stream<VNode> = view(onion.state$);
 
     const selection$ = selection.selections();
@@ -155,7 +155,7 @@ export function Editor({ DOM, onion, selection }: Sources): Sinks {
     };
 }
 
-function intent(DOM: DOMSource): Stream<Reducer> {
+function intent(/* DOM: DOMSource */): Stream<Reducer> {
     const init$ = xs.of<Reducer>(
         prevState => (prevState === undefined ? defaultState : prevState)
     );
@@ -164,7 +164,7 @@ function intent(DOM: DOMSource): Stream<Reducer> {
 }
 
 function view(state$: Stream<State>): Stream<VNode> {
-    return state$.map(({ instances, buffer, mode }) => {
+    return state$.map(({ instances, buffer }) => {
         const lines = buffer.split('\n').reduce((acc, line, i): Array<
             string | JSX.Element
         > => {
@@ -353,9 +353,9 @@ function fromLH(lh: number) {
 function toCH(px: number) {
     return Math.round(px / 12);
 }
-function fromCH(ch: number) {
-    return ch * 12;
-}
+// function fromCH(ch: number) {
+//     return ch * 12;
+// }
 
 function init<T>(arr: T[]) {
     const len = arr.length;
