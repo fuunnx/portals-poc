@@ -1,9 +1,5 @@
 import { setup, run } from '@cycle/run';
 import isolate from '@cycle/isolate';
-/// #if DEVELOPMENT
-import { restartable, rerunner } from 'cycle-restart';
-/// #endif
-
 import { buildDrivers, wrapMain } from './drivers';
 import { Component } from './interfaces';
 import { App } from './components/app';
@@ -14,6 +10,7 @@ const main: Component = wrapMain(App);
 run(main as any, buildDrivers(([k, t]) => [k, t()]));
 
 /// #else
+import { restartable, rerunner } from 'cycle-restart';
 const mkDrivers = () =>
     buildDrivers(([k, t]) => {
         if (k === 'DOM') {
