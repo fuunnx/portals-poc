@@ -24,7 +24,8 @@ export interface State {
 export const defaultState: State = {
     portals: {
         instances: [],
-        buffer: ''
+        buffer: '',
+        mode: 'edit'
     }
 };
 export type Reducer = (prev?: State) => State | undefined;

@@ -57,7 +57,8 @@ pre {
         calc(var(--left) * var(--ch)),
         calc(var(--top) * var(--lh))
     );
+    transition: transform 0.1s ease-out;
     overflow: hidden;
-    box-shadow: 6.25px 6.25px 25px 12.5px rgba(0, 100, 255, 1);
+    box-shadow: 6.25px 6.25px 25px 12.5px rgba(0, 100, 255, 0.2);
     background: #333;
 }

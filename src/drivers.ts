@@ -37,13 +37,9 @@ export const driverNames = driverThunks
     .concat(['onion', 'router']);
 
 export function wrapMain(main: Component): Component {
-    return routerify(
-        onionify(
-            storageify(main as any, {
-                key: 'cycle-spa-state',
-                debounce: 100 // wait for 100ms without state change before writing to localStorage
-            })
-        ),
-        switchPath
-    ) as any;
+    return routerify(onionify(main as any), switchPath) as any;
+            // storageify(main as any, {
+            //     key: 'cycle-spa-state',
+            //     debounce: 100 // wait for 100ms without state change before writing to localStorage
+            // })
 }
