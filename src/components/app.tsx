@@ -1,54 +1,43 @@
-import xs, { Stream } from 'xstream';
-import { StateSource } from 'cycle-onionify';
-import isolate from '@cycle/isolate';
-import { extractSinks } from 'cyclejs-utils';
+import { Stream } from 'xstream'
+import { StateSource } from 'cycle-onionify'
+import isolate from '@cycle/isolate'
+import { extractSinks } from 'cyclejs-utils'
 
-import { driverNames } from '../drivers';
-import { BaseSources, BaseSinks } from '../interfaces';
-import { RouteValue, routes } from '../routes';
+import { driverNames } from '../drivers'
+import { BaseSources, BaseSinks } from '../interfaces'
+import { RouteValue, routes } from '../routes'
 
-import { State as PortalsState } from './editor';
+import { State as PortalsState } from './Editor'
 
 export interface Sources extends BaseSources {
-    onion: StateSource<State>;
+    onion: StateSource<State>
 }
 export interface Sinks extends BaseSinks {
-    onion?: Stream<Reducer>;
+    onion?: Stream<Reducer>
 }
 
 // State
 export interface State {
-    portals?: PortalsState;
+    portals?: PortalsState
 }
-export const defaultState: State = {
-    portals: {
-        instances: [],
-        buffer: '',
-        mode: 'edit'
-    }
-};
-export type Reducer = (prev?: State) => State | undefined;
+
+export type Reducer = (prev?: State) => State | undefined
 
 export function App(sources: Sources): Sinks {
-    const initReducer$ = xs.of<Reducer>(
-        prevState => (prevState === undefined ? defaultState : prevState)
-    );
-
-    const match$ = sources.router.define(routes);
+    const match$ = sources.router.define(routes)
 
     const componentSinks$ = match$.map(
         ({ path, value }: { path: string; value: RouteValue }) => {
-            const { component, scope } = value;
+            const { component, scope } = value
             return isolate(component, scope)({
                 ...sources,
                 router: sources.router.path(path)
-            });
+            })
         }
-    );
+    )
 
-    const sinks = extractSinks(componentSinks$, driverNames);
+    const sinks = extractSinks(componentSinks$, driverNames)
     return {
-        ...sinks,
-        onion: xs.merge(initReducer$, sinks.onion)
-    };
+        ...sinks
+    }
 }

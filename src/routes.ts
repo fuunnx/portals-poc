@@ -1,16 +1,16 @@
-import { Component } from './interfaces';
-import { Editor } from './components/editor';
+import { Component } from './interfaces'
+import { Editor } from './components/Editor'
 
 export interface RouteValue {
-    component: Component;
-    scope: string;
+    component: Component
+    scope: string
 }
 export interface Routes {
-    readonly [index: string]: RouteValue;
+    readonly [index: string]: RouteValue
 }
 
 export const routes: Routes = {
-    '/': { component: Editor, scope: 'Editor' },
-};
+    '/': { component: Editor, scope: 'Editor' }
+}
 
-export const initialRoute = '/';
+export const initialRoute = '/'
