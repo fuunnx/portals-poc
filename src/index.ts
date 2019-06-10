@@ -6,9 +6,9 @@ import { restartable, rerunner } from 'cycle-restart';
 
 import { buildDrivers, wrapMain } from './drivers';
 import { Component } from './interfaces';
-import { App } from './components/app';
+import { Editor } from './components/editor';
 
-const main: Component = wrapMain(App);
+const main: Component = wrapMain(Editor);
 
 /// #if PRODUCTION
 run(main as any, buildDrivers(([k, t]) => [k, t()]));
