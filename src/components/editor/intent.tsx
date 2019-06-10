@@ -1,46 +1,108 @@
 import xs from 'xstream';
 import sampleCombine from 'xstream/extra/sampleCombine';
+import dropRepeats from 'xstream/extra/dropRepeats';
 import { Sources } from './index';
+import { init } from '../../libs/array';
+import { img } from '@cycle/dom';
 
-export function intent({ DOM, selection }: Sources) {
+export function intent({ DOM, selection, onion }: Sources) {
 
     const selection$ = selection.selections();
-    const range$ = selection.selections().filter(x => x.type === 'Range');
-    const caret$ = selection.selections().filter(x => x.type === 'Caret');
+    const range$ = xs.combine(
+        selection$,
+        onion.state$.map(x => x.buffer).compose(dropRepeats())
+    )
+        .map(([selec, buffer]) => {
+            if (selec.type !== 'Range') return null
 
-    const createPortal$ = DOM.select('document')
-        .events('mousedown')
-        .filter(e => e.altKey)
+            const range = selec.getRangeAt(0);
+            const allLines = buffer.split('\n');
+
+            const start = init(buffer.slice(0, range.startOffset).split('\n'))
+                .length;
+            const height = buffer
+                .slice(range.startOffset, range.endOffset)
+                .split('\n').length;
+            const end = start + height;
+            const selected = allLines.slice(start, end);
+
+            const left = selected
+                .map(x => (x.match(/^\s+/) || [''])[0].length)
+                .reduce((a, b) => Math.min(a, b), Infinity);
+
+            const width = selected
+                .map(x => x.length)
+                .reduce((a, b) => Math.max(a, b), 1);
+
+
+
+            return {
+                start,
+                end: start + height,
+                height,
+                width: width === left ? width : width - left,
+                top: start,
+                left: width === left ? left : 0,
+            }
+        });
+
+    const mouseDown$ = xs.merge(
+        DOM.select('document')
+            .events('mousedown'),
+        DOM.select('document')
+            .events('mouseup')
+            .mapTo(null),
+    ).startWith(null)
+
+    const copiable$ = xs.merge(
+        DOM.select('document')
+            .events('keydown')
+            .filter(e => e.key === 'Alt'),
+        DOM.select('document')
+            .events('keyup')
+            .filter(e => e.key === 'Alt')
+            .mapTo(null),
+    ).startWith(null)
+
+    const movable$ = xs.merge(
+        DOM.select('document')
+            .events('keydown')
+            .filter(e => e.key === 'Meta'),
+        DOM.select('document')
+            .events('keyup')
+            .filter(e => e.key === 'Meta')
+            .mapTo(null)
+    ).startWith(null)
+
+    const create$ = movable$.filter(Boolean)
         .compose(sampleCombine(selection$))
-        .map(([event, selection]) => ({ event, selection }))
-        .filter(({ selection }) => selection.type === 'Range')
-        .map(x =>
-            move$()
-                .take(1)
-                .mapTo(x)
-        )
-        .flatten()
+        .map(([, selection]) => selection)
+        .filter((selection) => selection.type === 'Range')
 
-    const movePortal$ = createPortal$
-        .map(({ event }) => {
-            const start = {
-                x: event.clientX,
-                y: event.clientY
-            };
+    // move$()
+    //     .map(({ event }) => {
+    //         const start = {
+    //             x: event.clientX,
+    //             y: event.clientY
+    //         };
 
-            return move$().map(e => ({
-                x: start.x - e.clientX,
-                y: start.y - e.clientY
-            }));
-        })
-        .flatten();
+    //         return move$().map(e => ({
+    //             x: start.x - e.clientX,
+    //             y: start.y - e.clientY
+    //         }));
+    //     })
+    //     .flatten();
 
 
     return {
-        input$: DOM.select('document')
+        input$: DOM
+            .select('document')
             .events('input'),
-        createPortal$,
-        movePortal$,
+        create$: xs.empty(),
+        range$,
+        movable$,
+        copiable$,
+        // movePortal$,
     };
 
     function move$() {

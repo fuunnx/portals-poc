@@ -6,9 +6,9 @@ import { restartable, rerunner } from 'cycle-restart';
 
 import { buildDrivers, wrapMain } from './drivers';
 import { Component } from './interfaces';
-import { Editor } from './components/editor';
+import { Main } from './components/main';
 
-const main: Component = wrapMain(Editor);
+const main: Component = wrapMain(Main);
 
 /// #if PRODUCTION
 run(main as any, buildDrivers(([k, t]) => [k, t()]));
@@ -28,8 +28,8 @@ const rerun = rerunner(setup, mkDrivers, isolate);
 rerun(main as any);
 
 if (module.hot) {
-    module.hot.accept('./components/app', () => {
-        const newApp = (require('./components/app') as any).App;
+    module.hot.accept('./components/main', () => {
+        const newApp = (require('./components/main') as any).Main;
 
         rerun(wrapMain(newApp));
     });

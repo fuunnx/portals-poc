@@ -35,6 +35,9 @@ export interface Portal {
 export interface State {
     buffer: String;
     instances: Portal[];
+    range: Portal | null;
+    movable: Boolean;
+    copiable: Boolean;
 }
 
 const defaultState: State = {
@@ -46,7 +49,10 @@ const defaultState: State = {
                 .lines.slice(0, Math.round(Math.random() * 4) + 1)
                 .join('\n')
         )
-        .join('\n\n')
+        .join('\n\n'),
+    range: null,
+    movable: false,
+    copiable: false,
 };
 export type Reducer = (prev: State) => State | undefined;
 
@@ -56,37 +62,12 @@ export function Editor(sources: Sources): Sinks {
     const intents = intent(sources);
     const vdom$: Stream<VNode> = view(onion.state$);
 
-    const createPortal$ = intents.createPortal$
-        .map(({ selection }) => (state: State) => {
-            const { buffer } = state
-            const range = selection.getRangeAt(0);
-            const allLines = buffer.split('\n');
-            const start = init(buffer.slice(0, range.startOffset).split('\n'))
-                .length;
-            const height = buffer
-                .slice(range.startOffset, range.endOffset)
-                .split('\n').length;
-            const end = start + height;
-            const selected = allLines.slice(start, end);
-
-            const left = selected
-                .map(x => (x.match(/^\s+/) || [''])[0].length)
-                .reduce((a, b) => Math.min(a, b), Infinity);
-
-            const width = selected
-                .map(x => x.length)
-                .reduce((a, b) => Math.max(a, b), 1);
-
+    const createPortal$ = intents.create$
+        .map(() => (state: State) => {
+            if (!state.range) return state
             return {
                 ...state,
-                instances: state.instances.concat({
-                    start,
-                    end: start + height,
-                    height,
-                    width: width === left ? width : width - left,
-                    top: start,
-                    left: width === left ? left : 0
-                })
+                instances: state.instances.concat([state.range])
             };
         });
 
@@ -108,6 +89,9 @@ export function Editor(sources: Sources): Sinks {
         onion: xs.merge(
             input$,
             init$,
+            intents.range$.map(range => (state: State) => ({ ...state, range })),
+            intents.movable$.map(movable => (state: State) => ({ ...state, movable: Boolean(movable) })),
+            intents.copiable$.map(copiable => (state: State) => ({ ...state, copiable: Boolean(copiable) })),
             createPortal$
         )
     };

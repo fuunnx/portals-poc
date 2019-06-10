@@ -9,6 +9,10 @@
       "property-declaration",
       "member-variable-declaration"
     ],
+    "semicolon": [
+      true,
+      "never"
+    ],
     "curly": true,
     "no-duplicate-variable": true,
     "no-empty": true,
@@ -21,6 +25,14 @@
     "use-isnan": true,
     "prefer-const": true,
     "class-name": true,
+    "trailing-comma": [
+      true,
+      {
+        "multiline": "always",
+        "singleline": "never",
+        "esSpecCompliant": true
+      }
+    ],
     "no-angle-bracket-type-assertion": true,
     "no-consecutive-blank-lines": true
   }

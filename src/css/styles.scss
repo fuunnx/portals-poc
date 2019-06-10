@@ -13,10 +13,12 @@ body {
 }
 
 body {
+    --primary-color: rgba(0, 100, 200, 1);
+    --background-color: #333;
     --lh: 25px;
     --ch: 1ch;
     height: auto;
-    background: #333;
+    background: var(--background-color);
     color: #eee;
     font-size: 20px;
     padding: 25px;
@@ -24,7 +26,7 @@ body {
 }
 
 ::selection {
-    background: #e33;
+    background: var(--primary-color);
 }
 
 textarea {
@@ -48,16 +50,26 @@ pre {
 }
 
 .portal {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: calc(var(--height) * var(--lh));
-    width: calc(var(--width) * var(--ch));
-    transform: translate(
-        calc(var(--left) * var(--ch)),
-        calc(var(--top) * var(--lh))
-    );
-    overflow: hidden;
-    box-shadow: 6.25px 6.25px 25px 12.5px rgba(0, 100, 255, 1);
-    background: #333;
+    & {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: calc(var(--height) * var(--lh));
+        width: calc(var(--width) * var(--ch));
+        transform: translate(
+            calc(var(--left) * var(--ch)),
+            calc(var(--top) * var(--lh))
+        );
+        overflow: hidden;
+        box-shadow: 2px 2px 5px 5px rgba(0, 100, 255, 0.1);
+        background: var(--background-color);
+    }
+    &.-movable {
+        top: calc(-1 * var(--lh) / 4);
+        left: calc(-1 * var(--lh) / 4);
+        border: calc(var(--lh) / 4) solid var(--background-color);
+        box-shadow: 0 0 0 calc(var(--lh) / 4) var(--primary-color);
+        box-sizing: content-box;
+        cursor: grab;
+    }
 }
