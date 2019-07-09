@@ -31,17 +31,15 @@ export function intent({ DOM, selection, onion }: Sources) {
 
             const width = selected
                 .map(x => x.length)
-                .reduce((a, b) => Math.max(a, b), 1)
-
-
+                .reduce((a, b) => Math.max(a, b), left)
 
             return {
                 start,
                 end: start + height,
                 height,
-                width: width === left ? width : width - left,
+                width: width - left,
                 top: start,
-                left: width === left ? left : 0,
+                left: left,
             }
         })
 

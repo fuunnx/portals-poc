@@ -16,6 +16,7 @@ export function view(state$: Stream<State>): Stream<VNode> {
                     className="portal"
                     movable={movable}
                     start={range.start}
+                    left={range.left}
                     style={{
                         '--start': String(range.start),
                         '--end': String(range.end),
@@ -32,6 +33,7 @@ export function view(state$: Stream<State>): Stream<VNode> {
                         className="portal"
                         movable={movable}
                         start={portal.start}
+                        left={portal.left}
                         style={{
                             '--start': String(portal.start),
                             '--end': String(portal.end),

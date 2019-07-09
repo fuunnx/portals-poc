@@ -4,6 +4,7 @@ interface BufferElement {
     className?: String
     style?: VNodeStyle
     start?: number
+    left?: number
     movable?: Boolean
 }
 
@@ -13,7 +14,8 @@ export function Buffer(
         className,
         style,
         movable,
-        start = 0
+        start = 0,
+        left = 0,
     }: BufferElement,
     children: JSX.Element[]
 ) {
@@ -23,11 +25,14 @@ export function Buffer(
             className={[className, 'buffer', movable && '-movable'].filter(Boolean).join(' ')}
             attrs-contenteditable={!movable}
             attrs-spellcheck={false}
-            scrolltop={25 * start}
+            scrollTop={25 * start}
+            scrollLeft={25 * left}
             hook={{
                 insert: vnode => {
                     if (vnode.elm) {
-                        (vnode.elm as HTMLElement).scrollTop = 25 * start
+                        let elm = vnode.elm as HTMLElement
+                        elm.scrollTop = 25 * start
+                        elm.scrollLeft = 12 * left
                     }
                 }
             }}
