@@ -1,12 +1,12 @@
-import xs from 'xstream';
-// import sampleCombine from 'xstream/extra/sampleCombine';
-import dropRepeats from 'xstream/extra/dropRepeats';
-import { Sources } from './index';
-import { init } from '../../libs/array';
+import xs from 'xstream'
+// import sampleCombine from 'xstream/extra/sampleCombine'
+import dropRepeats from 'xstream/extra/dropRepeats'
+import { Sources } from './index'
+import { init } from '../../libs/array'
 
 export function intent({ DOM, selection, onion }: Sources) {
 
-    const selection$ = selection.selections();
+    const selection$ = selection.selections()
     const range$ = xs.combine(
         selection$,
         onion.state$.map(x => x.buffer).compose(dropRepeats())
@@ -14,24 +14,24 @@ export function intent({ DOM, selection, onion }: Sources) {
         .map(([selec, buffer]) => {
             if (selec.type !== 'Range') return null
 
-            const range = selec.getRangeAt(0);
-            const allLines = buffer.split('\n');
+            const range = selec.getRangeAt(0)
+            const allLines = buffer.split('\n')
 
             const start = init(buffer.slice(0, range.startOffset).split('\n'))
-                .length;
+                .length
             const height = buffer
                 .slice(range.startOffset, range.endOffset)
-                .split('\n').length;
-            const end = start + height;
-            const selected = allLines.slice(start, end);
+                .split('\n').length
+            const end = start + height
+            const selected = allLines.slice(start, end)
 
             const left = selected
                 .map(x => (x.match(/^\s+/) || [''])[0].length)
-                .reduce((a, b) => Math.min(a, b), Infinity);
+                .reduce((a, b) => Math.min(a, b), Infinity)
 
             const width = selected
                 .map(x => x.length)
-                .reduce((a, b) => Math.max(a, b), 1);
+                .reduce((a, b) => Math.max(a, b), 1)
 
 
 
@@ -43,7 +43,7 @@ export function intent({ DOM, selection, onion }: Sources) {
                 top: start,
                 left: width === left ? left : 0,
             }
-        });
+        })
 
     const mouseDown$ = xs.merge(
         DOM.select('document')
@@ -83,14 +83,14 @@ export function intent({ DOM, selection, onion }: Sources) {
     //         const start = {
     //             x: event.clientX,
     //             y: event.clientY
-    //         };
+    //         }
 
     //         return move$().map(e => ({
     //             x: start.x - e.clientX,
     //             y: start.y - e.clientY
-    //         }));
+    //         }))
     //     })
-    //     .flatten();
+    //     .flatten()
 
 
     return {
@@ -103,7 +103,7 @@ export function intent({ DOM, selection, onion }: Sources) {
         copiable$,
         mouseDown$,
         // movePortal$,
-    };
+    }
 
     // function move$() {
     //     return DOM.select('document')
@@ -113,6 +113,6 @@ export function intent({ DOM, selection, onion }: Sources) {
     //                 DOM.select('document').events('mouseup'),
     //                 DOM.select('window').events('blur')
     //             )
-    //         );
+    //         )
     // }
 }

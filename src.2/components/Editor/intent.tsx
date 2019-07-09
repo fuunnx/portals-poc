@@ -1,5 +1,5 @@
 import xs, { Stream } from 'xstream'
-import { init } from '../../libs/list'
+import { init } from '../../../src/libs/array'
 import { Portal, Sources } from './index'
 import sampleCombine from 'xstream/extra/sampleCombine'
 

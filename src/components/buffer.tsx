@@ -1,4 +1,4 @@
-import { VNodeStyle } from 'snabbdom/modules/style';
+import { VNodeStyle } from 'snabbdom/modules/style'
 
 interface BufferElement {
     className?: String
@@ -27,12 +27,12 @@ export function Buffer(
             hook={{
                 insert: vnode => {
                     if (vnode.elm) {
-                        (vnode.elm as HTMLElement).scrollTop = 25 * start;
+                        (vnode.elm as HTMLElement).scrollTop = 25 * start
                     }
                 }
             }}
         >
             {children}
         </pre>
-    );
+    )
 }

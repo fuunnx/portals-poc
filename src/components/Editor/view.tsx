@@ -1,7 +1,7 @@
-import { Buffer } from '../buffer';
+import { Buffer } from '../buffer'
 import { State } from './index'
-import { Stream } from 'xstream';
-import { VNode } from '@cycle/dom';
+import { Stream } from 'xstream'
+import { VNode } from '@cycle/dom'
 
 export function view(state$: Stream<State>): Stream<VNode> {
     return state$.map(({ instances, buffer, movable, range, copiable }) => {
@@ -47,5 +47,5 @@ export function view(state$: Stream<State>): Stream<VNode> {
             </div>
         )
 
-    });
+    })
 }

@@ -1,5 +1,4 @@
 const path = require('path');
-const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 
 const appPath = (...names) => path.join(process.cwd(), ...names);
 
@@ -13,7 +12,9 @@ module.exports = {
         path: appPath('build'),
         publicPath: '/'
     },
-    plugins: [
-        new ProgressBarPlugin()
-    ]
-};
+    stats: "verbose",
+    devServer: {
+        clientLogLevel: 'warning',
+        stats: 'normal',
+    }
+}

@@ -9,11 +9,14 @@
       "member-variable-declaration"
     ],
     "curly": false,
-    "semicolon": [true, "never"],
+    "semicolon": [
+      true,
+      "never"
+    ],
     "no-duplicate-variable": true,
     "no-empty": true,
     "no-eval": true,
-    "no-null-keyword": true,
+    "no-null-keyword": false,
     "no-shadowed-variable": true,
     "no-var-keyword": true,
     "switch-default": true,
@@ -22,6 +25,6 @@
     "prefer-const": true,
     "class-name": true,
     "no-angle-bracket-type-assertion": true,
-    "no-consecutive-blank-lines": true
+    "no-consecutive-blank-lines": false
   }
 }

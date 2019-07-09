@@ -9,33 +9,33 @@
         "cyclejs-test-helpers": "^2.0.0",
         "html-looks-like": "^1.0.3",
         "husky": "^0.14.3",
-        "jsverify": "^0.8.3",
-        "lint-staged": "^7.0.3",
-        "prettier": "^1.14.3",
-        "progress-bar-webpack-plugin": "^1.11.0",
-        "snabbdom-to-html": "^5.1.0",
-        "tslint": "^5.13.1"
+        "jsverify": "^0.8.4",
+        "lint-staged": "^7.3.0",
+        "prettier": "^1.18.2",
+        "progress-bar-webpack-plugin": "^1.12.1",
+        "snabbdom-to-html": "^5.1.1",
+        "tslint": "^5.18.0"
     },
     "dependencies": {
-        "@cycle/dom": "^20.2.0",
+        "@cycle/dom": "^20.4.0",
         "@cycle/history": "^6.10.0",
-        "@cycle/http": "^14.9.0",
-        "@cycle/isolate": "^3.2.0",
-        "@cycle/run": "^4.1.0",
+        "@cycle/http": "^14.10.0",
+        "@cycle/isolate": "^3.4.0",
+        "@cycle/run": "^4.4.0",
         "@cycle/storage": "^5.0.3",
         "@cycle/time": "^0.13.0",
         "@typed/list": "^2.3.0",
-        "@types/webpack-env": "^1.13.6",
+        "@types/webpack-env": "^1.13.9",
         "any-observable": "^0.3.0",
-        "cycle-onionify": "^5.0.0",
+        "cycle-onionify": "^5.2.0",
         "cycle-selection-driver": "^1.1.1",
         "cycle-storageify": "^4.0.1",
-        "cyclejs-utils": "^3.1.0",
+        "cyclejs-utils": "^3.2.0",
         "cyclic-router": "^5.1.7",
         "ramda": "^0.25.0",
         "shakespeare-data": "^3.0.0",
         "switch-path": "^1.2.0",
-        "xstream": "^11.2.0",
+        "xstream": "^11.11.0",
         "xstream-sample": "^1.0.0"
     },
     "scripts": {
@@ -54,7 +54,9 @@
         ]
     },
     "prettier": {
-        "singleQuote": true
+        "singleQuote": true,
+        "trailingComma": "all",
+        "semi": false
     },
     "nyc": {
         "instrument": false,

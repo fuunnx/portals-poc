@@ -14,7 +14,16 @@
         "strict": true,
         "strictFunctionTypes": false,
         "allowJs": true,
-        "lib": ["es6", "es5", "dom"]
+        "watch": true,
+        "lib": [
+            "es6",
+            "es5",
+            "dom"
+        ]
     },
-    "exclude": ["node_modules", "build"]
+    "exclude": [
+        "node_modules",
+        "build",
+        "src/src.2"
+    ]
 }
