@@ -6,7 +6,7 @@ import { VNode } from '@cycle/dom'
 export function view(state$: Stream<State>): Stream<VNode> {
     return state$.map(({ instances, buffer, movable, range, copiable }) => {
 
-        console.log(buffer, copiable)
+        console.log(range)
         return (
             <div className="editor">
                 <Buffer movable={movable} style={{ '--height': String(buffer.split('\n').length) }}>

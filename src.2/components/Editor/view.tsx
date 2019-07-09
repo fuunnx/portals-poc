@@ -2,7 +2,7 @@ import { VNodeStyle } from 'snabbdom/modules/style'
 import { VNode } from '@cycle/dom'
 import { Stream } from 'xstream'
 import { State, Portal } from './index'
-import { init, last } from '../../libs/list'
+import { init, last } from '../../../src/libs/array'
 
 function getLines({
     buffer,
@@ -13,7 +13,7 @@ function getLines({
 }) {
     return buffer
         .split('\n')
-        .reduce(function(
+        .reduce(function (
             lines: Array<string | JSX.Element>,
             line,
             index
@@ -54,7 +54,7 @@ function getLines({
                 }
             ]
         },
-        [])
+            [])
 }
 
 export function view(state$: Stream<State>): Stream<VNode> {

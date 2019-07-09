@@ -17,7 +17,7 @@
     "no-empty": true,
     "no-eval": true,
     "no-null-keyword": false,
-    "no-shadowed-variable": true,
+    "no-shadowed-variable": "warning",
     "no-var-keyword": true,
     "switch-default": true,
     "triple-equals": true,
@@ -25,6 +25,9 @@
     "prefer-const": true,
     "class-name": true,
     "no-angle-bracket-type-assertion": true,
-    "no-consecutive-blank-lines": false
+    "no-consecutive-blank-lines": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "no-unused-variable": false
   }
 }
