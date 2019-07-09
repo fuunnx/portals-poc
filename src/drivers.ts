@@ -23,7 +23,7 @@ export const buildDrivers = (fn: DriverThunkMapper) =>
     .map(([n, t]: DriverThunk) => ({ [n]: t }))
     .reduce((a, c) => Object.assign(a, c), {});
 
-export const driverNames = driverThunks.map(([n, t]) => n).concat(['onion']);
+export const driverNames = driverThunks.map(([n]) => n).concat(['onion']);
 
 export function wrapMain(main: Component): Component {
   return onionify(main as any) as any;

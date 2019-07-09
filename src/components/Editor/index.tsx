@@ -5,7 +5,6 @@ import { StateSource } from 'cycle-onionify';
 import { Sonnets } from 'shakespeare-data/lib/data/sonnets';
 import { intent } from './intent';
 import { view } from './view';
-import { init } from '../../libs/array';
 
 const sonnets = new Sonnets();
 

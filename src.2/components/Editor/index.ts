@@ -1,5 +1,5 @@
 import { Stream } from 'xstream'
-import { BaseSources, BaseSinks } from '../../interfaces'
+import { BaseSources, BaseSinks } from '../../../src/interfaces'
 import { VNode } from '@cycle/dom'
 import { StateSource } from 'cycle-onionify'
 import { view } from './view'

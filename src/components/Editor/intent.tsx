@@ -1,139 +1,118 @@
-import xs, { Stream } from 'xstream'
-import { init } from '../../libs/list'
-import { Portal } from './index'
-import { Sources } from '.'
-import sampleCombine from 'xstream/extra/sampleCombine'
+import xs from 'xstream';
+// import sampleCombine from 'xstream/extra/sampleCombine';
+import dropRepeats from 'xstream/extra/dropRepeats';
+import { Sources } from './index';
+import { init } from '../../libs/array';
 
-export interface Intents {
-    dragMode$: Stream<boolean>
-    input$: Stream<string>
-    createPortal$: Stream<Portal>
-    movePortal$: Stream<{ id: string; left: number; top: number }>
-}
+export function intent({ DOM, selection, onion }: Sources) {
 
-export function intent({ selection, DOM, onion }: Sources): Intents {
-    const selection$ = selection.selections()
-    // const range$ = selection.selections().filter(x => x.type === 'Range');
-    // const caret$ = selection.selections().filter(x => x.type === 'Caret');
+    const selection$ = selection.selections();
+    const range$ = xs.combine(
+        selection$,
+        onion.state$.map(x => x.buffer).compose(dropRepeats())
+    )
+        .map(([selec, buffer]) => {
+            if (selec.type !== 'Range') return null
 
-    function startDragging(target: string) {
-        return DOM.select(target)
-            .events('mousedown')
-            .filter(e => e.altKey)
-            .map(x =>
-                move()
-                    .take(1)
-                    .mapTo(x)
-            )
-            .flatten()
-    }
+            const range = selec.getRangeAt(0);
+            const allLines = buffer.split('\n');
 
-    const createPortal$ = startDragging('document')
-        .compose(sampleCombine(selection$, onion.state$))
-        .filter(([, selec]) => selec.type === 'Range')
-        .map(([event, selec, { buffer }]) => {
-            const range = selec.getRangeAt(0)
-            const allLines = buffer.split('\n')
             const start = init(buffer.slice(0, range.startOffset).split('\n'))
-                .length
+                .length;
             const height = buffer
                 .slice(range.startOffset, range.endOffset)
-                .trim()
-                .split('\n').length
-            const end = start + height
-            const selected = allLines.slice(start, end)
+                .split('\n').length;
+            const end = start + height;
+            const selected = allLines.slice(start, end);
 
             const left = selected
                 .map(x => (x.match(/^\s+/) || [''])[0].length)
-                .reduce((a, b) => Math.min(a, b), Infinity)
+                .reduce((a, b) => Math.min(a, b), Infinity);
 
             const width = selected
                 .map(x => x.length)
-                .reduce((a, b) => Math.max(a, b), 1)
+                .reduce((a, b) => Math.max(a, b), 1);
+
+
 
             return {
-                event,
-                portal: {
-                    id: Math.random()
-                        .toString(16)
-                        .split('.')[1],
-                    start,
-                    end: start + height,
-                    height,
-                    width: width === left ? width : width - left,
-                    top: start,
-                    left: width === left ? left : 0
-                }
+                start,
+                end: start + height,
+                height,
+                width: width === left ? width : width - left,
+                top: start,
+                left: width === left ? left : 0,
             }
-        })
+        });
 
-    const dragStart$ = startDragging('[data-portal-id]')
-        .debug('starting')
-        .compose(sampleCombine(selection$, onion.state$.map(x => x.instances)))
-        .filter(([, selec]) => selec.type !== 'Range')
-        .map(([event, , instances]) => ({
-            event,
-            portal: instances.find(
-                portal =>
-                    portal.id === (event.target as HTMLElement).dataset.portalId
-            )
-        }))
-        .filter(x => Boolean(x.portal))
+    const mouseDown$ = xs.merge(
+        DOM.select('document')
+            .events('mousedown'),
+        DOM.select('document')
+            .events('mouseup')
+            .mapTo(null),
+    ).startWith(null)
 
-    const movePortal$ = xs
-        .merge(createPortal$, dragStart$)
-        .map(({ event, portal: portal_ }) => {
-            const portal = portal_ as Portal // wtf can't be undefined here
-            const start = { x: event.clientX, y: event.clientY }
-            event.target && (event.target as HTMLElement).blur()
-
-            return move().map(e => ({
-                id: portal.id,
-                left: portal.left + toCH(e.clientX - start.x),
-                top: portal.top + toLH(e.clientY - start.y)
-            }))
-        })
-        .flatten()
-        .debug('movePortal')
-
-    function move() {
-        return DOM.select('document')
-            .events('mousemove')
-            .endWhen(
-                xs.merge(
-                    DOM.select('document').events('mouseup'),
-                    DOM.select('window').events('blur')
-                )
-            )
-    }
-
-    const input$ = DOM.select('document')
-        .events('input')
-        .map(ev => (ev.target as HTMLElement).textContent || '')
-
-    const dragMode$ = xs.merge(
+    const copiable$ = xs.merge(
         DOM.select('document')
             .events('keydown')
-            .filter(x => x.altKey)
-            .mapTo(true),
+            .filter(e => e.key === 'Alt'),
         DOM.select('document')
             .events('keyup')
-            .filter(x => x.altKey)
-            .mapTo(false)
-    )
+            .filter(e => e.key === 'Alt')
+            .mapTo(null),
+    ).startWith(null)
+
+    const movable$ = xs.merge(
+        DOM.select('document')
+            .events('keydown')
+            .filter(e => e.key === 'Meta'),
+        DOM.select('document')
+            .events('keyup')
+            .filter(e => e.key === 'Meta')
+            .mapTo(null)
+    ).startWith(null)
+
+    // const create$ = movable$.filter(Boolean)
+    //     .compose(sampleCombine(selection$))
+    //     .map(([, selection]) => selection)
+    //     .filter((selection) => selection.type === 'Range')
+
+    // move$()
+    //     .map(({ event }) => {
+    //         const start = {
+    //             x: event.clientX,
+    //             y: event.clientY
+    //         };
+
+    //         return move$().map(e => ({
+    //             x: start.x - e.clientX,
+    //             y: start.y - e.clientY
+    //         }));
+    //     })
+    //     .flatten();
+
 
     return {
-        dragMode$,
-        input$,
-        createPortal$: createPortal$.map(x => x.portal),
-        movePortal$
-    }
-}
+        input$: DOM
+            .select('document')
+            .events('input'),
+        create$: xs.empty(),
+        range$,
+        movable$,
+        copiable$,
+        mouseDown$,
+        // movePortal$,
+    };
 
-function toLH(px: number) {
-    return Math.round(px / 25)
-}
-
-function toCH(px: number) {
-    return Math.round(px / 12)
+    // function move$() {
+    //     return DOM.select('document')
+    //         .events('mousemove')
+    //         .endWhen(
+    //             xs.merge(
+    //                 DOM.select('document').events('mouseup'),
+    //                 DOM.select('window').events('blur')
+    //             )
+    //         );
+    // }
 }
