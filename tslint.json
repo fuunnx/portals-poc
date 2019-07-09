@@ -4,16 +4,12 @@
     "no-reference": true,
     "typedef": [
       true,
-      "call-signature",
       "parameter",
       "property-declaration",
       "member-variable-declaration"
     ],
-    "semicolon": [
-      true,
-      "never"
-    ],
-    "curly": true,
+    "curly": false,
+    "semicolon": [true, "never"],
     "no-duplicate-variable": true,
     "no-empty": true,
     "no-eval": true,
@@ -25,14 +21,6 @@
     "use-isnan": true,
     "prefer-const": true,
     "class-name": true,
-    "trailing-comma": [
-      true,
-      {
-        "multiline": "always",
-        "singleline": "never",
-        "esSpecCompliant": true
-      }
-    ],
     "no-angle-bracket-type-assertion": true,
     "no-consecutive-blank-lines": true
   }

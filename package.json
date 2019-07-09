@@ -3,6 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "devDependencies": {
+        "cross-spawn": "^6.0.5",
         "cycle-restart": "^0.2.3",
         "cycle-scripts-one-fits-all": "5.4.3",
         "cyclejs-test-helpers": "^2.0.0",
@@ -12,7 +13,8 @@
         "lint-staged": "^7.0.3",
         "prettier": "^1.14.3",
         "progress-bar-webpack-plugin": "^1.11.0",
-        "snabbdom-to-html": "^5.1.0"
+        "snabbdom-to-html": "^5.1.0",
+        "tslint": "^5.13.1"
     },
     "dependencies": {
         "@cycle/dom": "^20.2.0",
@@ -22,7 +24,9 @@
         "@cycle/run": "^4.1.0",
         "@cycle/storage": "^5.0.3",
         "@cycle/time": "^0.13.0",
+        "@typed/list": "^2.3.0",
         "@types/webpack-env": "^1.13.6",
+        "any-observable": "^0.3.0",
         "cycle-onionify": "^5.0.0",
         "cycle-selection-driver": "^1.1.1",
         "cycle-storageify": "^4.0.1",
@@ -35,7 +39,7 @@
         "xstream-sample": "^1.0.0"
     },
     "scripts": {
-        "precommit": "lint-staged",
+        "_precommit": "lint-staged",
         "format": "prettier --write '{src,test}/**/*.{js,jsx,ts,tsx}'",
         "start": "cycle-scripts start",
         "test": "cycle-scripts test",
