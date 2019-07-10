@@ -15,7 +15,11 @@
         "strictFunctionTypes": false,
         "allowJs": true,
         "watch": true,
+        "types": [
+            "webpack-env"
+        ],
         "lib": [
+            "es2017",
             "es6",
             "es5",
             "dom"
