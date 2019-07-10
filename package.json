@@ -3,17 +3,20 @@
     "version": "0.1.0",
     "private": true,
     "devDependencies": {
+        "@types/jest": "^24.0.15",
         "cross-spawn": "^6.0.5",
         "cycle-restart": "^0.2.3",
         "cycle-scripts-one-fits-all": "5.4.3",
         "cyclejs-test-helpers": "^2.0.0",
         "html-looks-like": "^1.0.3",
         "husky": "^0.14.3",
+        "jest": "^24.8.0",
         "jsverify": "^0.8.4",
         "lint-staged": "^7.3.0",
         "prettier": "^1.18.2",
         "progress-bar-webpack-plugin": "^1.12.1",
         "snabbdom-to-html": "^5.1.1",
+        "ts-jest": "^24.0.2",
         "tslint": "^5.18.0"
     },
     "dependencies": {
@@ -42,7 +45,7 @@
         "_precommit": "lint-staged",
         "format": "prettier --write '{src,test}/**/*.{js,jsx,ts,tsx}'",
         "start": "cycle-scripts start",
-        "test": "cycle-scripts test",
+        "test": "jest --watch",
         "build": "cycle-scripts build",
         "eject": "cycle-scripts eject",
         "clean": "cycle-scripts clean"
