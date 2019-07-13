@@ -10,7 +10,7 @@ export interface Intents {
     movePortal$: Stream<{ id: string; left: number; top: number }>
 }
 
-export function intent({ selection, DOM, onion }: Sources): Intents {
+export function intent({ selection, DOM, state }: Sources): Intents {
     const selection$ = selection.selections()
     // const range$ = selection.selections().filter(x => x.type === 'Range');
     // const caret$ = selection.selections().filter(x => x.type === 'Caret');
@@ -28,7 +28,7 @@ export function intent({ selection, DOM, onion }: Sources): Intents {
     }
 
     const createPortal$ = startDragging('document')
-        .compose(sampleCombine(selection$, onion.state$))
+        .compose(sampleCombine(selection$, state.stream))
         .filter(([, selec]) => selec.type === 'Range')
         .map(([event, selec, { buffer }]) => {
             const range = selec.getRangeAt(0)
@@ -68,7 +68,7 @@ export function intent({ selection, DOM, onion }: Sources): Intents {
 
     const dragStart$ = startDragging('[data-portal-id]')
         .debug('starting')
-        .compose(sampleCombine(selection$, onion.state$.map(x => x.instances)))
+        .compose(sampleCombine(selection$, state.stream.map(x => x.instances)))
         .filter(([, selec]) => selec.type !== 'Range')
         .map(([event, , instances]) => ({
             event,

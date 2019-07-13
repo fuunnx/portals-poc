@@ -1,7 +1,7 @@
 import { Stream } from 'xstream'
 import { BaseSources, BaseSinks } from '../../../src/interfaces'
 import { VNode } from '@cycle/dom'
-import { StateSource } from 'cycle-onionify'
+import { StateSource } from '@cycle/state'
 import { view } from './view'
 import { update } from './update'
 import { Reducer } from './update'
@@ -9,9 +9,9 @@ import { intent } from './intent'
 
 export function Editor(sources: Sources): Sinks {
     const action$: Stream<Reducer> = update(intent(sources))
-    const vdom$: Stream<VNode> = view(sources.onion.state$)
+    const vdom$: Stream<VNode> = view(sources.state.stream)
 
-    return { DOM: vdom$, onion: action$ }
+    return { DOM: vdom$, state: action$ }
 }
 
 type LineCount = number
@@ -36,8 +36,8 @@ export interface State {
 
 // Types
 export interface Sources extends BaseSources {
-    onion: StateSource<State>
+    state: StateSource<State>
 }
 export interface Sinks extends BaseSinks {
-    onion?: Stream<Reducer>
+    state?: Stream<Reducer>
 }

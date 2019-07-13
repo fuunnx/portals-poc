@@ -4,12 +4,12 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 import { Sources } from './index'
 import { init } from '../../libs/array'
 
-export function intent({ DOM, selection, onion }: Sources) {
+export function intent({ DOM, selection, state }: Sources) {
 
     const selection$ = selection.selections()
     const range$ = xs.combine(
         selection$,
-        onion.state$.map(x => x.buffer).compose(dropRepeats())
+        state.stream.map(x => x.buffer).compose(dropRepeats())
     )
         .map(([selec, buffer]) => {
             if (selec.type !== 'Range') return null

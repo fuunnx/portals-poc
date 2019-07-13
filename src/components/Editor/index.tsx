@@ -1,17 +1,17 @@
 import xs, { Stream } from 'xstream'
 import { BaseSources, BaseSinks } from '../../interfaces'
 import { VNode } from '@cycle/dom'
-import { StateSource } from 'cycle-onionify'
+import { StateSource } from '@cycle/state'
 import { intent } from './intent'
 import { view } from './view'
 
 // Types
 export interface Sources extends BaseSources {
-    onion: StateSource<State>
+    state: StateSource<State>
 }
 
 export interface Sinks extends BaseSinks {
-    onion?: Stream<Reducer>
+    state?: Stream<Reducer>
 }
 
 type LineCount = number
@@ -72,23 +72,23 @@ export type Reducer = (prev: State) => State | undefined
 
 
 export function Editor(sources: Sources): Sinks {
-    const { onion } = sources
+    const { state } = sources
     const intents = intent(sources)
-    const vdom$: Stream<VNode> = view(onion.state$)
+    const vdom$: Stream<VNode> = view(state.stream)
 
     const createPortal$ = intents.create$
-        .map(() => (state: State) => {
-            if (!state.range) return state
+        .map(() => (currState: State) => {
+            if (!currState.range) return currState
             return {
-                ...state,
-                instances: state.instances.concat([state.range])
+                ...currState,
+                instances: currState.instances.concat([currState.range])
             }
         })
 
     const input$ = intents.input$
-        .map(ev => (state: State) => {
+        .map(ev => (currState: State) => {
             return {
-                ...state,
+                ...currState,
                 buffer: (ev.target as HTMLElement).textContent || ''
             }
         })
@@ -100,12 +100,12 @@ export function Editor(sources: Sources): Sinks {
 
     return {
         DOM: vdom$,
-        onion: xs.merge(
+        state: xs.merge(
             input$,
             init$,
-            intents.range$.map(range => (state: State) => ({ ...state, range })),
-            intents.movable$.map(movable => (state: State) => ({ ...state, movable: Boolean(movable) })),
-            intents.copiable$.map(copiable => (state: State) => ({ ...state, copiable: Boolean(copiable) })),
+            intents.range$.map(range => (curr: State) => ({ ...curr, range })),
+            intents.movable$.map(movable => (curr: State) => ({ ...curr, movable: Boolean(movable) })),
+            intents.copiable$.map(copiable => (curr: State) => ({ ...curr, copiable: Boolean(copiable) })),
             createPortal$
         )
     }
