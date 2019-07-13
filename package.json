@@ -3,9 +3,10 @@
     "version": "0.1.0",
     "private": true,
     "devDependencies": {
+        "@types/ramda": "github:types/npm-ramda#dist",
         "cross-spawn": "^6.0.5",
         "cycle-restart": "^0.2.3",
-        "cycle-scripts-one-fits-all": "5.4.3",
+        "cycle-scripts-one-fits-all": "^7.2.1",
         "cyclejs-test-helpers": "^2.0.0",
         "html-looks-like": "^1.0.3",
         "husky": "^0.14.3",

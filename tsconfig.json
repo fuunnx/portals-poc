@@ -9,14 +9,17 @@
         "jsxFactory": "Snabbdom.createElement",
         "noImplicitReturns": true,
         "noImplicitAny": true,
-        "noUnusedLocals": true,
+        "noUnusedLocals": false,
         "noUnusedParameters": false,
         "strict": true,
+        "esModuleInterop": true,
         "strictFunctionTypes": false,
         "allowJs": true,
         "watch": true,
+        "baseUrl": "./",
         "types": [
-            "webpack-env"
+            "webpack-env",
+            "ramda"
         ],
         "lib": [
             "es2017",
