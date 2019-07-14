@@ -7,7 +7,8 @@ interface BufferElement {
     start?: number
     left?: number
     end?: number
-    movable?: Boolean
+    movable?: Boolean,
+    value?: string,
 }
 
 
@@ -19,9 +20,9 @@ export function Buffer(
         movable,
         start = 0,
         left = 0,
-        end = 0
-    }: BufferElement,
-    children: JSX.Element[]
+        end = 0,
+        value = '',
+    }: BufferElement
 ) {
 
     return (
@@ -48,7 +49,7 @@ export function Buffer(
                     }
                 }
             }}
-            value={children}
+            value={value}
         />
     )
 }

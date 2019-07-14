@@ -40,5 +40,5 @@ function editor({ content, portals, buffer }: { content: Array<BufferContent>, p
 }
 
 function text(buffer: string, x: { start: number, end: number, type?: string }, key?: (string | number)) {
-    return <Buffer key={key} className={x.type || ''} start={x.start} end={x.end}>{buffer}</Buffer>
+    return <Buffer value={buffer} key={key} className={x.type || ''} start={x.start} end={x.end} />
 }
