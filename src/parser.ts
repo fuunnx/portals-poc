@@ -1,22 +1,40 @@
-import { is, last, isNil, filter } from 'ramda'
+import { is, last, isNil, filter, map, join } from 'ramda'
 
-interface Dict {
-    [id: string]: any;
+interface Dict<T> {
+    [id: string]: T
 }
 
+type BufferContent = string | Placeholder | Destination
+type PortalsDict = Dict<Portal>
+
+
 interface Context {
-    id?: string,
-    start?: number,
-    end?: number,
-    children: Array<Context | Token | string | Placeholder | Destination>,
-    portals: Dict,
-    parent?: Context,
+    content: Array<BufferContent>,
+    portals: Dict<Partial<Portal>>,
+}
+
+type LineCount = number
+type CharCount = number
+type Id = string
+
+export interface Portal {
+    id?: Id
+    start: LineCount
+    end: LineCount
+    width: CharCount
+    content: Array<BufferContent>,
+}
+
+export interface PortalInstance extends Portal {
+    top: LineCount
+    left: LineCount
+    height: LineCount
 }
 
 interface Token {
     tag: string
-    id: string
-    pos: ('start' | 'end' | undefined),
+    id: Id
+    pos?: ('start' | 'end'),
     original: string,
 }
 
@@ -30,113 +48,91 @@ interface Destination {
     for: string
 }
 
-export function parse(text: string) {
-    let lines = text.split('\n').map((line) => {
+
+export function parse(text: string): Context {
+    const lines = text.split('\n').map((line) => {
         return tokenize(line) || line
-    });
+    })
 
-    let portals = lines.reduce((portals, token, index) => {
-        if (is(String, token)) return portals
-
-        if (token.pos === 'start' && token.tag === 'portal') {
-            portals[token.id] = {
-                id: token.id,
-                start: index,
-            }
+    const context = lines.reduce((context, line, index) => {
+        if (is(String, line)) {
+            return pushToOpenedElements(line, context)
         }
-
-        if (token.pos === 'end' && token.tag === 'portal') {
-            let existing = portals[token.id]
-            if (existing) {
-                portals[token.id] = {
-                    ...existing,
-                    end: index,
+        if (line.tag === 'warp') {
+            pushToOpenedElements(line.original, context)
+            pushToOpenedElements({ type: 'destination', for: line.id }, context)
+            return context
+        }
+        if (line.tag === 'portal') {
+            if (line.pos === 'start') {
+                pushToOpenedElements(line.original, context)
+                pushToOpenedElements({ type: 'placeholder', for: line.id }, context)
+                context.portals[line.id] = {
+                    id: line.id,
+                    start: index + 1,
+                    content: []
                 }
-            }
-        }
-
-        return portals
-    }, {} as Dict)
-
-    let completePortals = filter(isComplete, portals)
-
-
-
-    const walk = makeWalker(lines)
-
-    function pushToChildren(context: Context, x: string) {
-        let prev = last(context.children)
-
-        if (is(String, prev)) {
-            context.children[(context.children.length - 1)] = `${prev}\n${x}`
-        } else {
-            context.children.push(x)
-        }
-        return context
-
-    }
-
-    function walker(context: Context, token: Token, index: number) {
-        if (is(String, token)) {
-            return pushToChildren(context, token as unknown as string)
-        }
-
-        if (token.tag === 'portal') {
-            if (token.pos === 'start') {
-                context = pushToChildren(context, token.original)
-                if (!completePortals[token.id]) return context
-
-                context.children.push({ type: 'placeholder', for: token.id })
-
-                context.portals[token.id] = walk(walker, {
-                    id: token.id,
-                    start: index + 2,
-                    children: [],
-                    portals: {},
-                    parent: context
-                })
-
                 return context
             }
+            if (line.pos === 'end') {
+                let matching = context.portals[line.id]
+                if (matching) {
+                    context.portals[line.id] = {
+                        ...matching,
+                        end: index - 1,
+                    }
+                }
 
-            if (token.pos === 'end' && token.id === context.id && context.parent) {
-                context.end = index
-                pushToChildren(context.parent, token.original)
-                delete context.parent
+                pushToOpenedElements(line.original, context)
+                return context
             }
         }
-
-        if (token.tag === 'warp') {
-            pushToChildren(context, token.original)
-            if (!completePortals[token.id]) return context
-
-            context.children.push({ type: 'destination', for: token.id })
-        }
-
         return context
-    }
+    }, { content: [], portals: {} } as Context)
 
-    return walk(walker, { children: [], portals: {} })
+    return joinStrings(context)
 }
 
+function pushToOpenedElements(toPush: BufferContent, context: Context): Context {
+    let openedPortals = Object.values(context.portals).filter(x => !isComplete(x))
 
-
-function makeWalker(lines: Array<Token | string>) {
-    let walked = lines.slice()
-    let index = -1
-
-    return function walk(walker: (i: Context, j: (Token | string), k?: number) => Context, context: Context) {
-        while (walked.length) {
-            let next = walked.shift()
-            if (next === undefined) continue
-            context = walker(context, next, index++)
-            if (isComplete(context)) {
-                break;
-            }
-        }
-
+    if (!openedPortals.length) {
+        context.content.push(toPush)
         return context
     }
+
+    openedPortals.forEach((portal = {}) => {
+        (portal.content || []).push(toPush)
+    })
+    return context
+}
+
+function joinStrings<T>(x: T): T {
+    if (Array.isArray(x)) {
+        return x.reduce((acc, curr) => {
+            const prev = last(acc)
+            if (is(String, curr)) {
+                if (is(String, prev)) {
+                    acc[acc.length - 1] = `${prev}\n${curr}`
+                } else {
+                    acc.push(curr)
+                }
+            } else {
+                acc.push(joinStrings(curr))
+            }
+
+            return acc
+        }, [])
+    }
+
+    if (x && ('content' in x)) {
+        return {
+            ...x,
+            content: joinStrings((x as unknown as { content: unknown }).content)
+        }
+    }
+
+    return x
 }
 
 
@@ -160,20 +156,20 @@ function tokenize(str: string) {
         original: str,
     }
 
-    tokens.forEach(str => {
-        if (str === 'WARP') {
+    tokens.forEach(token => {
+        if (token === 'WARP') {
             returned.tag = 'warp'
         }
-        if (str === 'PORTAL') {
+        if (token === 'PORTAL') {
             returned.tag = 'portal'
             returned.pos = 'start'
         }
-        if (str === '/PORTAL') {
+        if (token === '/PORTAL') {
             returned.tag = 'portal'
             returned.pos = 'end'
         }
-        if (returned.tag && str.startsWith('#')) {
-            returned.id = str.replace(/^#/, '')
+        if (returned.tag && token.startsWith('#')) {
+            returned.id = token.replace(/^#/, '')
         }
     })
 

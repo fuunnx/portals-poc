@@ -4,6 +4,7 @@ import { VNode } from '@cycle/dom'
 import { StateSource } from '@cycle/state'
 import { intent } from './intent'
 import { view } from './view'
+import { PortalInstance } from '../../parser'
 
 // Types
 export interface Sources extends BaseSources {
@@ -14,23 +15,12 @@ export interface Sinks extends BaseSinks {
     state?: Stream<Reducer>
 }
 
-type LineCount = number
-type CharCount = number
-
-export interface Portal {
-    start: LineCount
-    end: LineCount
-    width: CharCount
-    height: LineCount
-    top: LineCount
-    left: CharCount
-}
 
 // State
 export interface State {
-    buffer: String
-    instances: Portal[]
-    range: Portal | null
+    buffer: string
+    instances: Array<PortalInstance>
+    range: PortalInstance | null
     movable: Boolean
     copiable: Boolean
 }
@@ -41,14 +31,23 @@ const defaultState: State = {
     movable: false,
     copiable: false,
     buffer: `
+// PORTAL #1
 function fibonnaci (n) {
+    // PORTAL #2
     if (n === 1) {
         return 1
     }
+    // /PORTAL #2
+    // PORTAL #3
     return n + fibonnaci(n - 1)
+    // /PORTAL #3
+    // WARP #2
 }
-
+// /PORTAL #1
+ 
 fibonnaci(5) // = 15
+// WARP #1
+
 
 html\`
 <grid columns="3">

@@ -3,6 +3,7 @@ import xs from 'xstream'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { Sources } from './index'
 import { init } from '../../libs/array'
+import { PortalInstance } from 'src/parser';
 
 export function intent({ DOM, selection, state }: Sources) {
 
@@ -11,7 +12,7 @@ export function intent({ DOM, selection, state }: Sources) {
         selection$,
         state.stream.map(x => x.buffer).compose(dropRepeats())
     )
-        .map(([selec, buffer]) => {
+        .map(([selec, buffer]): (PortalInstance | null) => {
             if (selec.type !== 'Range') return null
 
             const range = selec.getRangeAt(0)
@@ -40,6 +41,7 @@ export function intent({ DOM, selection, state }: Sources) {
                 width: width - left,
                 top: start,
                 left: left,
+                content: []
             }
         })
 
