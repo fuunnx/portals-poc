@@ -28,18 +28,8 @@ Hello guys
 
 How are you ?
 `)).toEqual({
-    content: [
-      `
-// PORTAL #1`,
-      { type: 'placeholder', for: '1' },
-      `// /PORTAL #1
-
-How are you ?
-`
-    ],
-    portals: {
-      '1': { id: '1', start: 2, end: 2, content: ['Hello guys'] }
-    }
+    content: [{ type: 'text', start: 0, end: 6 }],
+    portals: {}
   });
 });
 
@@ -53,92 +43,78 @@ How are you ?
 // WARP #1
 `)).toEqual({
     content: [
-      `
-// PORTAL #1`,
-      { type: 'placeholder', for: '1' },
-      `// /PORTAL #1
-
-How are you ?
-// WARP #1`,
-      { type: 'destination', for: '1' },
-      ``
+      { type: 'text', start: 0, end: 0 },
+      { type: 'opening', start: 1, end: 1, for: '1' },
+      { type: 'ending', start: 3, end: 3, for: '1' },
+      { type: 'text', start: 4, end: 5 },
+      { type: 'destination', start: 6, end: 6, for: '1' },
+      { type: 'text', start: 7, end: 7 },
     ],
     portals: {
-      '1': { id: '1', start: 2, end: 2, content: ['Hello guys'] }
+      '1': { id: '1', start: 2, end: 2, content: [{ type: 'text', start: 2, end: 2 }], warped: true }
     }
   })
 })
 
-// balec !
-// Pour que ça fonctionne -> un premier passage pour récupérer les portails completes, puis construction de l'arbre
-// test('malformed', () => {
-//   expect(parse(`
-// // PORTAL #1
-// Hello guys
+test('malformed', () => {
+  expect(parse(`
+// PORTAL #1
+Hello guys
 
-// How are you ?
-// // WARP #1
-// `)).toEqual({
-//     content: [`
-// // PORTAL #1
-// Hello guys
-
-// How are you ?
-// // WARP #1
-// `
-//     ],
-//     portals: {}
-//   });
-// });
+How are you ?
+// WARP #1
+`)).toEqual({
+    content: [{ type: 'text', start: 0, end: 6 }],
+    portals: {}
+  });
+});
 
 // Balec aussi
-// test('nested', () => {
-//   expect(parse(`
-// // PORTAL #1
-// Hello
-// // PORTAL #2
-// guys
-// // /PORTAL #2
-// // /PORTAL #1
+test('nested', () => {
+  expect(parse(`
+// PORTAL #1
+Hello
+// PORTAL #2
+guys
+// /PORTAL #2
+// /PORTAL #1
 
-// How are you ?
-// // WARP #1
-// `)).toEqual({
-//     children: [
-//       `
-// // PORTAL #1`,
-//       { type: 'placeholder', for: '1' },
-//       `// /PORTAL #1
+How are you ?
+// WARP #1
+// WARP #2
+`)).toEqual({
+    content: [
+      { type: 'text', start: 0, end: 0 },
+      { type: 'opening', start: 1, end: 1, for: '1' },
+      { type: 'ending', start: 6, end: 6, for: '1' },
+      { type: 'text', start: 7, end: 8 },
+      { type: 'destination', start: 9, end: 9, for: '1' },
+      { type: 'destination', start: 10, end: 10, for: '2' },
+      { type: 'text', start: 11, end: 11 },
+    ],
+    portals: {
+      '1': {
+        id: '1',
+        start: 2,
+        end: 5,
+        content: [
+          { type: 'text', start: 2, end: 2 },
+          { type: 'opening', start: 3, end: 3, for: '2' },
+          { type: 'ending', start: 5, end: 5, for: '2' },
+        ],
+        warped: true,
+      },
 
-// How are you ?
-// // WARP #1`,
-//       { type: 'destination', for: '1' },
-//       ``
-//     ],
-//     portals: {
-//       '1': {
-//         id: '1',
-//         start: 2,
-//         end: 5,
-//         content: [
-//           `Hello
-// // PORTAL #2`,
-//           { type: 'placeholder', for: '2' },
-//           `// /PORTAL #2`
-//         ],
-//       },
-
-//       '2': {
-//         id: '2',
-//         start: 4,
-//         end: 4,
-//         content: ['guys'],
-//       },
-
-//     },
-
-//   });
-// });
+      '2': {
+        id: '2',
+        start: 4,
+        end: 4,
+        content: [{ type: 'text', start: 4, end: 4 },],
+        warped: true,
+      },
+    },
+  });
+});
 
 // let's keep it simple for now
 // test('superposed', () => {
@@ -152,17 +128,16 @@ How are you ?
 
 // How are you ?
 // // WARP #1
+// // WARP #2
 // `)).toEqual({
-//     children: [
-//       `
-// // PORTAL #2`,
-//       { type: 'placeholder', for: '1' },
-//       `// PORTAL #1
-
-// How are you ?
-// // WARP #1`,
-//       { type: 'destination', for: '1' },
-//       ``
+//     content: [
+//       { type: 'text', start: 0, end: 0 },
+//       { type: 'opening', start: 1, end: 1, for: '2' },
+//       { type: 'ending', start: 6, end: 6, for: '1' },
+//       { type: 'text', start: 7, end: 8 },
+//       { type: 'destination', start: 9, end: 9, for: '1' },
+//       { type: 'destination', start: 10, end: 10, for: '2' },
+//       { type: 'text', start: 11, end: 11 },
 //     ],
 //     portals: {
 //       '1': {
@@ -170,21 +145,20 @@ How are you ?
 //         start: 2,
 //         end: 5,
 //         content: [
-//           `Hello
-// // PORTAL #2`,
-//           { type: 'placeholder', for: '2' },
-//           `// /PORTAL #2`
+//           { type: 'text', start: 2, end: 2 },
+//           { type: 'opening', start: 3, end: 3, for: '2' },
+//           { type: 'ending', start: 5, end: 5, for: '2' },
 //         ],
+//         warped: true,
 //       },
 
 //       '2': {
 //         id: '2',
 //         start: 4,
 //         end: 4,
-//         content: ['guys'],
+//         content: [{ type: 'text', start: 4, end: 4 },],
+//         warped: true,
 //       },
-
 //     },
-
 //   });
 // });

@@ -31,7 +31,7 @@ const defaultState: State = {
     movable: false,
     copiable: false,
     buffer: `
-// PORTAL #1
+// PORTAL #fibonnaci
 function fibonnaci (n) {
     // PORTAL #2
     if (n === 1) {
@@ -43,10 +43,10 @@ function fibonnaci (n) {
     // /PORTAL #3
     // WARP #2
 }
-// /PORTAL #1
+// /PORTAL #fibonnaci
  
 fibonnaci(5) // = 15
-// WARP #1
+// WARP #fibonnaci
 
 
 html\`

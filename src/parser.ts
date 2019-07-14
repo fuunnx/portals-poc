@@ -10,7 +10,7 @@ export type PortalsDict = Dict<Portal>
 
 interface Context {
     content: Array<BufferContent>,
-    portals: Dict<Partial<Portal>>,
+    portals: Dict<Portal>,
 }
 
 type LineCount = number
@@ -22,7 +22,8 @@ export interface Portal {
     start: LineCount
     end: LineCount
     width: CharCount
-    content: Array<BufferContent>,
+    content: Array<BufferContent>
+    warped?: boolean
 }
 
 export interface PortalInstance extends Portal {
@@ -76,53 +77,79 @@ export function parse(text: string): Context {
         return tokenize(line) || line
     })
 
-    const ctx = lines.reduce((context, line, index) => {
-        if (is(String, line)) {
-            return pushToOpenedElements({ type: 'text', start: index, end: index }, context)
-        }
+    const portals = filter(isComplete, lines.reduce((dict, line, index) => {
+        if (is(String, line)) { return dict }
         if (line.tag === 'warp') {
-            pushToOpenedElements({ type: 'destination', for: line.id, start: index, end: index }, context)
-            return context
+            dict[line.id] = {
+                ...dict[line.id],
+                id: line.id,
+                warped: true,
+            }
+        }
+
+        if (line.tag !== 'portal') { return dict }
+
+        if (line.pos === 'start') {
+            dict[line.id] = {
+                ...dict[line.id],
+                id: line.id,
+                start: index + 1,
+                content: []
+            }
+        }
+
+        if (line.pos === 'end') {
+            if (dict[line.id]) {
+                dict[line.id] = {
+                    ...dict[line.id],
+                    end: index - 1,
+                }
+            }
+        }
+
+        return dict
+    }, {} as Dict<Partial<Portal>>))
+
+    const ctx = lines.reduce((context, line, index) => {
+        if (is(String, line) || !portals[line.id]) {
+            return pushToContext({ type: 'text', start: index, end: index }, context, index)
+        }
+
+
+        if (line.tag === 'warp') {
+            return pushToContext({ type: 'destination', for: line.id, start: index, end: index }, context, index)
         }
         if (line.tag === 'portal') {
             if (line.pos === 'start') {
-                pushToOpenedElements({ type: 'opening', for: line.id, start: index, end: index }, context)
-                context.portals[line.id] = {
-                    id: line.id,
-                    start: index + 1,
-                    content: []
-                }
-                return context
+                return pushToContext({ type: 'opening', for: line.id, start: index, end: index }, context, index)
             }
             if (line.pos === 'end') {
-                let matching = context.portals[line.id]
-                if (matching) {
-                    context.portals[line.id] = {
-                        ...matching,
-                        end: index - 1,
-                    }
-                }
-
-                pushToOpenedElements({ type: 'ending', for: line.id, start: index, end: index }, context)
-                return context
+                return pushToContext({ type: 'ending', for: line.id, start: index, end: index }, context, index)
             }
         }
         return context
-    }, { content: [], portals: {} } as Context)
+    }, { content: [], portals } as Context)
 
     return joinStrings(ctx)
 }
 
-function pushToOpenedElements(toPush: BufferContent, context: Context): Context {
-    let openedPortals = Object.values(context.portals).filter(x => !isComplete(x))
+function pushToContext(toPush: BufferContent, context: Context, index: number): Context {
+    let openedPortals = Object.values(context.portals).filter(portal => {
+        return portal.start <= index && index <= portal.end
+    })
 
     if (!openedPortals.length) {
         context.content.push(toPush)
         return context
     }
 
-    openedPortals.forEach((portal = {}) => {
-        (portal.content || []).push(toPush)
+    openedPortals.forEach((portal) => {
+        const smallerPortalsInside = openedPortals.some(x => {
+            return x.id !== portal.id && portal.start <= x.start && x.start <= portal.end
+        })
+        if (!smallerPortalsInside) {
+            portal.content.push(toPush)
+        }
     })
     return context
 }
@@ -164,7 +191,7 @@ function joinStrings<T>(x: T): T {
 
 
 function isComplete(x: any) {
-    return x && !isNil(x.start) && !isNil(x.end)
+    return x && x.warped && !isNil(x.start) && !isNil(x.end)
 }
 
 function isComment(str: string) {
