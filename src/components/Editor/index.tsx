@@ -88,7 +88,7 @@ export function Editor(sources: Sources): Sinks {
         .map(ev => (currState: State) => {
             return {
                 ...currState,
-                buffer: (ev.target as HTMLElement).textContent || ''
+                buffer: (ev.target as HTMLInputElement).value || ''
             }
         })
 

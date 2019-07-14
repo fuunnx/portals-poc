@@ -4,8 +4,8 @@ interface Dict<T> {
     [id: string]: T
 }
 
-type BufferContent = string | Placeholder | Destination
-type PortalsDict = Dict<Portal>
+export type BufferContent = Placeholder | Destination | Text | Opening | Ending
+export type PortalsDict = Dict<Portal>
 
 
 interface Context {
@@ -38,14 +38,36 @@ interface Token {
     original: string,
 }
 
-interface Placeholder {
+export interface Opening {
+    type: 'opening'
+    for: string
+    start: LineCount
+    end: LineCount
+}
+
+export interface Ending {
+    type: 'ending'
+    for: string
+    start: LineCount
+    end: LineCount
+}
+
+export interface Placeholder {
     type: 'placeholder'
     for: string
 }
 
-interface Destination {
+export interface Destination {
     type: 'destination'
     for: string
+    start: LineCount
+    end: LineCount
+}
+
+export interface Text {
+    type: 'text'
+    start: LineCount
+    end: LineCount
 }
 
 
@@ -54,19 +76,17 @@ export function parse(text: string): Context {
         return tokenize(line) || line
     })
 
-    const context = lines.reduce((context, line, index) => {
+    const ctx = lines.reduce((context, line, index) => {
         if (is(String, line)) {
-            return pushToOpenedElements(line, context)
+            return pushToOpenedElements({ type: 'text', start: index, end: index }, context)
         }
         if (line.tag === 'warp') {
-            pushToOpenedElements(line.original, context)
-            pushToOpenedElements({ type: 'destination', for: line.id }, context)
+            pushToOpenedElements({ type: 'destination', for: line.id, start: index, end: index }, context)
             return context
         }
         if (line.tag === 'portal') {
             if (line.pos === 'start') {
-                pushToOpenedElements(line.original, context)
-                pushToOpenedElements({ type: 'placeholder', for: line.id }, context)
+                pushToOpenedElements({ type: 'opening', for: line.id, start: index, end: index }, context)
                 context.portals[line.id] = {
                     id: line.id,
                     start: index + 1,
@@ -83,14 +103,14 @@ export function parse(text: string): Context {
                     }
                 }
 
-                pushToOpenedElements(line.original, context)
+                pushToOpenedElements({ type: 'ending', for: line.id, start: index, end: index }, context)
                 return context
             }
         }
         return context
     }, { content: [], portals: {} } as Context)
 
-    return joinStrings(context)
+    return joinStrings(ctx)
 }
 
 function pushToOpenedElements(toPush: BufferContent, context: Context): Context {
@@ -111,9 +131,9 @@ function joinStrings<T>(x: T): T {
     if (Array.isArray(x)) {
         return x.reduce((acc, curr) => {
             const prev = last(acc)
-            if (is(String, curr)) {
-                if (is(String, prev)) {
-                    acc[acc.length - 1] = `${prev}\n${curr}`
+            if (curr.type === 'text') {
+                if (prev && prev.type === 'text') {
+                    prev.end = curr.end
                 } else {
                     acc.push(curr)
                 }
@@ -125,8 +145,15 @@ function joinStrings<T>(x: T): T {
         }, [])
     }
 
+    if (x && ('portals' in x)) {
+        let portals = (x as unknown as { portals: unknown }).portals as Dict<T>
+        x = {
+            ...x,
+            portals: map(joinStrings, portals)
+        }
+    }
     if (x && ('content' in x)) {
-        return {
+        x = {
             ...x,
             content: joinStrings((x as unknown as { content: unknown }).content)
         }

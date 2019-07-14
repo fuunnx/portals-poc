@@ -3,7 +3,7 @@ import xs from 'xstream'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { Sources } from './index'
 import { init } from '../../libs/array'
-import { PortalInstance } from 'src/parser';
+import { PortalInstance } from 'src/parser'
 
 export function intent({ DOM, selection, state }: Sources) {
 

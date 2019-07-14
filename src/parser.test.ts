@@ -5,7 +5,7 @@ import { parse } from './parser'
 test('empty text', () => {
   expect(parse('')).toEqual({
     portals: {},
-    content: [''],
+    content: [{ type: 'text', start: 0, end: 0 }],
   });
 });
 
@@ -16,12 +16,7 @@ Hello guys
 How are you ?
 `)).toEqual({
     portals: {},
-    content: [`
-Hello guys
-
-How are you ?
-`,
-    ],
+    content: [{ type: 'text', start: 0, end: 4 }],
   });
 });
 
