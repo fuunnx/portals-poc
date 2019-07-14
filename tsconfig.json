@@ -17,6 +17,7 @@
         "allowJs": true,
         "watch": true,
         "baseUrl": "./",
+        "outDir": "./build",
         "types": [
             "webpack-env",
             "ramda"
