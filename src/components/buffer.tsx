@@ -9,6 +9,7 @@ interface BufferElement {
     end?: number
     movable?: Boolean,
     value?: string,
+    width?: number,
 }
 
 
@@ -22,6 +23,7 @@ export function Buffer(
         left = 0,
         end = 0,
         value = '',
+        width = 0,
     }: BufferElement
 ) {
 
@@ -29,7 +31,7 @@ export function Buffer(
 
         <textarea
             key={key || `id-${start}-${end}`}
-            style={Object.assign({ '--height': String(end - start + 1) }, style)}
+            style={Object.assign({ '--height': String(end - start + 1), '--width': String(width || 999) }, style)}
             className={[className, 'buffer', movable && '-movable'].filter(Boolean).join(' ')}
             attrs-contenteditable={!movable}
             attrs-spellcheck={false}

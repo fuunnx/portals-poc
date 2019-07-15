@@ -39,36 +39,34 @@ interface Token {
     original: string,
 }
 
-export interface Opening {
+export interface Opening extends Ref {
     type: 'opening'
-    for: string
-    start: LineCount
-    end: LineCount
 }
 
-export interface Ending {
+export interface Ending extends Ref {
     type: 'ending'
-    for: string
-    start: LineCount
-    end: LineCount
 }
 
-export interface Placeholder {
+export interface Placeholder extends Ref {
     type: 'placeholder'
-    for: string
 }
 
-export interface Destination {
+export interface Destination extends Ref {
     type: 'destination'
-    for: string
-    start: LineCount
-    end: LineCount
 }
 
-export interface Text {
+export interface Text extends Base {
     type: 'text'
+}
+
+interface Ref extends Base {
+    for: Id
+}
+
+interface Base {
     start: LineCount
     end: LineCount
+    width: CharCount
 }
 
 
@@ -94,6 +92,7 @@ export function parse(text: string): Context {
                 ...dict[line.id],
                 id: line.id,
                 start: index + 1,
+                width: 0,
                 content: []
             }
         }
@@ -108,29 +107,48 @@ export function parse(text: string): Context {
         }
 
         return dict
-    }, {} as Dict<Partial<Portal>>))
+    }, {} as Dict<Partial<Portal>>)) as Dict<Portal>
 
     const ctx = lines.reduce((context, line, index) => {
-        if (is(String, line) || !portals[line.id]) {
-            return pushToContext({ type: 'text', start: index, end: index }, context, index)
+        if (is(String, line)) {
+            return pushToContext({ type: 'text', start: index, end: index, width: line.length }, context, index)
+        }
+
+        if (!portals[line.id]) {
+            return pushToContext({ type: 'text', start: index, end: index, width: line.original.length }, context, index)
         }
 
 
         if (line.tag === 'warp') {
-            return pushToContext({ type: 'destination', for: line.id, start: index, end: index }, context, index)
+            return pushToContext({ type: 'destination', for: line.id, start: index, end: index, width: line.original.length }, context, index)
         }
         if (line.tag === 'portal') {
             if (line.pos === 'start') {
-                return pushToContext({ type: 'opening', for: line.id, start: index, end: index }, context, index)
+                return pushToContext({ type: 'opening', for: line.id, start: index, end: index, width: line.original.length }, context, index)
             }
             if (line.pos === 'end') {
-                return pushToContext({ type: 'ending', for: line.id, start: index, end: index }, context, index)
+                return pushToContext({ type: 'ending', for: line.id, start: index, end: index, width: line.original.length }, context, index)
             }
         }
         return context
     }, { content: [], portals } as Context)
 
-    return joinStrings(ctx)
+    const ctx2 = joinStrings(ctx)
+    const portals2 = map((portal) => {
+        const width = (portal.content || []).reduce((max, curr) => {
+            return Math.max(max, curr.width)
+        }, 0)
+
+        return {
+            ...portal,
+            width,
+        }
+    }, portals) as Dict<Portal>
+
+    return {
+        ...ctx2,
+        portals: portals2
+    }
 }
 
 function pushToContext(toPush: BufferContent, context: Context, index: number): Context {
@@ -161,6 +179,7 @@ function joinStrings<T>(x: T): T {
             if (curr.type === 'text') {
                 if (prev && prev.type === 'text') {
                     prev.end = curr.end
+                    prev.width = Math.max(prev.width, curr.width)
                 } else {
                     acc.push(curr)
                 }
@@ -191,7 +210,7 @@ function joinStrings<T>(x: T): T {
 
 
 function isComplete(x: any) {
-    return x && x.warped && !isNil(x.start) && !isNil(x.end)
+    return x && x.warped && x.content && !isNil(x.start) && !isNil(x.end)
 }
 
 function isComment(str: string) {

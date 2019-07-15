@@ -21,14 +21,17 @@ function editor({ content, portals, buffer }: { content: Array<BufferContent>, p
                 if (x.type === 'text') {
                     return text(buffer, x, key)
                 }
+                const matchingPortal = portals[x.for]
+                const width = Math.max(x.width, matchingPortal.width)
+
                 if (x.type === 'opening' || x.type === 'ending') {
-                    return text(buffer, x, key)
+                    return text(buffer, x, key, width)
                 }
+
                 if (x.type === 'destination') {
-                    const matchingPortal = portals[x.for]
                     return (
-                        <div className="portal-instance">
-                            {text(buffer, x, key)}
+                        <div className="portal-instance" style={{ 'max-width': `calc(var(--ch) * ${width + 20})` }}>
+                            {text(buffer, x, key, width)}
                             {matchingPortal && editor({ content: matchingPortal.content, portals, buffer })}
                         </div>
                     )
@@ -39,6 +42,6 @@ function editor({ content, portals, buffer }: { content: Array<BufferContent>, p
     )
 }
 
-function text(buffer: string, x: { start: number, end: number, type?: string }, key?: (string | number)) {
-    return <Buffer value={buffer} key={key} className={x.type || ''} start={x.start} end={x.end} />
+function text(buffer: string, x: { start: number, end: number, type?: string }, key?: (string | number), width?: number) {
+    return <Buffer value={buffer} key={key} className={x.type || ''} start={x.start} end={x.end} width={width} />
 }
