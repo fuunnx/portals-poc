@@ -21,14 +21,16 @@ export interface Portal {
     id?: Id
     start: LineCount
     end: LineCount
-    width: CharCount
+    left: CharCount
+    right: CharCount
     content: Array<BufferContent>
     warped?: boolean
 }
 
 export interface PortalInstance extends Portal {
     top: LineCount
-    left: LineCount
+    left: CharCount
+    right: CharCount
     height: LineCount
 }
 
@@ -66,7 +68,8 @@ interface Ref extends Base {
 interface Base {
     start: LineCount
     end: LineCount
-    width: CharCount
+    left: CharCount
+    right: CharCount
 }
 
 
@@ -92,7 +95,8 @@ export function parse(text: string): Context {
                 ...dict[line.id],
                 id: line.id,
                 start: index + 1,
-                width: 0,
+                left: 0,
+                right: 0,
                 content: []
             }
         }
@@ -111,37 +115,69 @@ export function parse(text: string): Context {
 
     const ctx = lines.reduce((context, line, index) => {
         if (is(String, line)) {
-            return pushToContext({ type: 'text', start: index, end: index, width: line.length }, context, index)
+            return pushToContext({
+                type: 'text',
+                ...position(line),
+            }, context, index)
         }
 
         if (!portals[line.id]) {
-            return pushToContext({ type: 'text', start: index, end: index, width: line.original.length }, context, index)
+            return pushToContext({
+                type: 'text',
+                ...position(line.original),
+            }, context, index)
         }
 
 
         if (line.tag === 'warp') {
-            return pushToContext({ type: 'destination', for: line.id, start: index, end: index, width: line.original.length }, context, index)
+            return pushToContext({
+                type: 'destination',
+                for: line.id,
+                ...position(line.original),
+            }, context, index)
         }
         if (line.tag === 'portal') {
             if (line.pos === 'start') {
-                return pushToContext({ type: 'opening', for: line.id, start: index, end: index, width: line.original.length }, context, index)
+                return pushToContext({
+                    type: 'opening',
+                    for: line.id,
+                    ...position(line.original),
+                }, context, index)
             }
             if (line.pos === 'end') {
-                return pushToContext({ type: 'ending', for: line.id, start: index, end: index, width: line.original.length }, context, index)
+                return pushToContext({
+                    type: 'ending',
+                    for: line.id,
+                    ...position(line.original),
+                }, context, index)
             }
         }
         return context
+
+        function position(str: string): Base {
+            const left = ((str.match(/^[\s]+/g) || [])[0] || '').length
+            return {
+                start: index,
+                end: index,
+                left: left,
+                right: str.length,
+            }
+        }
     }, { content: [], portals } as Context)
 
     const ctx2 = joinStrings(ctx)
     const portals2 = map((portal) => {
-        const width = (portal.content || []).reduce((max, curr) => {
-            return Math.max(max, curr.width)
+        const right = (portal.content || []).reduce((max, curr) => {
+            return Math.max(max, curr.right)
         }, 0)
+        const left = (portal.content || []).reduce((min, curr) => {
+            return Math.min(min, curr.left)
+        }, Infinity)
 
         return {
             ...portal,
-            width,
+            right,
+            left,
         }
     }, portals) as Dict<Portal>
 
@@ -179,7 +215,8 @@ function joinStrings<T>(x: T): T {
             if (curr.type === 'text') {
                 if (prev && prev.type === 'text') {
                     prev.end = curr.end
-                    prev.width = Math.max(prev.width, curr.width)
+                    prev.right = Math.max(prev.right, curr.right)
+                    prev.left = Math.min(prev.left, curr.left)
                 } else {
                     acc.push(curr)
                 }

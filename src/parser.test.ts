@@ -5,7 +5,7 @@ import { parse } from './parser'
 test('empty text', () => {
   expect(parse('')).toEqual({
     portals: {},
-    content: [{ type: 'text', start: 0, end: 0, width: 0 }],
+    content: [{ type: 'text', start: 0, end: 0, left: 0, right: 0 }],
   });
 });
 
@@ -16,7 +16,7 @@ Hello guys
 How are you ?
 `)).toEqual({
     portals: {},
-    content: [{ type: 'text', start: 0, end: 4, width: 13 }],
+    content: [{ type: 'text', start: 0, end: 4, left: 0, right: 13 }],
   });
 });
 
@@ -28,7 +28,7 @@ Hello guys
 
 How are you ?
 `)).toEqual({
-    content: [{ type: 'text', start: 0, end: 6, width: 13 }],
+    content: [{ type: 'text', start: 0, end: 6, left: 0, right: 13 }],
     portals: {}
   });
 });
@@ -43,15 +43,15 @@ How are you ?
 // WARP #1
 `)).toEqual({
     content: [
-      { type: 'text', start: 0, end: 0, width: 0 },
-      { type: 'opening', start: 1, end: 1, width: 12, for: '1' },
-      { type: 'ending', start: 3, end: 3, width: 13, for: '1' },
-      { type: 'text', start: 4, end: 5, width: 13 },
-      { type: 'destination', start: 6, end: 6, width: 10, for: '1' },
-      { type: 'text', start: 7, end: 7, width: 0 },
+      { type: 'text', start: 0, end: 0, left: 0, right: 0 },
+      { type: 'opening', start: 1, end: 1, left: 0, right: 12, for: '1' },
+      { type: 'ending', start: 3, end: 3, left: 0, right: 13, for: '1' },
+      { type: 'text', start: 4, end: 5, left: 0, right: 13 },
+      { type: 'destination', start: 6, end: 6, left: 0, right: 10, for: '1' },
+      { type: 'text', start: 7, end: 7, left: 0, right: 0 },
     ],
     portals: {
-      '1': { id: '1', start: 2, end: 2, width: 10, content: [{ type: 'text', start: 2, end: 2, width: 10 }], warped: true }
+      '1': { id: '1', start: 2, end: 2, left: 0, right: 10, content: [{ type: 'text', start: 2, end: 2, left: 0, right: 10 }], warped: true }
     }
   })
 })
@@ -64,7 +64,7 @@ Hello guys
 How are you ?
 // WARP #1
 `)).toEqual({
-    content: [{ type: 'text', start: 0, end: 6, width: 13 }],
+    content: [{ type: 'text', start: 0, end: 6, left: 0, right: 13 }],
     portals: {}
   });
 });
@@ -84,13 +84,13 @@ How are you ?
 // WARP #2
 `)).toEqual({
     content: [
-      { type: 'text', start: 0, end: 0, width: 0, },
-      { type: 'opening', start: 1, end: 1, width: 12, for: '1' },
-      { type: 'ending', start: 6, end: 6, width: 13, for: '1' },
-      { type: 'text', start: 7, end: 8, width: 13 },
-      { type: 'destination', start: 9, end: 9, width: 10, for: '1' },
-      { type: 'destination', start: 10, end: 10, width: 10, for: '2' },
-      { type: 'text', start: 11, end: 11, width: 0, },
+      { type: 'text', start: 0, end: 0, left: 0, right: 0, },
+      { type: 'opening', start: 1, end: 1, left: 0, right: 12, for: '1' },
+      { type: 'ending', start: 6, end: 6, left: 0, right: 13, for: '1' },
+      { type: 'text', start: 7, end: 8, left: 0, right: 13 },
+      { type: 'destination', start: 9, end: 9, left: 0, right: 10, for: '1' },
+      { type: 'destination', start: 10, end: 10, left: 0, right: 10, for: '2' },
+      { type: 'text', start: 11, end: 11, left: 0, right: 0, },
     ],
     portals: {
       '1': {
@@ -98,25 +98,42 @@ How are you ?
         start: 2,
         end: 5,
         content: [
-          { type: 'text', start: 2, end: 2, width: 5 },
-          { type: 'opening', start: 3, end: 3, width: 12, for: '2' },
-          { type: 'ending', start: 5, end: 5, width: 13, for: '2' },
+          { type: 'text', start: 2, end: 2, left: 0, right: 5 },
+          { type: 'opening', start: 3, end: 3, left: 0, right: 12, for: '2' },
+          { type: 'ending', start: 5, end: 5, left: 0, right: 13, for: '2' },
         ],
         warped: true,
-        width: 13,
+        left: 0,
+        right: 13,
       },
 
       '2': {
         id: '2',
         start: 4,
         end: 4,
-        content: [{ type: 'text', start: 4, end: 4, width: 4 },],
+        content: [{ type: 'text', start: 4, end: 4, left: 0, right: 4 },],
         warped: true,
-        width: 4,
+        left: 0,
+        right: 4,
       },
     },
   });
 });
+
+test('left indentation', () => {
+  const result = parse(`
+  // PORTAL #1
+      abcd
+    Hello guys
+  // /PORTAL #1
+
+How are you ?
+// WARP #1
+`)
+
+  expect([result.content[1].left, result.content[1].right]).toEqual([2, 14])
+  expect([result.portals['1'].left, result.portals['1'].right]).toEqual([4, 14])
+})
 
 // let's keep it simple for now
 // test('superposed', () => {

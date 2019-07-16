@@ -5,6 +5,7 @@ import { StateSource } from '@cycle/state'
 import { intent } from './intent'
 import { view } from './view'
 import { PortalInstance } from '../../parser'
+import dropRepeats from 'xstream/extra/dropRepeats';
 
 // Types
 export interface Sources extends BaseSources {
@@ -85,10 +86,12 @@ export function Editor(sources: Sources): Sinks {
         })
 
     const input$ = intents.input$
-        .map(ev => (currState: State) => {
+        .map(ev => (ev.target as HTMLInputElement).value || '')
+        .compose(dropRepeats())
+        .map(buffer => (currState: State) => {
             return {
                 ...currState,
-                buffer: (ev.target as HTMLInputElement).value || ''
+                buffer,
             }
         })
 

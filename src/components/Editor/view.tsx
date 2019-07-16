@@ -3,6 +3,8 @@ import { State } from './index'
 import { Stream } from 'xstream'
 import { VNode } from '@cycle/dom'
 import { parse, BufferContent, PortalsDict } from '../../parser'
+import dropRepeats from 'xstream/extra/dropRepeats';
+import { equals } from 'ramda';
 
 export function view(state$: Stream<State>): Stream<VNode> {
     return state$
@@ -22,17 +24,37 @@ function editor({ content, portals, buffer }: { content: Array<BufferContent>, p
                     return text(buffer, x, key)
                 }
                 const matchingPortal = portals[x.for]
-                const width = Math.max(x.width, matchingPortal.width)
+                const left = Math.min(x.left, matchingPortal.left)
+                const width = Math.max(x.right, matchingPortal.right) - left
 
                 if (x.type === 'opening' || x.type === 'ending') {
-                    return text(buffer, x, key, width)
+                    return text(buffer, x, key, left, width)
                 }
 
                 if (x.type === 'destination') {
+                    if (!matchingPortal) {
+                        return text(buffer, x, key, left, width)
+                    }
                     return (
-                        <div className="portal-instance" style={{ 'max-width': `calc(var(--ch) * ${width + 20})` }}>
-                            {text(buffer, x, key, width)}
-                            {matchingPortal && editor({ content: matchingPortal.content, portals, buffer })}
+                        <div className="portal-instance" style={{
+                            'margin-left': `calc(var(--ch) * ${left})`,
+                            'max-width': `calc(var(--ch) * ${width + 20})`,
+                            'overflow': 'hidden'
+                        }} scrollLeft={left * 12}
+                            hook={{
+                                update: vnode => {
+                                    if (vnode.elm) {
+                                        let elm = vnode.elm as HTMLElement
+                                        elm.scrollLeft = 12 * left
+
+                                        elm.onscroll = () => {
+                                            elm.scrollLeft = 12 * left
+                                        }
+                                    }
+                                }
+                            }} >
+                            {text(buffer, x, key, left, width)}
+                            {editor({ content: matchingPortal.content, portals, buffer })}
                         </div>
                     )
                 }
@@ -42,6 +64,6 @@ function editor({ content, portals, buffer }: { content: Array<BufferContent>, p
     )
 }
 
-function text(buffer: string, x: { start: number, end: number, type?: string }, key?: (string | number), width?: number) {
-    return <Buffer value={buffer} key={key} className={x.type || ''} start={x.start} end={x.end} width={width} />
+function text(buffer: string, x: { start: number, end: number, type?: string }, key?: (string | number), left?: number, width?: number) {
+    return <Buffer value={buffer} key={key} className={x.type || ''} start={x.start} end={x.end} width={width} left={left} />
 }

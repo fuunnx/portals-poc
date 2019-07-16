@@ -52,7 +52,10 @@ pre {
 
 .buffer {
     height: calc(var(--height) * var(--lh));
+    max-height: calc(var(--height) * var(--lh));
+    min-height: calc(var(--height) * var(--lh));
     width: 100%;
+    margin-left: calc((var(--left)) * var(--ch));
     max-width: calc((var(--width) + 20) * var(--ch));
     overflow: hidden;
     display: block;
