@@ -1,5 +1,5 @@
 import { VNodeStyle } from 'snabbdom/modules/style'
-import { textarea } from '@cycle/dom';
+import { VNode } from '@cycle/dom'
 
 interface BufferElement {
     key?: string | number
@@ -27,7 +27,22 @@ export function Buffer(
         width = 0,
     }: BufferElement
 ) {
-    console.log(left)
+    function hook(vnode: VNode) {
+        if (vnode.elm) {
+            let elm = vnode.elm as HTMLElement
+
+            requestAnimationFrame(() => {
+                elm.scrollTop = 25 * start
+                elm.scrollLeft = 12 * left
+            })
+
+            elm.onscroll = () => {
+                elm.scrollTop = 25 * start
+                elm.scrollLeft = 12 * left
+            }
+        }
+    }
+
     return (
 
         <textarea
@@ -43,23 +58,7 @@ export function Buffer(
             scrollTop={25 * start}
             scrollLeft={12 * left}
             wrap='off'
-            hook={{
-
-                update: vnode => {
-                    if (vnode.elm) {
-                        let elm = vnode.elm as HTMLElement
-                        elm.scrollTop = 25 * start
-                        elm.scrollLeft = 12 * left
-
-                        elm.onscroll = () => {
-                            elm.scrollTop = 25 * start
-                            elm.scrollLeft = 12 * left
-                        }
-
-                        console.log(elm.scrollLeft)
-                    }
-                }
-            }}
+            hook={{ insert: hook, update: hook }}
             value={value}
         />
     )

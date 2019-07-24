@@ -5,7 +5,7 @@ import { StateSource } from '@cycle/state'
 import { intent } from './intent'
 import { view } from './view'
 import { PortalInstance } from '../../parser'
-import dropRepeats from 'xstream/extra/dropRepeats';
+import dropRepeats from 'xstream/extra/dropRepeats'
 
 // Types
 export interface Sources extends BaseSources {

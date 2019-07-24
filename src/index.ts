@@ -29,6 +29,7 @@ rerun(main as any)
 
 if (module.hot) {
   module.hot.accept('./components/main', () => {
+    console.clear()
     const newApp = (require('./components/main') as any).Main
 
     rerun(wrapMain(newApp))

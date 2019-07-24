@@ -2,12 +2,12 @@ import { Buffer } from '../buffer'
 import { State } from './index'
 import { Stream } from 'xstream'
 import { VNode } from '@cycle/dom'
-import { parse, BufferContent, PortalsDict } from '../../parser'
 import dropRepeats from 'xstream/extra/dropRepeats'
-import { equals } from 'ramda'
+import { parse, BufferContent, PortalsDict } from '../../parser'
 
 export function view(state$: Stream<State>): Stream<VNode> {
   return state$
+    .compose(dropRepeats((a, b) => a.buffer === b.buffer))
     .map(state => {
       return { buffer: state.buffer, ...parse(state.buffer) }
     })
@@ -77,14 +77,12 @@ function editor({
     return null
   })
 
-  console.log(content, children)
-
   return <div className="editor">{children}</div>
 }
 
 function text(
   buffer: string,
-  x: { start: number; end: number; type?: string },
+  x: { start: number, end: number, type?: string },
   key?: string | number,
   left?: number,
   width?: number,
