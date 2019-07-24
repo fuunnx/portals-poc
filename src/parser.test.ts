@@ -43,6 +43,7 @@ test('with target', () => {
 // PORTAL #1
 Hello guys
 Tadaa
+Multiline
 // /PORTAL #1
 
 How are you ?
@@ -52,19 +53,19 @@ How are you ?
     content: [
       { type: 'text', start: 0, end: 0, left: 0, right: 0 },
       { type: 'opening', start: 1, end: 1, left: 0, right: 12, for: '1' },
-      { type: 'ending', start: 4, end: 4, left: 0, right: 13, for: '1' },
-      { type: 'text', start: 5, end: 6, left: 0, right: 13 },
-      { type: 'destination', start: 7, end: 7, left: 0, right: 10, for: '1' },
-      { type: 'text', start: 8, end: 8, left: 0, right: 0 },
+      { type: 'ending', start: 5, end: 5, left: 0, right: 13, for: '1' },
+      { type: 'text', start: 6, end: 7, left: 0, right: 13 },
+      { type: 'destination', start: 8, end: 8, left: 0, right: 10, for: '1' },
+      { type: 'text', start: 9, end: 9, left: 0, right: 0 },
     ],
     portals: {
       '1': {
         id: '1',
         start: 2,
-        end: 3,
+        end: 4,
         left: 0,
         right: 10,
-        content: [{ type: 'text', start: 2, end: 3, left: 0, right: 10 }],
+        content: [{ type: 'text', start: 2, end: 4, left: 0, right: 10 }],
         warped: true,
       },
     },

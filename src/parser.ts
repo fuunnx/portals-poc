@@ -196,10 +196,12 @@ export function parse(text: string): Context {
   )
 
   const ctx2 = joinStrings(ctx)
-  const portals2 = map(portal => {
+
+  const portals2 = map((portal: Portal) => {
     const right = (portal.content || []).reduce((max, curr) => {
       return Math.max(max, curr.right)
     }, 0)
+
     const left = (portal.content || []).reduce((min, curr) => {
       return Math.min(min, curr.left)
     }, Infinity)
@@ -209,7 +211,7 @@ export function parse(text: string): Context {
       right,
       left,
     }
-  }, portals) as Dict<Portal>
+  }, filter(isComplete, ctx2.portals)) as Dict<Portal>
 
   return {
     ...ctx2,
