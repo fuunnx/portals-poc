@@ -1,3 +1,4 @@
+import './buffer.scss'
 import { VNodeStyle } from 'snabbdom/modules/style'
 import { VNode } from '@cycle/dom'
 

@@ -1,9 +1,9 @@
-import { Buffer } from '../buffer'
+import { Buffer } from '../Buffer'
 import { State } from './index'
 import { Stream } from 'xstream'
 import { VNode } from '@cycle/dom'
 import dropRepeats from 'xstream/extra/dropRepeats'
-import { parse, BufferContent, PortalsDict } from '../../parser'
+import { parse, BufferContent, PortalsDict } from '../lang'
 
 export function view(state$: Stream<State>): Stream<VNode> {
   return state$

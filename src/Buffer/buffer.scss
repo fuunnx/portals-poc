@@ -1,0 +1,16 @@
+.buffer {
+    height: calc(var(--height) * var(--lh));
+    max-height: calc(var(--height) * var(--lh));
+    min-height: calc(var(--height) * var(--lh));
+    width: 100%;
+    margin: 0;
+    margin-left: calc(var(--left) * var(--ch));
+    max-width: calc(var(--width) * var(--ch));
+    overflow: hidden;
+    display: block;
+    line-height: inherit;
+    font-size: inherit;
+    color: inherit;
+    background: inherit;
+    border: 0;
+}

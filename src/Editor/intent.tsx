@@ -1,12 +1,10 @@
 import xs from 'xstream'
-// import sampleCombine from 'xstream/extra/sampleCombine'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { Sources } from './index'
-import { init } from '../../libs/array'
-import { PortalInstance } from 'src/parser'
+import { init } from '../libs/array'
+import { PortalInstance } from 'src/lang'
 
 export function intent({ DOM, selection, state }: Sources) {
-
     const selection$ = selection.selections()
     const range$ = xs.combine(
         selection$,

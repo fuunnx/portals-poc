@@ -1,10 +1,12 @@
+import './editor.scss'
+
 import xs, { Stream } from 'xstream'
-import { BaseSources, BaseSinks } from '../../interfaces'
+import { BaseSources, BaseSinks } from '../interfaces'
 import { VNode } from '@cycle/dom'
 import { StateSource } from '@cycle/state'
 import { intent } from './intent'
 import { view } from './view'
-import { PortalInstance } from '../../parser'
+import { PortalInstance } from '../lang'
 import dropRepeats from 'xstream/extra/dropRepeats'
 
 // Types

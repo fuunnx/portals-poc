@@ -2,7 +2,7 @@ import isolate from '@cycle/isolate'
 
 import { buildDrivers, wrapMain } from './drivers'
 import { Component } from './interfaces'
-import { Main } from './components/main'
+import { Main } from './Main'
 
 const main: Component = wrapMain(Main)
 
@@ -28,9 +28,9 @@ const rerun = rerunner(setup, mkDrivers, isolate)
 rerun(main as any)
 
 if (module.hot) {
-  module.hot.accept('./components/main', () => {
+  module.hot.accept('./Main', () => {
     console.clear()
-    const newApp = (require('./components/main') as any).Main
+    const newApp = (require('./Main') as any).Main
 
     rerun(wrapMain(newApp))
   })

@@ -1,6 +1,6 @@
 import 'jest'
 
-import { parse } from './parser'
+import { parse } from '.'
 
 test('empty text', () => {
   expect(parse('')).toEqual({

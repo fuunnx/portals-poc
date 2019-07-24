@@ -1,4 +1,4 @@
-import { Buffer } from '../buffer'
+import { Buffer } from '../Buffer'
 import { State } from './index'
 import { Stream } from 'xstream'
 import { VNode } from '@cycle/dom'
