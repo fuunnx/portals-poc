@@ -3,7 +3,7 @@ import { is, filter, isNil } from 'ramda'
 import { Portal, Dict } from '../types'
 
 
-export function indexPortals(lines: Array<Token | string>) {
+export function referencePortals(lines: Array<Token | string>) {
     return filter(
         isComplete,
         lines.reduce(
@@ -48,7 +48,6 @@ export function indexPortals(lines: Array<Token | string>) {
             {} as Dict<Partial<Portal>>,
         ),
     ) as Dict<Portal>
-
 }
 
 

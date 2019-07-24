@@ -1,14 +1,14 @@
 import { is, map } from 'ramda'
 import { tokenize } from './tokenize'
-import { indexPortals } from './indexPortals'
 import { cleanupContent } from './cleanupContent'
-import { Context, Portal, Dict, BufferContent } from '../types'
+import { referencePortals } from './referencePortals'
+import { Context, Portal, BufferContent } from '../types'
 import { TextLine, DestinationLine, OpeningLine, EndingLine } from './Line'
 
 export function parse(text: string): Context {
   const tokens = text.split('\n').map(line => tokenize(line) || line)
 
-  const portals = indexPortals(tokens)
+  const portals = referencePortals(tokens)
   const ctx = tokens.reduce(
     (context, token, index) => {
       const push = pushToContext(context, index)
