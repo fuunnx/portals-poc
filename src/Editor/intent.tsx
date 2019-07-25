@@ -35,9 +35,8 @@ export function intent({ DOM, selection, state }: Sources) {
             return {
                 start,
                 end: start + height,
-                height,
+                width,
                 right: width - left,
-                top: start,
                 left: left,
                 content: []
             }
