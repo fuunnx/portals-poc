@@ -1,14 +1,20 @@
 .buffer {
-    height: calc(var(--height) * var(--lh));
-    max-height: calc(var(--height) * var(--lh));
-    min-height: calc(var(--height) * var(--lh));
-    width: 100%;
+    --computedWidth: calc(var(--width) * var(--ch));
+    --computedHeight: calc(var(--height) * var(--lh));
+    min-height: var(--computedHeight);
+    height: var(--computedHeight);
+    max-height: var(--computedHeight);
     margin: 0;
     margin-left: calc(var(--left) * var(--ch));
-    max-width: calc(var(--width) * var(--ch));
+    width: 100%;
+    max-width: var(--computedWidth);
+
+    resize: none;
     overflow: hidden;
     display: block;
-    line-height: inherit;
+
+    line-height: var(--lh);
+    
     font-size: inherit;
     color: inherit;
     background: inherit;
