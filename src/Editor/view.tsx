@@ -11,14 +11,28 @@ import {
   Destination,
 } from '../lang'
 
+import { cleanupContent } from '../lang/parse'
+import { equals } from 'ramda'
+
 export function view(state$: Stream<State>): Stream<VNode> {
   return state$
-    .compose(dropRepeats((a, b) => a.buffer === b.buffer))
-    .map(state => {
-      return { buffer: state.buffer, ...parse(state.buffer) }
-    })
+    .compose(dropRepeats(equals))
+    .map(viewModel)
     .map(EditorContent)
 }
+
+
+function viewModel(state: State) {
+  const context = parse(state.buffer)
+  console.log(state.range)
+
+  if (state.movable && state.range) {
+    console.log(state.range)
+  }
+
+  return { buffer: state.buffer, ...cleanupContent(context) }
+}
+
 
 const OFFSET = 1
 

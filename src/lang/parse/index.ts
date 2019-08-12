@@ -1,6 +1,6 @@
 import { is, map } from 'ramda'
 import { tokenize } from './tokenize'
-import { cleanupContent } from './cleanupContent'
+export { cleanupContent } from './cleanupContent'
 import { referencePortals } from './referencePortals'
 import { Context, Portal, BufferContent } from '../types'
 import { TextLine, DestinationLine, OpeningLine, EndingLine } from './Line'
@@ -39,7 +39,7 @@ export function parse(text: string): Context {
     { content: [], portals } as Context,
   )
 
-  return cleanupContent({
+  return ({
     ...ctx,
     portals: map(computePortalSize, ctx.portals)
   })

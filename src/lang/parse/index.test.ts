@@ -1,9 +1,10 @@
 import 'jest'
 
 import { parse } from '.'
+import { cleanupContent } from './cleanupContent'
 
 test('empty text', () => {
-  expect(parse('')).toEqual({
+  expect(cleanupContent(parse(''))).toEqual({
     portals: {},
     content: [{ type: 'text', start: 0, end: 0, left: 0, right: 0 }],
   })
@@ -11,11 +12,11 @@ test('empty text', () => {
 
 test('no annotations', () => {
   expect(
-    parse(`
+    cleanupContent(parse(`
 Hello guys
 
 How are you ?
-`),
+`)),
   ).toEqual({
     portals: {},
     content: [{ type: 'text', start: 0, end: 4, left: 0, right: 13 }],
@@ -24,13 +25,13 @@ How are you ?
 
 test('simple', () => {
   expect(
-    parse(`
+    cleanupContent(parse(`
 // PORTAL #1
 Hello guys
 // /PORTAL #1
 
 How are you ?
-`),
+`)),
   ).toEqual({
     content: [{ type: 'text', start: 0, end: 6, left: 0, right: 13 }],
     portals: {},
@@ -39,7 +40,7 @@ How are you ?
 
 test('with target', () => {
   expect(
-    parse(`
+    cleanupContent(parse(`
 // PORTAL #1
 Hello guys
 Tadaa
@@ -48,7 +49,7 @@ Multiline
 
 How are you ?
 // WARP #1
-`),
+`)),
   ).toEqual({
     content: [
       { type: 'text', start: 0, end: 0, left: 0, right: 0 },
@@ -74,13 +75,13 @@ How are you ?
 
 test('malformed', () => {
   expect(
-    parse(`
+    cleanupContent(parse(`
 // PORTAL #1
 Hello guys
 
 How are you ?
 // WARP #1
-`),
+`)),
   ).toEqual({
     content: [{ type: 'text', start: 0, end: 6, left: 0, right: 13 }],
     portals: {},
@@ -90,7 +91,7 @@ How are you ?
 // Balec aussi
 test('nested', () => {
   expect(
-    parse(`
+    cleanupContent(parse(`
 // PORTAL #1
 Hello
 // PORTAL #2
@@ -101,7 +102,7 @@ guys
 How are you ?
 // WARP #1
 // WARP #2
-`),
+`)),
   ).toEqual({
     content: [
       { type: 'text', start: 0, end: 0, left: 0, right: 0 },
@@ -141,7 +142,7 @@ How are you ?
 })
 
 test('left indentation', () => {
-  const result = parse(`
+  const result = cleanupContent(parse(`
   // PORTAL #1
       abcd
     Hello guys
@@ -149,7 +150,7 @@ test('left indentation', () => {
 
 How are you ?
 // WARP #1
-`)
+`))
 
   expect([result.content[1].left, result.content[1].right]).toEqual([2, 14])
   expect([result.portals['1'].left, result.portals['1'].right]).toEqual([4, 14])

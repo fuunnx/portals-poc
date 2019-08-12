@@ -10,9 +10,10 @@ export function cleanupContent<T extends (Context | Portal | BufferContent)>(x: 
                 return acc
             }
 
-            prev.end = curr.end
-            prev.right = Math.max(prev.right, curr.right)
+            prev.start = Math.min(prev.start, curr.start)
+            prev.end = Math.max(prev.end, curr.end)
             prev.left = Math.min(prev.left, curr.left)
+            prev.right = Math.max(prev.right, curr.right)
             return acc
         }, [])
     }
