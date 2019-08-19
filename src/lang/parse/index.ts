@@ -2,18 +2,18 @@ import { map, flatten } from 'ramda'
 import { tokenize } from './tokenize'
 export { cleanupContent } from './cleanupContent'
 import { referencePortals } from './referencePortals'
-import { fromArray, update, values, set } from '@collectable/sorted-map'
-import { Context, Portal, NumDict, BufferContent, Token } from '../types'
+import { fromArray, update, values } from '@collectable/sorted-map'
+import { Context, Portal, NumDict, Symbol, Token } from '../types'
 import { TextLine, DestinationLine, OpeningLine, EndingLine } from './Line'
 
 
 
-export function parse(text: string, virtualTokens?: NumDict<Token>): Context {
+export function parse(text: string, virtualTokens?: Array<[number, Token]>): Context {
   const tokens = text.split('\n').map((line, index) => [index, tokenize(line)])
 
   const indexedTokens = [
     ...tokens,
-    ...Object.entries(virtualTokens || {}),
+    ...virtualTokens || [],
   ].map(([k, v]) => [Number(k), v] as [number, Token])  // <-- fuck you typescript
 
   const portals = referencePortals(indexedTokens)
@@ -72,12 +72,15 @@ function pushWithContext(
   context: Context,
   index: number,
 ) {
-  function _push<T extends Context | Portal>(container: T, x: BufferContent) {
-    container.content = update(() => x, index, container.content)
+  function _push<T extends Context | Portal>(container: T, x: Symbol) {
+    container.content = update((symbols) => {
+      if (!symbols) return [x]
+      return symbols.concat([x])
+    }, index, container.content)
     return container
   }
 
-  return function push(toPush: BufferContent): Context {
+  return function push(toPush: Symbol): Context {
     let openedPortals = Object.values(context.portals).filter(portal => {
       return portal.start <= index && index <= portal.end
     })

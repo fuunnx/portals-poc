@@ -1,4 +1,4 @@
-import { isNil } from 'ramda'
+import { isNil, flatten } from 'ramda'
 import { Buffer } from '../Buffer'
 import { State } from './index'
 import { Stream } from 'xstream'
@@ -19,7 +19,7 @@ export function view(state$: Stream<State>): Stream<VNode> {
 
 
 function viewModel(state: State) {
-  const context = parse(state.buffer, state.movable ? state.range : {})
+  const context = parse(state.buffer, state.movable ? state.range : [])
   return { buffer: state.buffer, ...cleanupContent(context) }
 }
 
@@ -36,7 +36,7 @@ function EditorContent({
   left?: number
 }
 ) {
-  const children = content.map((line) => {
+  const children = flatten(content).map((line) => {
     if (line.type === 'text') {
       return TextNode({ ...line, left: parentLeft })
     }

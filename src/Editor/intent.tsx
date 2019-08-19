@@ -10,7 +10,7 @@ export function intent({ DOM, selection, state }: Sources) {
         selection$,
         state.stream.map(x => x.buffer).compose(dropRepeats())
     )
-        .map(([selec, buffer]): (Dict<Token> | undefined) => {
+        .map(([selec, buffer]): (Array<[number, Token]> | undefined) => {
             if (selec.type !== 'Range') return undefined
             const range = selec.getRangeAt(0)
             const start = init(buffer.slice(0, range.startOffset).split('\n'))
@@ -19,26 +19,34 @@ export function intent({ DOM, selection, state }: Sources) {
                 .slice(0, range.endOffset)
                 .split('\n').length
 
-            return {
-                [start - 1]: {
-                    tag: 'warp',
-                    portal: 'selectionRange',
-                    original: null,
-                },
-                [start]: {
-                    tag: 'portal',
-                    portal: 'selectionRange',
-                    pos: 'start',
-                    original: null,
-                },
-                [end]: {
-                    tag: 'portal',
-                    portal: 'selectionRange',
-                    pos: 'end',
-                    original: null,
-                },
-            }
-        })
+            return [
+                [
+                    start,
+                    {
+                        tag: 'warp',
+                        portal: 'selectionRange',
+                        original: null,
+                    },
+                ],
+                [
+                    start, {
+                        tag: 'portal',
+                        portal: 'selectionRange',
+                        pos: 'start',
+                        original: null,
+                    },
+                ],
+                [
+                    end,
+                    {
+                        tag: 'portal',
+                        portal: 'selectionRange',
+                        pos: 'end',
+                        original: null,
+                    }
+                ]
+            ]
+        )
 
     const mouseDown$ = xs.merge(
         DOM.select('document')

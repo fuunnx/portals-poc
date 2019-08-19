@@ -6,7 +6,7 @@ import { VNode } from '@cycle/dom'
 import { StateSource } from '@cycle/state'
 import { intent } from './intent'
 import { view } from './view'
-import { Dict, Token } from '../lang'
+import { NumDict, Token } from '../lang'
 import { initialState } from './initialState'
 import dropRepeats from 'xstream/extra/dropRepeats'
 
@@ -23,7 +23,7 @@ export interface Sinks extends BaseSinks {
 // State
 export interface State {
     buffer: string
-    range: Dict<Token> | undefined
+    range: Array<[number, Token]> | undefined
     movable: Boolean
     copiable: Boolean
 }

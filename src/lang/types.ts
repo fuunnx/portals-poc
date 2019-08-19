@@ -10,8 +10,9 @@ export interface NumDict<T> {
   [id: number]: T
 }
 
-export type BufferContent = Placeholder | Destination | Text | Opening | Ending
-export type Content = SortedMapStructure<number, BufferContent>
+export type Symbol = Placeholder | Destination | Text | Opening | Ending
+export type Symbols = Array<Symbol>
+export type Content = SortedMapStructure<number, Symbols>
 export type PortalsDict = Dict<Portal>
 
 export interface Context {
