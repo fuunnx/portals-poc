@@ -1,47 +1,33 @@
-import { Id } from '../types'
-
-export interface Token {
-    tag: string
-    id: Id
-    pos?: 'start' | 'end'
-    original: string
-}
-
+import { Token } from '../types'
 
 export function tokenize(str: string) {
-    if (!isComment(str)) return null
-
-    let tokens = str.split(' ')
-
-    let returned: Token = {
-        tag: '',
-        id: '',
+    let token: Token = {
+        tag: 'text',
+        portal: undefined,
         pos: undefined,
         original: str,
     }
 
-    tokens.forEach(token => {
-        if (token === 'WARP') {
-            returned.tag = 'warp'
-        }
-        if (token === 'PORTAL') {
-            returned.tag = 'portal'
-            returned.pos = 'start'
-        }
-        if (token === '/PORTAL') {
-            returned.tag = 'portal'
-            returned.pos = 'end'
-        }
-        if (returned.tag && token.startsWith('#')) {
-            returned.id = token.replace(/^#/, '')
-        }
-    })
-
-    if (!returned.tag) {
-        return null
+    if (isComment(str)) {
+        str.split(' ').forEach(word => {
+            if (word === 'WARP') {
+                token.tag = 'warp'
+            }
+            if (word === 'PORTAL') {
+                token.tag = 'portal'
+                token.pos = 'start'
+            }
+            if (word === '/PORTAL') {
+                token.tag = 'portal'
+                token.pos = 'end'
+            }
+            if (token.tag && word.startsWith('#')) {
+                token.portal = word.replace(/^#/, '')
+            }
+        })
     }
 
-    return returned
+    return token
 }
 
 function isComment(str: string) {

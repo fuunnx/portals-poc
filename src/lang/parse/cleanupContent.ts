@@ -1,9 +1,32 @@
-import { last, map } from 'ramda'
-import { Context, Portal, Dict, BufferContent } from '../types'
+import { map, last } from 'ramda'
+import { Context, Portal, Dict, Content, BufferContent } from '../types'
+import { values } from '@collectable/sorted-map'
+import { unwrap } from '@collectable/core'
 
-export function cleanupContent<T extends (Context | Portal | BufferContent)>(x: T): T {
-    if (Array.isArray(x)) {
-        return x.reduce((acc, curr) => {
+export interface CleanPortal extends Omit<Portal, 'content'> {
+    content: Array<BufferContent>
+}
+
+export interface CleanContext extends Omit<Omit<Context, 'content'>, 'portals'> {
+    content: Array<BufferContent>
+    portals: Dict<CleanPortal>
+}
+
+export function cleanupContent(x: Context): CleanContext {
+    return {
+        ...x,
+        portals: map((portal) => {
+            return {
+                ...portal,
+                content: cleanup(portal.content)
+            }
+        }, x.portals),
+        content: cleanup(x.content),
+    }
+
+    function cleanup(content: Content): Array<BufferContent> {
+
+        return Array.from(values(content)).reduce((acc, curr) => {
             const prev = last(acc)
             if (!prev || prev.type !== 'text' || curr.type !== 'text') {
                 acc.push(curr)
@@ -15,24 +38,6 @@ export function cleanupContent<T extends (Context | Portal | BufferContent)>(x: 
             prev.left = Math.min(prev.left, curr.left)
             prev.right = Math.max(prev.right, curr.right)
             return acc
-        }, [])
+        }, [] as Array<BufferContent>)
     }
-
-    if (x && 'portals' in x) {
-        let portals = ((x as unknown) as { portals: unknown }).portals as Dict<Portal>
-        x = {
-            ...x,
-            portals: map(cleanupContent, portals),
-        }
-    }
-
-    if (x && x.hasOwnProperty('content')) {
-        const content = (x as unknown as { content: BufferContent }).content
-        x = {
-            ...x,
-            content: cleanupContent(content),
-        }
-    }
-
-    return x
 }

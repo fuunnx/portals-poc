@@ -1,43 +1,43 @@
-import { Token } from './tokenize'
 import { is, filter, isNil } from 'ramda'
-import { Portal, Dict } from '../types'
+import { Portal, Dict, Token } from '../types'
+import { fromArray } from '@collectable/sorted-map'
 
 
-export function referencePortals(lines: Array<Token | string>) {
+export function referencePortals(tokens: Array<[number, Token]>) {
     return filter(
         isComplete,
-        lines.reduce(
-            (dict, line, index) => {
-                if (is(String, line)) {
+        tokens.reduce(
+            (dict, [index, token]) => {
+                if (token.tag === 'text' || !token.portal) {
                     return dict
                 }
-                if (line.tag === 'warp') {
-                    dict[line.id] = {
-                        ...dict[line.id],
-                        id: line.id,
+                if (token.tag === 'warp') {
+                    dict[token.portal] = {
+                        ...dict[token.portal],
+                        id: token.portal,
                         warped: true,
                     }
                 }
 
-                if (line.tag !== 'portal') {
+                if (token.tag !== 'portal') {
                     return dict
                 }
 
-                if (line.pos === 'start') {
-                    dict[line.id] = {
-                        ...dict[line.id],
-                        id: line.id,
+                if (token.pos === 'start') {
+                    dict[token.portal] = {
+                        ...dict[token.portal],
+                        id: token.portal,
                         start: index + 1,
                         left: 0,
                         right: 0,
-                        content: [],
+                        content: fromArray([]),
                     }
                 }
 
-                if (line.pos === 'end') {
-                    if (dict[line.id]) {
-                        dict[line.id] = {
-                            ...dict[line.id],
+                if (token.pos === 'end') {
+                    if (dict[token.portal]) {
+                        dict[token.portal] = {
+                            ...dict[token.portal],
                             end: index - 1,
                         }
                     }

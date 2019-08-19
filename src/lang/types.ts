@@ -1,13 +1,29 @@
+import { SortedMapStructure } from '@collectable/sorted-map';
+
+
 export interface Dict<T> {
   [id: string]: T
+  [id: number]: T
+}
+
+export interface NumDict<T> {
+  [id: number]: T
 }
 
 export type BufferContent = Placeholder | Destination | Text | Opening | Ending
+export type Content = SortedMapStructure<number, BufferContent>
 export type PortalsDict = Dict<Portal>
 
 export interface Context {
-  content: Array<BufferContent>
+  content: Content
   portals: Dict<Portal>
+}
+
+export interface Token {
+  tag: 'portal' | 'warp' | 'text'
+  portal?: Id
+  pos?: 'start' | 'end'
+  original: string | null
 }
 
 type LineCount = number
@@ -20,7 +36,7 @@ export interface Portal {
   end: LineCount
   left: CharCount
   right: CharCount
-  content: Array<BufferContent>
+  content: Content
   warped?: boolean
 }
 
@@ -54,7 +70,7 @@ interface Ref extends Base {
 
 export interface Base {
   start: LineCount
-  end: LineCount
+  end?: LineCount
   left: CharCount
   right: CharCount
 }

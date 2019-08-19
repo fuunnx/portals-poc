@@ -46,7 +46,7 @@ export function Buffer(
 
     return (
 
-        <textarea
+        <pre
             key={key || `id-${start}-${end}`}
             style={Object.assign({
                 '--height': String(end - start + 1),
@@ -61,6 +61,6 @@ export function Buffer(
             wrap='off'
             hook={{ insert: hook, update: hook }}
             value={value}
-        />
+        >{value}</pre>
     )
 }

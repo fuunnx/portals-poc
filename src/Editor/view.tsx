@@ -1,18 +1,14 @@
+import { isNil } from 'ramda'
 import { Buffer } from '../Buffer'
 import { State } from './index'
 import { Stream } from 'xstream'
 import { VNode } from '@cycle/dom'
 import dropRepeats from 'xstream/extra/dropRepeats'
-import {
-  parse,
-  BufferContent,
-  PortalsDict,
-  PortalInstance,
-  Destination,
-} from '../lang'
+import { parse, Destination } from '../lang'
 
-import { cleanupContent } from '../lang/parse'
 import { equals } from 'ramda'
+import { cleanupContent } from '../lang/parse'
+import { CleanPortal, CleanContext } from 'src/lang/parse/cleanupContent'
 
 export function view(state$: Stream<State>): Stream<VNode> {
   return state$
@@ -23,13 +19,7 @@ export function view(state$: Stream<State>): Stream<VNode> {
 
 
 function viewModel(state: State) {
-  const context = parse(state.buffer)
-  console.log(state.range)
-
-  if (state.movable && state.range) {
-    console.log(state.range)
-  }
-
+  const context = parse(state.buffer, state.movable ? state.range : {})
   return { buffer: state.buffer, ...cleanupContent(context) }
 }
 
@@ -41,15 +31,14 @@ function EditorContent({
   portals,
   buffer,
   left: parentLeft = 0,
-}: {
-  content: Array<BufferContent>
-  portals: PortalsDict
+}: CleanContext & {
   buffer: string
   left?: number
-}) {
-  const children = content.map((line, index) => {
+}
+) {
+  const children = content.map((line) => {
     if (line.type === 'text') {
-      return TextNode({ ...line, left: parentLeft }, index)
+      return TextNode({ ...line, left: parentLeft })
     }
 
     const matchingPortal = portals[line.for]
@@ -58,7 +47,7 @@ function EditorContent({
       Math.max(line.right, matchingPortal.right) - left + 1 + 2 * OFFSET
 
     if (line.type === 'opening' || line.type === 'ending') {
-      return TextNode({ ...line, left, width }, index)
+      return TextNode({ ...line, left, width })
     }
 
     if (line.type === 'destination') {
@@ -66,10 +55,9 @@ function EditorContent({
         return RenderPortalInstance(
           line,
           { ...matchingPortal, left, width },
-          index,
         )
       }
-      return TextNode({ ...line, left, width }, index)
+      return TextNode({ ...line, left, width })
     }
     return null
   })
@@ -79,16 +67,15 @@ function EditorContent({
   function TextNode(
     x: {
       start: number
-      end: number
+      end?: number
       type?: string
       left?: number
       width?: number
-    },
-    index: number,
+    }
   ) {
+    if (isNil(x.end)) return null
     return (
       <Buffer
-        key={`texnode-${index}`}
         className={`-${x.type}`}
         value={buffer}
         start={x.start}
@@ -101,8 +88,7 @@ function EditorContent({
 
   function RenderPortalInstance(
     line: Destination,
-    portal: PortalInstance,
-    index: number,
+    portal: CleanPortal & { width: number },
   ) {
     function hook(vnode: VNode) {
       if (vnode.elm) {
@@ -119,7 +105,6 @@ function EditorContent({
     return (
       <div
         className="portal-instance"
-        key={`portalInstance-${index}`}
         style={{
           'margin-left': `calc(var(--ch) * ${portal.left})`,
           'max-width': `calc(var(--ch) * ${portal.width})`,
@@ -128,7 +113,7 @@ function EditorContent({
         scrollLeft={portal.left * 12}
         hook={{ insert: hook, update: hook }}
       >
-        {TextNode({ ...line, left: portal.left, width: portal.width }, index)}
+        {TextNode({ ...line, left: portal.left, width: portal.width })}
         {EditorContent({
           content: portal.content,
           portals,

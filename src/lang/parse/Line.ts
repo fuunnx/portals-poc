@@ -1,17 +1,16 @@
-import { Token } from './tokenize'
-import { Base, Text, Destination, Opening, Ending } from '../types'
+import { Base, Text, Destination, Opening, Ending, Token } from '../types'
 
-export function TextLine(index: number, line: string): Text {
+export function TextLine(index: number, token: Token): Text {
     return {
         type: 'text',
-        ...calcPosition(index, line),
+        ...calcPosition(index, token.original),
     }
 }
 
 export function DestinationLine(index: number, token: Token): Destination {
     return {
         type: 'destination',
-        for: token.id,
+        for: token.portal || '',
         ...calcPosition(index, token.original),
     }
 }
@@ -19,7 +18,7 @@ export function DestinationLine(index: number, token: Token): Destination {
 export function OpeningLine(index: number, token: Token): Opening {
     return {
         type: 'opening',
-        for: token.id,
+        for: token.portal || '',
         ...calcPosition(index, token.original),
     }
 }
@@ -27,12 +26,21 @@ export function OpeningLine(index: number, token: Token): Opening {
 export function EndingLine(index: number, token: Token): Ending {
     return {
         type: 'ending',
-        for: token.id,
+        for: token.portal || '',
         ...calcPosition(index, token.original),
     }
 }
 
-export function calcPosition(index: number, str: string): Base {
+export function calcPosition(index: number, str: string | null): Base {
+    if (str === null) {
+        return {
+            start: index,
+            end: undefined,
+            left: Infinity,
+            right: -Infinity,
+        }
+    }
+
     const left = ((str.match(/^[\s]+/g) || [])[0] || '').length
     return {
         start: index,

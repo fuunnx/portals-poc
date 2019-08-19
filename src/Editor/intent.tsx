@@ -2,7 +2,7 @@ import xs from 'xstream'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { Sources } from './index'
 import { init } from '../libs/array'
-import { PortalInstance } from 'src/lang'
+import { Dict, Token } from 'src/lang'
 
 export function intent({ DOM, selection, state }: Sources) {
     const selection$ = selection.selections()
@@ -10,35 +10,33 @@ export function intent({ DOM, selection, state }: Sources) {
         selection$,
         state.stream.map(x => x.buffer).compose(dropRepeats())
     )
-        .map(([selec, buffer]): (PortalInstance | null) => {
-            if (selec.type !== 'Range') return null
-
+        .map(([selec, buffer]): (Dict<Token> | undefined) => {
+            if (selec.type !== 'Range') return undefined
             const range = selec.getRangeAt(0)
-            const allLines = buffer.split('\n')
-
             const start = init(buffer.slice(0, range.startOffset).split('\n'))
-                .length
-            const height = buffer
-                .slice(range.startOffset, range.endOffset)
+                .length - 1
+            const end = buffer
+                .slice(0, range.endOffset)
                 .split('\n').length
-            const end = start + height
-            const selected = allLines.slice(start, end)
-
-            const left = selected
-                .map(x => (x.match(/^\s+/) || [''])[0].length)
-                .reduce((a, b) => Math.min(a, b), Infinity)
-
-            const width = selected
-                .map(x => x.length)
-                .reduce((a, b) => Math.max(a, b), left)
 
             return {
-                start,
-                end: start + height,
-                width,
-                right: width - left,
-                left: left,
-                content: []
+                [start - 1]: {
+                    tag: 'warp',
+                    portal: 'selectionRange',
+                    original: null,
+                },
+                [start]: {
+                    tag: 'portal',
+                    portal: 'selectionRange',
+                    pos: 'start',
+                    original: null,
+                },
+                [end]: {
+                    tag: 'portal',
+                    portal: 'selectionRange',
+                    pos: 'end',
+                    original: null,
+                },
             }
         })
 
