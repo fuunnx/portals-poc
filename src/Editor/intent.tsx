@@ -46,7 +46,7 @@ export function intent({ DOM, selection, state }: Sources) {
                     }
                 ]
             ]
-        )
+        })
 
     const mouseDown$ = xs.merge(
         DOM.select('document')
