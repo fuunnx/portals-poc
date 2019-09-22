@@ -1,5 +1,4 @@
-import { SortedMapStructure } from '@collectable/sorted-map';
-
+import { SortedMapStructure } from '@collectable/sorted-map'
 
 export interface Dict<T> {
   [id: string]: T

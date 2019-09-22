@@ -12,11 +12,13 @@ test('empty text', () => {
 
 test('no annotations', () => {
   expect(
-    cleanupContent(parse(`
+    cleanupContent(
+      parse(`
 Hello guys
 
 How are you ?
-`)),
+`),
+    ),
   ).toEqual({
     portals: {},
     content: [[{ type: 'text', start: 0, end: 4, left: 0, right: 13 }]],
@@ -25,13 +27,15 @@ How are you ?
 
 test('simple', () => {
   expect(
-    cleanupContent(parse(`
+    cleanupContent(
+      parse(`
 // PORTAL #1
 Hello guys
 // /PORTAL #1
 
 How are you ?
-`)),
+`),
+    ),
   ).toEqual({
     content: [[{ type: 'text', start: 0, end: 6, left: 0, right: 13 }]],
     portals: {},
@@ -40,7 +44,8 @@ How are you ?
 
 test('with target', () => {
   expect(
-    cleanupContent(parse(`
+    cleanupContent(
+      parse(`
 // PORTAL #1
 Hello guys
 Tadaa
@@ -49,7 +54,9 @@ Multiline
 
 How are you ?
 // WARP #1
-`)),
+Hum
+`),
+    ),
   ).toEqual({
     content: [
       [{ type: 'text', start: 0, end: 0, left: 0, right: 0 }],
@@ -57,7 +64,7 @@ How are you ?
       [{ type: 'ending', start: 5, end: 5, left: 0, right: 13, for: '1' }],
       [{ type: 'text', start: 6, end: 7, left: 0, right: 13 }],
       [{ type: 'destination', start: 8, end: 8, left: 0, right: 10, for: '1' }],
-      [{ type: 'text', start: 9, end: 9, left: 0, right: 0 }],
+      [{ type: 'text', start: 9, end: 10, left: 0, right: 3 }],
     ],
     portals: {
       '1': {
@@ -75,13 +82,15 @@ How are you ?
 
 test('malformed', () => {
   expect(
-    cleanupContent(parse(`
+    cleanupContent(
+      parse(`
 // PORTAL #1
 Hello guys
 
 How are you ?
 // WARP #1
-`)),
+`),
+    ),
   ).toEqual({
     content: [[{ type: 'text', start: 0, end: 6, left: 0, right: 13 }]],
     portals: {},
@@ -91,7 +100,8 @@ How are you ?
 // Balec aussi
 test('nested', () => {
   expect(
-    cleanupContent(parse(`
+    cleanupContent(
+      parse(`
 // PORTAL #1
 Hello
 // PORTAL #2
@@ -102,7 +112,8 @@ guys
 How are you ?
 // WARP #1
 // WARP #2
-`)),
+`),
+    ),
   ).toEqual({
     content: [
       [{ type: 'text', start: 0, end: 0, left: 0, right: 0 }],
@@ -110,7 +121,16 @@ How are you ?
       [{ type: 'ending', start: 6, end: 6, left: 0, right: 13, for: '1' }],
       [{ type: 'text', start: 7, end: 8, left: 0, right: 13 }],
       [{ type: 'destination', start: 9, end: 9, left: 0, right: 10, for: '1' }],
-      [{ type: 'destination', start: 10, end: 10, left: 0, right: 10, for: '2' }],
+      [
+        {
+          type: 'destination',
+          start: 10,
+          end: 10,
+          left: 0,
+          right: 10,
+          for: '2',
+        },
+      ],
       [{ type: 'text', start: 11, end: 11, left: 0, right: 0 }],
     ],
     portals: {
@@ -142,7 +162,8 @@ How are you ?
 })
 
 test('left indentation', () => {
-  const result = cleanupContent(parse(`
+  const result = cleanupContent(
+    parse(`
   // PORTAL #1
       abcd
     Hello guys
@@ -150,7 +171,8 @@ test('left indentation', () => {
 
 How are you ?
 // WARP #1
-`))
+`),
+  )
 
   // const secondLine = get(1, result.content)
   // expect(secondLine).toBeDefined()
@@ -158,6 +180,43 @@ How are you ?
   // const tested = (secondLine || [])[0]
   // expect([(tested || {}).left, (tested || {}).right]).toEqual([2, 14])
   // expect([result.portals['1'].left, result.portals['1'].right]).toEqual([4, 14])
+})
+
+test('virtual tokens', () => {
+  let result = cleanupContent(
+    parse('', [
+      [
+        0,
+        {
+          tag: 'warp',
+          portal: 'selectionRange',
+          original: null,
+        },
+      ],
+      [
+        0,
+        {
+          tag: 'portal',
+          portal: 'selectionRange',
+          pos: 'start',
+          original: null,
+        },
+      ],
+      [
+        0,
+        {
+          tag: 'portal',
+          portal: 'selectionRange',
+          pos: 'end',
+          original: null,
+        },
+      ],
+    ]),
+  )
+  expect(result).toEqual({
+    portals: {},
+    content: [[{ type: 'text', start: 0, end: 0, left: 0, right: 0 }]],
+  })
 })
 
 // let's keep it simple for now

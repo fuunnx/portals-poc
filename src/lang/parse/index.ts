@@ -3,18 +3,18 @@ import { tokenize } from './tokenize'
 export { cleanupContent } from './cleanupContent'
 import { referencePortals } from './referencePortals'
 import { fromArray, update, values } from '@collectable/sorted-map'
-import { Context, Portal, NumDict, Symbol, Token } from '../types'
+import { Context, Portal, NumDict, Symbol, Token, Content } from '../types'
 import { TextLine, DestinationLine, OpeningLine, EndingLine } from './Line'
 
-
-
-export function parse(text: string, virtualTokens?: Array<[number, Token]>): Context {
+export function parse(
+  text: string,
+  virtualTokens?: Array<[number, Token]>,
+): Context {
   const tokens = text.split('\n').map((line, index) => [index, tokenize(line)])
 
-  const indexedTokens = [
-    ...tokens,
-    ...virtualTokens || [],
-  ].map(([k, v]) => [Number(k), v] as [number, Token])  // <-- fuck you typescript
+  const indexedTokens = [...tokens, ...(virtualTokens || [])].map(
+    ([k, v]) => [Number(k), v] as [number, Token],
+  ) // <-- fuck you typescript
 
   const portals = referencePortals(indexedTokens)
 
@@ -44,14 +44,14 @@ export function parse(text: string, virtualTokens?: Array<[number, Token]>): Con
     { content: fromArray([]), portals } as Context,
   )
 
-  return ({
+  return {
     ...ctx,
-    portals: map(computePortalSize, ctx.portals)
-  })
+    portals: map(computePortalSize, ctx.portals),
+  }
 }
 
 function computePortalSize(portal: Portal): Portal {
-  const content = flatten(Array.from(values((portal.content))))
+  const content = flatten(Array.from(values(portal.content)))
 
   const right = content.reduce((max, curr) => {
     return Math.max(max, curr.right)
@@ -68,15 +68,18 @@ function computePortalSize(portal: Portal): Portal {
   }
 }
 
-function pushWithContext(
-  context: Context,
-  index: number,
-) {
-  function _push<T extends Context | Portal>(container: T, x: Symbol) {
-    container.content = update((symbols) => {
-      if (!symbols) return [x]
-      return symbols.concat([x])
-    }, index, container.content)
+function pushWithContext(context: Context, index: number) {
+  function _push(container: Context, x: Symbol): Context
+  function _push(container: Portal, x: Symbol): Portal
+  function _push(container: { content: Content }, x: Symbol) {
+    container.content = update(
+      symbols => {
+        if (!symbols) return [x]
+        return symbols.concat([x])
+      },
+      index,
+      container.content,
+    )
     return container
   }
 
@@ -85,20 +88,25 @@ function pushWithContext(
       return portal.start <= index && index <= portal.end
     })
 
-    if (!openedPortals.length) {
-      return _push(context, toPush)
+    let found = undefined
+    for (let portal of openedPortals) {
+      if ('for' in toPush && portal.id === toPush.for) {
+        continue
+      }
+      if (!found) {
+        found = portal
+        continue
+      }
+      if (found.start <= portal.start && portal.end <= found.end) {
+        found = portal
+      }
     }
 
-    openedPortals.forEach(portal => {
-      const smallerPortalsInside = openedPortals.some(x => {
-        return (
-          x.id !== portal.id && portal.start <= x.start && x.start <= portal.end
-        )
-      })
-      if (!smallerPortalsInside) {
-        _push(portal, toPush)
-      }
-    })
-    return context
+    if (found) {
+      _push(found, toPush)
+      return context
+    }
+
+    return _push(context, toPush)
   }
 }

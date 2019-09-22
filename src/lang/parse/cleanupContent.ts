@@ -1,57 +1,59 @@
 import { map, last } from 'ramda'
 import { Context, Portal, Dict, Content, Symbols } from '../types'
 import { values } from '@collectable/sorted-map'
-import { unwrap } from '@collectable/core'
 
 export interface CleanPortal extends Omit<Portal, 'content'> {
-    content: Array<Symbols>
+  content: Array<Symbols>
 }
 
-export interface CleanContext extends Omit<Omit<Context, 'content'>, 'portals'> {
-    content: Array<Symbols>
-    portals: Dict<CleanPortal>
+export interface CleanContext
+  extends Omit<Omit<Context, 'content'>, 'portals'> {
+  content: Array<Symbols>
+  portals: Dict<CleanPortal>
 }
 
 export function cleanupContent(context: Context): CleanContext {
-    return {
-        ...context,
-        portals: map((portal) => {
-            return {
-                ...portal,
-                content: cleanup(portal.content)
-            }
-        }, context.portals),
-        content: cleanup(context.content),
-    }
+  return {
+    ...context,
+    portals: map(portal => {
+      return {
+        ...portal,
+        content: cleanup(portal.content),
+      }
+    }, context.portals),
+    content: cleanup(context.content),
+  }
 
-    function cleanup(content: Content): Array<Symbols> {
+  function cleanup(content: Content): Array<Symbols> {
+    return Array.from(values(content)).reduce(
+      (acc, symbols) => {
+        const prevs = last(acc)
 
-        return Array.from(values(content)).reduce((acc, symbols) => {
-            const prevs = last(acc)
+        if (
+          !prevs ||
+          prevs.some(x => x.type !== 'text') ||
+          symbols.some(x => x.type !== 'text')
+        ) {
+          acc.push(symbols)
+          return acc
+        }
 
-            if (
-                !prevs
-                || prevs.some(x => x.type !== 'text')
-                || symbols.some(x => x.type !== 'text')
-            ) {
-                acc.push(symbols)
-                return acc
-            }
+        const prev = last(prevs)
 
-            const prev = last(prevs)
+        if (!prev) {
+          acc.push(symbols)
+          return acc
+        }
 
-            if (!prev) {
-                acc.push(symbols)
-                return acc
-            }
-
-            symbols.forEach((curr) => {
-                prev.start = Math.min(prev.start, curr.start)
-                prev.end = Math.max(prev.end || 0, curr.end || 0)
-                prev.left = Math.min(prev.left, curr.left)
-                prev.right = Math.max(prev.right, curr.right)
-            })
-            return acc
-        }, [] as Array<Symbols>)
-    }
+        symbols.forEach(curr => {
+          prev.start = Math.min(prev.start, curr.start) || 0
+          prev.end = Math.max(0, prev.end || 0, curr.end || 0)
+          prev.left = Math.min(prev.left, curr.left) || 0
+          prev.right = Math.max(0, prev.right, curr.right)
+        })
+        return acc
+      },
+      [] as Array<Symbols>,
+    )
+  }
 }

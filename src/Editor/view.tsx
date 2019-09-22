@@ -9,20 +9,39 @@ import { parse, Destination } from '../lang'
 import { equals } from 'ramda'
 import { cleanupContent } from '../lang/parse'
 import { CleanPortal, CleanContext } from 'src/lang/parse/cleanupContent'
+import { TextLine } from 'src/lang/parse/Line'
 
 export function view(state$: Stream<State>): Stream<VNode> {
   return state$
     .compose(dropRepeats(equals))
     .map(viewModel)
-    .map(EditorContent)
+    .map(state => (
+      <div>
+        <button attrs-action="toggle-preview">TOGGLE PREVIEW</button>
+        {EditorContent(state)}
+      </div>
+    ))
 }
 
-
 function viewModel(state: State) {
+  if (state.disabled) {
+    return {
+      buffer: state.buffer,
+      content: [
+        [
+          {
+            ...TextLine(0, { tag: 'text', original: state.buffer }),
+            end: Infinity,
+          },
+        ],
+      ],
+      portals: {},
+    }
+  }
+
   const context = parse(state.buffer, state.movable ? state.range : [])
   return { buffer: state.buffer, ...cleanupContent(context) }
 }
-
 
 const OFFSET = 1
 
@@ -34,9 +53,8 @@ function EditorContent({
 }: CleanContext & {
   buffer: string
   left?: number
-}
-) {
-  const children = flatten(content).map((line) => {
+}) {
+  const children = flatten(content).map(line => {
     if (line.type === 'text') {
       return TextNode({ ...line, left: parentLeft })
     }
@@ -52,10 +70,7 @@ function EditorContent({
 
     if (line.type === 'destination') {
       if (matchingPortal) {
-        return RenderPortalInstance(
-          line,
-          { ...matchingPortal, left, width },
-        )
+        return RenderPortalInstance(line, { ...matchingPortal, left, width })
       }
       return TextNode({ ...line, left, width })
     }
@@ -64,15 +79,13 @@ function EditorContent({
 
   return <div className="editor">{children}</div>
 
-  function TextNode(
-    x: {
-      start: number
-      end?: number
-      type?: string
-      left?: number
-      width?: number
-    }
-  ) {
+  function TextNode(x: {
+    start: number
+    end?: number
+    type?: string
+    left?: number
+    width?: number
+  }) {
     if (isNil(x.end)) return null
     return (
       <Buffer
