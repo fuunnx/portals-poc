@@ -1,4 +1,4 @@
-import xs from 'xstream'
+import xs, { Stream } from 'xstream'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { Sources, State } from './index'
 import { init } from '../libs/array'
@@ -86,19 +86,26 @@ export function intent({ DOM, selection, state }: Sources) {
   //     .map(([, selection]) => selection)
   //     .filter((selection) => selection.type === 'Range')
 
-  // move$()
-  //     .map(({ event }) => {
-  //         const start = {
-  //             x: event.clientX,
-  //             y: event.clientY
-  //         }
+  let startMoving$ = movable$
+    .map(movable => {
+      if (!movable) return xs.empty()
+      return DOM.select('[data-buffer]')
+        .events('mousedown')
+        .map(event => {
+          const start = {
+            x: event.clientX,
+            y: event.clientY,
+          }
 
-  //         return move$().map(e => ({
-  //             x: start.x - e.clientX,
-  //             y: start.y - e.clientY
-  //         }))
-  //     })
-  //     .flatten()
+          return move$().map(e => ({
+            id: parseInt((event.target as HTMLElement).dataset.buffer || ''),
+            x: e.clientX - start.x,
+            y: e.clientY - start.y,
+          }))
+        })
+        .flatten()
+    })
+    .flatten() as Stream<{ id: number; x: number; y: number }>
 
   return {
     input$: DOM.select('document').events('input'),
@@ -108,17 +115,18 @@ export function intent({ DOM, selection, state }: Sources) {
     copiable$,
     mouseDown$,
     togglePreview$,
+    startMoving$,
     // movePortal$,
   }
 
-  // function move$() {
-  //     return DOM.select('document')
-  //         .events('mousemove')
-  //         .endWhen(
-  //             xs.merge(
-  //                 DOM.select('document').events('mouseup'),
-  //                 DOM.select('window').events('blur')
-  //             )
-  //         )
-  // }
+  function move$() {
+    return DOM.select('document')
+      .events('mousemove')
+      .endWhen(
+        xs.merge(
+          DOM.select('document').events('mouseup'),
+          DOM.select('window').events('blur'),
+        ),
+      )
+  }
 }

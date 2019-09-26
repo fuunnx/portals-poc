@@ -3,13 +3,14 @@ import { VNodeStyle } from 'snabbdom/modules/style'
 import { VNode } from '@cycle/dom'
 
 interface BufferElement {
+  id?: string | number
   key?: string | number
   className?: string
   style?: VNodeStyle
   start?: number
   left?: number
   end?: number
-  movable?: Boolean
+  movable: Boolean
   value?: string
   width?: number
 }
@@ -24,6 +25,7 @@ export function Buffer({
   end = 0,
   value = '',
   width = 0,
+  id,
 }: BufferElement) {
   function hook(vnode: VNode) {
     if (vnode.elm) {
@@ -43,6 +45,7 @@ export function Buffer({
 
   return (
     <pre
+      data-buffer={id}
       key={key || `id-${start}-${end}`}
       style={Object.assign(
         {

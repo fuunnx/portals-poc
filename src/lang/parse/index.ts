@@ -8,19 +8,29 @@ import { TextLine, DestinationLine, OpeningLine, EndingLine } from './Line'
 
 export function parse(
   text: string,
-  virtualTokens?: Array<[number, Token]>,
+  operations?: {
+    add?: Array<[number, Token]>
+    move?: { target: number; offset: number }
+  },
 ): Context {
   const tokens = text.split('\n').map((line, index) => [index, tokenize(line)])
 
-  const indexedTokens = [...tokens, ...(virtualTokens || [])].map(
-    ([k, v]) => [Number(k), v] as [number, Token],
-  ) // <-- fuck you typescript
+  const indexedTokens = [
+    ...tokens,
+    ...((operations && operations.add) || []),
+  ].map(([k, v]) => [Number(k), v] as [number, Token]) // <-- fuck you typescript
 
-  const portals = referencePortals(indexedTokens)
+  const portals = referencePortals(indexedTokens, operations && operations.move)
 
   const ctx = indexedTokens.reduce(
     (context, [index, token]) => {
-      const push = pushWithContext(context, index)
+      let targetIndex = index
+      if (operations && operations.move) {
+        if (index === operations.move.target) {
+          targetIndex = index + operations.move.offset
+        }
+      }
+      const push = pushWithContext(context, targetIndex)
 
       if (token.tag === 'text' || !token.portal || !portals[token.portal]) {
         return push(TextLine(index, token))

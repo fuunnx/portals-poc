@@ -16,7 +16,7 @@ export function view(state$: Stream<State>): Stream<VNode> {
     .compose(dropRepeats(equals))
     .map(viewModel)
     .map(state => (
-      <div>
+      <div class={{ 'editor-wrapper': true, '-movable': state.movable }}>
         <button attrs-action="toggle-preview">TOGGLE PREVIEW</button>
         {EditorContent(state)}
       </div>
@@ -36,11 +36,20 @@ function viewModel(state: State) {
         ],
       ],
       portals: {},
+      movable: state.movable,
     }
   }
 
-  const context = parse(state.buffer, state.movable ? state.range : [])
-  return { buffer: state.buffer, ...cleanupContent(context) }
+  let context = parse(
+    state.buffer,
+    state.movable ? { add: state.range, move: state.transform } : {},
+  )
+
+  return {
+    buffer: state.buffer,
+    ...cleanupContent(context),
+    movable: state.movable,
+  }
 }
 
 const OFFSET = 1
@@ -50,13 +59,15 @@ function EditorContent({
   portals,
   buffer,
   left: parentLeft = 0,
+  movable,
 }: CleanContext & {
   buffer: string
   left?: number
+  movable: boolean
 }) {
   const children = flatten(content).map(line => {
     if (line.type === 'text') {
-      return TextNode({ ...line, left: parentLeft })
+      return TextNode({ ...line, left: parentLeft, movable })
     }
 
     const matchingPortal = portals[line.for]
@@ -65,14 +76,19 @@ function EditorContent({
       Math.max(line.right, matchingPortal.right) - left + 1 + 2 * OFFSET
 
     if (line.type === 'opening' || line.type === 'ending') {
-      return TextNode({ ...line, left, width })
+      return TextNode({ ...line, left, width, movable })
     }
 
     if (line.type === 'destination') {
       if (matchingPortal) {
-        return RenderPortalInstance(line, { ...matchingPortal, left, width })
+        return RenderPortalInstance(line, {
+          ...matchingPortal,
+          left,
+          width,
+          movable,
+        })
       }
-      return TextNode({ ...line, left, width })
+      return TextNode({ ...line, left, width, movable })
     }
     return null
   })
@@ -85,23 +101,26 @@ function EditorContent({
     type?: string
     left?: number
     width?: number
+    movable: boolean
   }) {
     if (isNil(x.end)) return null
     return (
       <Buffer
+        id={x.start}
         className={`-${x.type}`}
         value={buffer}
         start={x.start}
         end={x.end}
         width={x.width}
         left={x.left}
+        movable={x.movable}
       />
     )
   }
 
   function RenderPortalInstance(
     line: Destination,
-    portal: CleanPortal & { width: number },
+    portal: CleanPortal & { width: number; movable: boolean },
   ) {
     function hook(vnode: VNode) {
       if (vnode.elm) {
@@ -126,12 +145,18 @@ function EditorContent({
         scrollLeft={portal.left * 12}
         hook={{ insert: hook, update: hook }}
       >
-        {TextNode({ ...line, left: portal.left, width: portal.width })}
+        {TextNode({
+          ...line,
+          left: portal.left,
+          width: portal.width,
+          movable: portal.movable,
+        })}
         {EditorContent({
           content: portal.content,
           portals,
           buffer,
           left: portal.left,
+          movable: portal.movable,
         })}
       </div>
     )

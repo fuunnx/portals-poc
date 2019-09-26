@@ -2,11 +2,18 @@ import { filter, isNil } from 'ramda'
 import { Portal, Dict, Token } from '../types'
 import { fromArray } from '@collectable/sorted-map'
 
-export function referencePortals(tokens: Array<[number, Token]>) {
+export function referencePortals(
+  tokens: Array<[number, Token]>,
+  move?: { target: number; offset: number },
+) {
   return filter(
     isComplete,
     tokens.reduce(
       (dict, [index, token]) => {
+        if (move && index === move.target) {
+          index = index + move.offset
+        }
+
         let tokenHeight = 1
         if (token.tag === 'text' || !token.portal) {
           return dict

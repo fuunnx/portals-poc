@@ -6,7 +6,7 @@ import { VNode } from '@cycle/dom'
 import { StateSource } from '@cycle/state'
 import { intent } from './intent'
 import { view } from './view'
-import { Token } from '../lang'
+import { Token, Id } from '../lang'
 import { initialState } from './initialState'
 import dropRepeats from 'xstream/extra/dropRepeats'
 
@@ -23,9 +23,13 @@ export interface Sinks extends BaseSinks {
 export interface State {
   buffer: string
   range: Array<[number, Token]> | undefined
-  movable: Boolean
-  copiable: Boolean
-  disabled: Boolean
+  movable: boolean
+  copiable: boolean
+  disabled: boolean
+  transform?: {
+    target: number
+    offset: number
+  }
 }
 
 export type Reducer = (prev: State) => State | undefined
@@ -64,6 +68,18 @@ export function Editor(sources: Sources): Sinks {
       input$,
       init$,
       intents.togglePreview$,
+      intents.startMoving$.map(transform => (curr: State) => {
+        return {
+          ...curr,
+          transform: Number.isFinite(transform.id)
+            ? {
+                target: transform.id,
+                offset: Math.round(transform.y / 25),
+              }
+            : undefined,
+        }
+      }),
+
       intents.range$.map(range => (curr: State) => ({ ...curr, range })),
       intents.movable$.map(movable => (curr: State) => ({
         ...curr,

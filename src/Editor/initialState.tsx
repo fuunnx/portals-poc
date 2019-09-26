@@ -21,7 +21,10 @@ export const initialState: State = {
   // /PORTAL #fibonnaci
 
   fibonnaci(5) // = 15
+  
+  
   // WARP #fibonnaci
+  // WARP #card
 
   html\`
   <grid columns="3">
@@ -33,10 +36,12 @@ export const initialState: State = {
           <img src="mauricette.jpg" />
           <h2>Mauricette</h2>
       </card>
+      // PORTAL #card
       <card>
           <img src="albert.jpg" />
           <h2>Albert</h2>
       </card>
+      // /PORTAL #card
   </grid>
   \`
   `,
