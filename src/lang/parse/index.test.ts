@@ -1,7 +1,8 @@
 import 'jest'
 
-import { parse } from '.'
+import { parse } from './index'
 import { cleanupContent } from './cleanupContent'
+import { Token } from '../types'
 
 test('empty text', () => {
   expect(cleanupContent(parse(''))).toEqual({
@@ -183,39 +184,76 @@ How are you ?
 })
 
 test('virtual tokens', () => {
-  let result = cleanupContent(
-    parse('', [
-      [
-        0,
-        {
-          tag: 'warp',
-          portal: 'selectionRange',
-          original: null,
-        },
-      ],
-      [
-        0,
-        {
-          tag: 'portal',
-          portal: 'selectionRange',
-          pos: 'start',
-          original: null,
-        },
-      ],
-      [
-        0,
-        {
-          tag: 'portal',
-          portal: 'selectionRange',
-          pos: 'end',
-          original: null,
-        },
-      ],
-    ]),
-  )
+  const toAdd = [
+    [
+      0,
+      {
+        tag: 'warp',
+        portal: 'selectionRange',
+        original: null,
+      },
+    ],
+    [
+      0,
+      {
+        tag: 'portal',
+        portal: 'selectionRange',
+        pos: 'start',
+        original: null,
+      },
+    ],
+    [
+      0,
+      {
+        tag: 'portal',
+        portal: 'selectionRange',
+        pos: 'end',
+        original: null,
+      },
+    ],
+  ] as Array<[number, Token]>
+
+  let result = cleanupContent(parse('', { add: toAdd }))
   expect(result).toEqual({
-    portals: {},
-    content: [[{ type: 'text', start: 0, end: 0, left: 0, right: 0 }]],
+    portals: {
+      selectionRange: {
+        id: 'selectionRange',
+        start: 0,
+        end: 0,
+        left: 0,
+        right: 0,
+        warped: true,
+        content: [[{ type: 'text', start: 0, end: 0, left: 0, right: 0 }]],
+      },
+    },
+    content: [
+      [
+        {
+          type: 'destination',
+          for: 'selectionRange',
+          start: 0,
+          end: 0,
+          left: 0,
+          right: 0,
+        },
+        {
+          type: 'opening',
+          for: 'selectionRange',
+          start: 0,
+          end: 0,
+          left: 0,
+          right: 0,
+        },
+        {
+          type: 'ending',
+          for: 'selectionRange',
+          start: 0,
+          end: 0,
+          left: 0,
+          right: 0,
+        },
+      ],
+    ],
   })
 })
 

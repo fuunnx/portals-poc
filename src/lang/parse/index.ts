@@ -3,13 +3,15 @@ import { tokenize } from './tokenize'
 export { cleanupContent } from './cleanupContent'
 import { referencePortals } from './referencePortals'
 import { fromArray, update, values } from '@collectable/sorted-map'
-import { Context, Portal, NumDict, Symbol, Token, Content } from '../types'
+import { Context, Portal, Symbol, Token, Content } from '../types'
 import { TextLine, DestinationLine, OpeningLine, EndingLine } from './Line'
+
+type TokensMap = Array<[number, Token]>
 
 export function parse(
   text: string,
   operations?: {
-    add?: Array<[number, Token]>
+    add?: TokensMap
     move?: { target: number; offset: number }
   },
 ): Context {

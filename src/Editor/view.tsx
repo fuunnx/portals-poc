@@ -40,10 +40,10 @@ function viewModel(state: State) {
     }
   }
 
-  let context = parse(
-    state.buffer,
-    state.movable ? { add: state.range, move: state.transform } : {},
-  )
+  let context = parse(state.buffer, {
+    add: state.movable ? state.range : [],
+    move: state.transform,
+  })
 
   return {
     buffer: state.buffer,

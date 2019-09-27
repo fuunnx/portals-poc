@@ -18,6 +18,10 @@ export function cleanupContent(context: Context): CleanContext {
     portals: map(portal => {
       return {
         ...portal,
+        start: makeFinite(portal.start),
+        end: makeFinite(portal.end),
+        left: makeFinite(portal.left),
+        right: makeFinite(portal.right),
         content: cleanup(portal.content),
       }
     }, context.portals),
@@ -25,35 +29,51 @@ export function cleanupContent(context: Context): CleanContext {
   }
 
   function cleanup(content: Content): Array<Symbols> {
-    return Array.from(values(content)).reduce(
-      (acc, symbols) => {
-        const prevs = last(acc)
+    return Array.from(values(content))
+      .reduce(
+        (acc, symbols) => {
+          const prevs = last(acc)
 
-        if (
-          !prevs ||
-          prevs.some(x => x.type !== 'text') ||
-          symbols.some(x => x.type !== 'text')
-        ) {
-          acc.push(symbols)
+          if (
+            !prevs ||
+            prevs.some(x => x.type !== 'text') ||
+            symbols.some(x => x.type !== 'text')
+          ) {
+            acc.push(symbols)
+            return acc
+          }
+
+          const prev = last(prevs)
+
+          if (!prev) {
+            acc.push(symbols)
+            return acc
+          }
+
+          symbols.forEach(curr => {
+            prev.start = Math.min(prev.start, curr.start) || 0
+            prev.end = Math.max(0, prev.end || 0, curr.end || 0)
+            prev.left = Math.min(prev.left, curr.left) || 0
+            prev.right = Math.max(0, prev.right, curr.right)
+          })
           return acc
-        }
-
-        const prev = last(prevs)
-
-        if (!prev) {
-          acc.push(symbols)
-          return acc
-        }
-
-        symbols.forEach(curr => {
-          prev.start = Math.min(prev.start, curr.start) || 0
-          prev.end = Math.max(0, prev.end || 0, curr.end || 0)
-          prev.left = Math.min(prev.left, curr.left) || 0
-          prev.right = Math.max(0, prev.right, curr.right)
-        })
-        return acc
-      },
-      [] as Array<Symbols>,
-    )
+        },
+        [] as Array<Symbols>,
+      )
+      .map(symbols =>
+        symbols.map(symbol => {
+          return {
+            ...symbol,
+            start: makeFinite(symbol.start),
+            end: makeFinite(symbol.end),
+            left: makeFinite(symbol.left),
+            right: makeFinite(symbol.right),
+          }
+        }),
+      )
   }
+}
+
+function makeFinite(num: any): number {
+  return Number.isFinite(num) ? num : 0
 }
