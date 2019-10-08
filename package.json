@@ -1,90 +1,90 @@
 {
-    "name": "atom-portals-sandbox",
-    "version": "0.1.0",
-    "private": true,
-    "devDependencies": {
-        "@types/ramda": "github:types/npm-ramda#dist",
-        "cross-spawn": "^6.0.5",
-        "cycle-restart": "^0.2.3",
-        "cycle-scripts-one-fits-all": "^7.2.1",
-        "cyclejs-test-helpers": "^2.0.0",
-        "html-looks-like": "^1.0.3",
-        "husky": "^0.14.3",
-        "jest": "^24.8.0",
-        "jsverify": "^0.8.4",
-        "lint-staged": "^7.3.0",
-        "patch-package": "^6.1.2",
-        "prettier": "^1.18.2",
-        "progress-bar-webpack-plugin": "^1.12.1",
-        "snabbdom-to-html": "^5.1.1",
-        "ts-jest": "^24.0.2",
-        "tslint": "^5.18.0",
-        "typescript": "^3.5.3"
-    },
-    "dependencies": {
-        "@collectable/sorted-map": "^3.0.1",
-        "@cycle/dom": "^22.3.0",
-        "@cycle/isolate": "^3.4.0",
-        "@cycle/run": "^5.2.0",
-        "@cycle/state": "^1.2.0",
-        "@cycle/time": "^0.19.0",
-        "@typed/list": "^2.3.0",
-        "@types/collections": "^5.0.0",
-        "@types/jest": "^24.0.15",
-        "@types/webpack-env": "^1.13.9",
-        "any-observable": "^0.3.0",
-        "collectable": "^0.31.0",
-        "collections": "^5.1.9",
-        "cycle-selection-driver": "git+https://git@github.com/fuunnx/cycle-selection-driver.git#published",
-        "cycle-storageify": "^4.0.1",
-        "cyclejs-utils": "^3.2.0",
-        "ramda": "^0.25.0",
-        "shakespeare-data": "^3.0.0",
-        "snabbdom-pragma": "^2.8.0",
-        "switch-path": "^1.2.0",
-        "xstream": "^11.11.0",
-        "xstream-sample": "^1.0.0"
-    },
-    "scripts": {
-        "_precommit": "lint-staged",
-        "format": "prettier --write '{src,test}/**/*.{js,jsx,ts,tsx}'",
-        "start": "cycle-scripts start",
-        "test": "jest --watch",
-        "build": "cycle-scripts build",
-        "eject": "cycle-scripts eject",
-        "clean": "cycle-scripts clean",
-        "postinstall": "patch-package"
-    },
-    "lint-staged": {
-        "*.{js,jsx,ts,tsx}": [
-            "prettier --write",
-            "git add"
-        ]
-    },
-    "browserslist": [
-        "last 1 version"
+  "name": "atom-portals-sandbox",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "@types/ramda": "github:types/npm-ramda#dist",
+    "cross-spawn": "^6.0.5",
+    "cycle-restart": "^0.2.3",
+    "cycle-scripts-one-fits-all": "^7.2.1",
+    "cyclejs-test-helpers": "^2.0.0",
+    "html-looks-like": "^1.0.3",
+    "husky": "^0.14.3",
+    "jest": "^24.8.0",
+    "jsverify": "^0.8.4",
+    "lint-staged": "^7.3.0",
+    "patch-package": "^6.1.2",
+    "prettier": "^1.18.2",
+    "progress-bar-webpack-plugin": "^1.12.1",
+    "snabbdom-to-html": "^5.1.1",
+    "ts-jest": "^24.0.2",
+    "tslint": "^5.18.0",
+    "typescript": "^3.5.3"
+  },
+  "dependencies": {
+    "@collectable/sorted-map": "^3.0.1",
+    "@cycle/dom": "^22.3.0",
+    "@cycle/isolate": "^3.4.0",
+    "@cycle/run": "^5.2.0",
+    "@cycle/state": "^1.2.0",
+    "@cycle/time": "^0.19.0",
+    "@typed/list": "^2.3.0",
+    "@types/collections": "^5.0.0",
+    "@types/jest": "^24.0.15",
+    "@types/webpack-env": "^1.13.9",
+    "any-observable": "^0.3.0",
+    "collectable": "^0.31.0",
+    "collections": "^5.1.9",
+    "cycle-selection-driver": "git+https://git@github.com/fuunnx/cycle-selection-driver.git#published",
+    "cycle-storageify": "^4.0.1",
+    "cyclejs-utils": "^3.2.0",
+    "ramda": "^0.25.0",
+    "shakespeare-data": "^3.0.0",
+    "snabbdom-pragma": "^2.8.0",
+    "switch-path": "^1.2.0",
+    "xstream": "^11.11.0",
+    "xstream-sample": "^1.0.0"
+  },
+  "scripts": {
+    "_precommit": "lint-staged",
+    "format": "prettier --write '{src,test}/**/*.{js,jsx,ts,tsx}'",
+    "start": "cycle-scripts start",
+    "test": "jest --watch --notify --runInBand",
+    "build": "cycle-scripts build",
+    "eject": "cycle-scripts eject",
+    "clean": "cycle-scripts clean",
+    "postinstall": "patch-package"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "browserslist": [
+    "last 1 version"
+  ],
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "semi": false
+  },
+  "nyc": {
+    "instrument": false,
+    "sourceMap": false,
+    "include": [
+      "src/components"
     ],
-    "prettier": {
-        "singleQuote": true,
-        "trailingComma": "all",
-        "semi": false
-    },
-    "nyc": {
-        "instrument": false,
-        "sourceMap": false,
-        "include": [
-            "src/components"
-        ],
-        "reporter": [
-            "html",
-            "text-summary"
-        ]
-    },
-    "mocha-webpack": {
-        "include": [
-            "src/components/**/*.{jsx,js,ts,tsx}",
-            "test/**/*.test.{js,jsx,ts,tsx}",
-            "cycle-selection-driver/e2e/**/*.test.{js,jsx,ts,tsx}"
-        ]
-    }
+    "reporter": [
+      "html",
+      "text-summary"
+    ]
+  },
+  "mocha-webpack": {
+    "include": [
+      "src/components/**/*.{jsx,js,ts,tsx}",
+      "test/**/*.test.{js,jsx,ts,tsx}",
+      "cycle-selection-driver/e2e/**/*.test.{js,jsx,ts,tsx}"
+    ]
+  }
 }
