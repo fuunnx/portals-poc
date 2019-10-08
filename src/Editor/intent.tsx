@@ -9,12 +9,44 @@ export function intent({ DOM, selection, state }: Sources) {
     .events('click')
     .mapTo((st: State) => ({ ...st, disabled: !st.disabled }))
 
-  const selection$ = selection.selections()
-  const range$ = xs
-    .combine(selection$, state.stream.map(x => x.buffer).compose(dropRepeats()))
-    .map(([selec, buffer]): Array<[number, Token]> | undefined => {
+  const movable$ = xs
+    .merge(
+      DOM.select('document')
+        .events('keydown')
+        .filter(e => e.key === 'Meta'),
+      DOM.select('document')
+        .events('keyup')
+        .filter(e => e.key === 'Meta')
+        .mapTo(null),
+    )
+    .startWith(null)
+
+  const currentRange$ = selection
+    .selections()
+    .map(selec => {
       if (selec.type !== 'Range') return undefined
-      const range = selec.getRangeAt(0)
+      return selec.getRangeAt(0)
+    })
+    .filter(Boolean) as Stream<Range>
+
+  const activeRange$ = currentRange$
+    .take(1)
+    .map(first => {
+      return xs
+        .combine(currentRange$, movable$)
+        .fold((currentRange, [nexRange, movable]) => {
+          if (movable) return currentRange
+          else return nexRange
+        }, first)
+    })
+    .flatten()
+
+  const range$ = xs
+    .combine(
+      activeRange$,
+      state.stream.map(x => x.buffer).compose(dropRepeats()),
+    )
+    .map(([range, buffer]): Array<[number, Token]> | undefined => {
       const start = init(buffer.slice(0, range.startOffset).split('\n')).length
       const end = buffer.slice(0, range.endOffset).split('\n').length
 
@@ -68,23 +100,6 @@ export function intent({ DOM, selection, state }: Sources) {
         .mapTo(null),
     )
     .startWith(null)
-
-  const movable$ = xs
-    .merge(
-      DOM.select('document')
-        .events('keydown')
-        .filter(e => e.key === 'Meta'),
-      DOM.select('document')
-        .events('keyup')
-        .filter(e => e.key === 'Meta')
-        .mapTo(null),
-    )
-    .startWith(null)
-
-  // const create$ = movable$.filter(Boolean)
-  //     .compose(sampleCombine(selection$))
-  //     .map(([, selection]) => selection)
-  //     .filter((selection) => selection.type === 'Range')
 
   let startMoving$ = movable$
     .map(movable => {
