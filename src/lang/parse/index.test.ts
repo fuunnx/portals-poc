@@ -3,6 +3,7 @@ import 'jest'
 import { parse } from './index'
 import { cleanupContent } from './cleanupContent'
 import { Token } from '../types'
+import { values } from '@collectable/sorted-map'
 
 test('empty text', () => {
   expect(cleanupContent(parse(''))).toEqual({
@@ -183,8 +184,8 @@ How are you ?
   // expect([result.portals['1'].left, result.portals['1'].right]).toEqual([4, 14])
 })
 
-test('virtual tokens', () => {
-  const toAdd = [
+test('add virtual tokens', () => {
+  const toAdd: Array<[number, Token]> = [
     [
       0,
       {
@@ -211,7 +212,7 @@ test('virtual tokens', () => {
         original: null,
       },
     ],
-  ] as Array<[number, Token]>
+  ]
 
   let result = cleanupContent(parse('', { add: toAdd }))
   expect(result).toEqual({
@@ -257,49 +258,36 @@ test('virtual tokens', () => {
   })
 })
 
-// let's keep it simple for now
-// test('superposed', () => {
-//   expect(parse(`
-// // PORTAL #2
-// Hello
-// // PORTAL #1
-// guys
-// // /PORTAL #2
-// // /PORTAL #1
+test('move tokens top', () => {
+  const result = parse(
+    `0
+2
+3`,
+    { move: { target: 1, offset: -1 } },
+  )
+  const content = Array.from(values(result.content))
+  expect(content).toEqual([
+    [
+      { type: 'text', start: 0, end: 0, left: 0, right: 1 },
+      { type: 'text', start: 1, end: 1, left: 0, right: 1 },
+    ],
+    [{ type: 'text', start: 2, end: 2, left: 0, right: 1 }],
+  ])
+})
 
-// How are you ?
-// // WARP #1
-// // WARP #2
-// `)).toEqual({
-//     content: [
-//       { type: 'text', start: 0, end: 0 },
-//       { type: 'opening', start: 1, end: 1, for: '2' },
-//       { type: 'ending', start: 6, end: 6, for: '1' },
-//       { type: 'text', start: 7, end: 8 },
-//       { type: 'destination', start: 9, end: 9, for: '1' },
-//       { type: 'destination', start: 10, end: 10, for: '2' },
-//       { type: 'text', start: 11, end: 11 },
-//     ],
-//     portals: {
-//       '1': {
-//         id: '1',
-//         start: 2,
-//         end: 5,
-//         content: [
-//           { type: 'text', start: 2, end: 2 },
-//           { type: 'opening', start: 3, end: 3, for: '2' },
-//           { type: 'ending', start: 5, end: 5, for: '2' },
-//         ],
-//         warped: true,
-//       },
-
-//       '2': {
-//         id: '2',
-//         start: 4,
-//         end: 4,
-//         content: [{ type: 'text', start: 4, end: 4 },],
-//         warped: true,
-//       },
-//     },
-//   });
-// });
+test('move tokens bottom', () => {
+  const result = parse(
+    `0
+2
+3`,
+    { move: { target: 1, offset: +1 } },
+  )
+  const content = Array.from(values(result.content))
+  expect(content).toEqual([
+    [{ type: 'text', start: 0, end: 0, left: 0, right: 1 }],
+    [
+      { type: 'text', start: 1, end: 1, left: 0, right: 1 },
+      { type: 'text', start: 2, end: 2, left: 0, right: 1 },
+    ],
+  ])
+})

@@ -87,7 +87,8 @@ function pushWithContext(context: Context, index: number) {
     container.content = update(
       symbols => {
         if (!symbols) return [x]
-        return symbols.concat([x])
+        symbols.push(x)
+        return symbols
       },
       index,
       container.content,
