@@ -13,22 +13,23 @@ Run the unit tests: `npm test`
 If you want to add custom config to webpack, you can do it! Just edit the `webpack.config.js` in your app's root directory. It will be merged with the default config.
 
 Example: Adding the progress bar plugin:
+
 ```javascript
-const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const ProgressBarPlugin = require('progress-bar-webpack-plugin')
 
 module.exports = {
-    plugins: [
-        new ProgressBarPlugin()
-    ]
+  plugins: [new ProgressBarPlugin()],
 }
 ```
+
 Example: Add API proxy for devServer
+
 ```javascript
 module.exports = {
-    devServer: {
-        proxy: {
-            "/api": "http://localhost:3000"
-        }
-    }
+  devServer: {
+    proxy: {
+      '/api': 'http://localhost:3000',
+    },
+  },
 }
 ```

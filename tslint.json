@@ -9,10 +9,7 @@
       "member-variable-declaration"
     ],
     "curly": false,
-    "semicolon": [
-      true,
-      "never"
-    ],
+    "semicolon": [true, "never"],
     "no-duplicate-variable": true,
     "no-empty": true,
     "no-eval": true,

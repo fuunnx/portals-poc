@@ -12,7 +12,7 @@ export type DriverThunkMapper = (t: DriverThunk) => DriverThunk
 const driverThunks: DriverThunk[] = [
   ['DOM', () => makeDOMDriver('#app')],
   ['time', () => timeDriver],
-  ['selection', () => selectionDriver]
+  ['selection', () => selectionDriver],
 ]
 
 export const buildDrivers = (fn: DriverThunkMapper) =>
