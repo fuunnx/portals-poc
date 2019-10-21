@@ -5,18 +5,18 @@ import { init } from '../libs/array'
 import { Dict, Token } from 'src/lang'
 
 export function intent({ DOM, selection, state }: Sources) {
-  const togglePreview$ = DOM.select('[action="toggle-preview"]')
+  const togglePreview$ = (DOM.select('[action="toggle-preview"]') as any)
     .events('click')
     .mapTo((st: State) => ({ ...st, disabled: !st.disabled }))
 
   const movable$ = xs
     .merge(
-      DOM.select('document')
+      (DOM.select('document') as any)
         .events('keydown')
-        .filter(e => e.key === 'Meta'),
-      DOM.select('document')
+        .filter((e: KeyboardEvent) => e.key === 'Meta'),
+      (DOM.select('document') as any)
         .events('keyup')
-        .filter(e => e.key === 'Meta')
+        .filter((e: KeyboardEvent) => e.key === 'Meta')
         .mapTo(null),
     )
     .startWith(null)
@@ -82,21 +82,19 @@ export function intent({ DOM, selection, state }: Sources) {
 
   const mouseDown$ = xs
     .merge(
-      DOM.select('document').events('mousedown'),
-      DOM.select('document')
-        .events('mouseup')
-        .mapTo(null),
+      (DOM.select('document') as any).events('mousedown'),
+      (DOM.select('document') as any).events('mouseup').mapTo(null),
     )
     .startWith(null)
 
   const copiable$ = xs
     .merge(
-      DOM.select('document')
+      (DOM.select('document') as any)
         .events('keydown')
-        .filter(e => e.key === 'Alt'),
-      DOM.select('document')
+        .filter((e: KeyboardEvent) => e.key === 'Alt'),
+      (DOM.select('document') as any)
         .events('keyup')
-        .filter(e => e.key === 'Alt')
+        .filter((e: KeyboardEvent) => e.key === 'Alt')
         .mapTo(null),
     )
     .startWith(null)
@@ -104,9 +102,9 @@ export function intent({ DOM, selection, state }: Sources) {
   let startMoving$ = movable$
     .map(movable => {
       if (!movable) return xs.empty()
-      return DOM.select('[data-buffer]')
+      return (DOM.select('[data-buffer]') as any)
         .events('mousedown')
-        .map(event => {
+        .map((event: MouseEvent) => {
           const start = {
             x: event.clientX,
             y: event.clientY,
@@ -123,7 +121,9 @@ export function intent({ DOM, selection, state }: Sources) {
     .flatten() as Stream<{ id: number; x: number; y: number }>
 
   return {
-    input$: DOM.select('document').events('input'),
+    input$: (DOM.select('document') as any).events('input') as Stream<
+      InputEvent
+    >,
     create$: xs.empty(),
     range$,
     movable$,
@@ -135,13 +135,13 @@ export function intent({ DOM, selection, state }: Sources) {
   }
 
   function move$() {
-    return DOM.select('document')
+    return (DOM.select('document') as any)
       .events('mousemove')
       .endWhen(
         xs.merge(
-          DOM.select('document').events('mouseup'),
-          DOM.select('window').events('blur'),
+          (DOM.select('document') as any).events('mouseup'),
+          (DOM.select('window') as any).events('blur'),
         ),
-      )
+      ) as Stream<MouseEvent>
   }
 }

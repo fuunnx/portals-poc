@@ -39,15 +39,6 @@ export function Editor(sources: Sources): Sinks {
   const intents = intent(sources)
   const vdom$: Stream<VNode> = view(state.stream)
 
-  // const createPortal$ = intents.create$
-  //     .map(() => (currState: State) => {
-  //         if (!currState.range) return currState
-  //         return {
-  //             ...currState,
-  //             instances: currState.instances.concat([currState.range])
-  //         }
-  //     })
-
   const input$ = intents.input$
     .map(ev => (ev.target as HTMLInputElement).value || '')
     .compose(dropRepeats())
