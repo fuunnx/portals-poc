@@ -22,10 +22,15 @@ export function parse(
     ...((operations && operations.add) || []),
   ].map(([k, v]) => [Number(k), v] as [number, Token]) // <-- fuck you typescript
 
+  if (indexedTokens.some(([index]) => index === -1)) {
+    console.log(indexedTokens)
+  }
   const portals = referencePortals(indexedTokens, operations && operations.move)
-
   const ctx = indexedTokens.reduce(
     (context, [index, token]) => {
+      if (index === -1) {
+        console.log(token)
+      }
       let targetIndex = index
       if (operations && operations.move) {
         if (index === operations.move.target) {

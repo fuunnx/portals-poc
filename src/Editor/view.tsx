@@ -10,17 +10,26 @@ import { equals } from 'ramda'
 import { cleanupContent } from '../lang/parse'
 import { CleanPortal, CleanContext } from 'src/lang/parse/cleanupContent'
 import { TextLine } from 'src/lang/parse/Line'
+import { last } from 'src/libs/array'
 
 export function view(state$: Stream<State>): Stream<VNode> {
   return state$
     .compose(dropRepeats(equals))
     .map(viewModel)
-    .map(state => (
-      <div class={{ 'editor-wrapper': true, '-movable': state.movable }}>
-        <button attrs-action="toggle-preview">TOGGLE PREVIEW</button>
-        {EditorContent(state)}
-      </div>
-    ))
+    .map(state => {
+      const content = EditorContent(state)
+      // if ((last(content.children || []) as any).sel === 'div') {
+      //   console.log(content)
+      //   console.log(state)
+      // }
+
+      return (
+        <div class={{ 'editor-wrapper': true, '-movable': state.movable }}>
+          <button attrs-action="toggle-preview">TOGGLE PREVIEW</button>
+          {content}
+        </div>
+      )
+    })
 }
 
 function viewModel(state: State) {
@@ -31,7 +40,7 @@ function viewModel(state: State) {
         [
           {
             ...TextLine(0, { tag: 'text', original: state.buffer }),
-            end: Infinity,
+            end: state.buffer.split('\n').length + 1,
           },
         ],
       ],

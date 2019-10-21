@@ -52,7 +52,7 @@ export function intent({ DOM, selection, state }: Sources) {
 
       return [
         [
-          start - 1,
+          start,
           {
             tag: 'portal',
             portal: 'selectionRange',
@@ -70,7 +70,7 @@ export function intent({ DOM, selection, state }: Sources) {
           },
         ],
         [
-          start - 1,
+          start,
           {
             tag: 'warp',
             portal: 'selectionRange',

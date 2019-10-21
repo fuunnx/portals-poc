@@ -16,6 +16,11 @@ export function DestinationLine(index: number, token: Token): Destination {
 }
 
 export function OpeningLine(index: number, token: Token): Opening {
+  const position = calcPosition(index, token.original)
+  if (position.start === -1) {
+    console.log('WUUUT', index, token)
+  }
+
   return {
     type: 'opening',
     for: token.portal || '',
