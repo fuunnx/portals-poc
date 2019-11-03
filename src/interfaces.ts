@@ -1,12 +1,12 @@
 import { Stream } from 'xstream'
-import { DOMSource, VNode } from '@cycle/dom'
+import { MainDOMSource, VNode } from '@cycle/dom'
 import { TimeSource } from '@cycle/time'
 import { ISelectionSource } from './drivers/selectionDriver'
 
 export type Component = (s: BaseSources) => BaseSinks
 
 export interface BaseSources {
-  DOM: DOMSource
+  DOM: MainDOMSource
   time: TimeSource
   selection: ISelectionSource
 }

@@ -18,10 +18,6 @@ export function view(state$: Stream<State>): Stream<VNode> {
     .map(viewModel)
     .map(state => {
       const content = EditorContent(state)
-      // if ((last(content.children || []) as any).sel === 'div') {
-      //   console.log(content)
-      //   console.log(state)
-      // }
 
       return (
         <div class={{ 'editor-wrapper': true, '-movable': state.movable }}>
