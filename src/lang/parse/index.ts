@@ -2,9 +2,10 @@ import { map, flatten } from 'ramda'
 import { tokenize } from './tokenize'
 export { cleanupContent } from './cleanupContent'
 import { referencePortals } from './referencePortals'
-import { fromArray, update, values } from '@collectable/sorted-map'
+import { fromArray, update } from '@collectable/sorted-map'
 import { Context, Portal, Symbol, Token, Content } from '../types'
 import { TextLine, DestinationLine, OpeningLine, EndingLine } from './Line'
+import { toSortedArray } from '../../libs/SortedMap'
 
 type TokensMap = Array<[number, Token]>
 
@@ -68,7 +69,7 @@ export function parse(
 }
 
 function computePortalSize(portal: Portal): Portal {
-  const content = flatten(Array.from(values(portal.content)))
+  const content = flatten(toSortedArray(portal.content)) as Symbol[]
 
   const right = content.reduce((max, curr) => {
     return Math.max(max, curr.right)

@@ -1,6 +1,6 @@
 import { map, last } from 'ramda'
 import { Context, Portal, Dict, Content, Symbols } from '../types'
-import { values } from '@collectable/sorted-map'
+import { toSortedArray } from '../../libs/SortedMap'
 
 export interface CleanPortal extends Omit<Portal, 'content'> {
   content: Array<Symbols>
@@ -29,7 +29,7 @@ export function cleanupContent(context: Context): CleanContext {
   }
 
   function cleanup(content: Content): Array<Symbols> {
-    return Array.from(values(content))
+    return toSortedArray(content)
       .reduce(
         (acc, symbols) => {
           const prevs = last(acc)

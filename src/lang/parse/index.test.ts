@@ -3,7 +3,7 @@ import 'jest'
 import { parse } from './index'
 import { cleanupContent } from './cleanupContent'
 import { Token } from '../types'
-import { values } from '@collectable/sorted-map'
+import { toSortedArray } from '../../libs/SortedMap'
 
 test('empty text', () => {
   expect(cleanupContent(parse(''))).toEqual({
@@ -265,7 +265,7 @@ test('move tokens top', () => {
 3`,
     { move: { target: 1, offset: -1 } },
   )
-  const content = Array.from(values(result.content))
+  const content = toSortedArray(result.content)
   expect(content).toEqual([
     [
       { type: 'text', start: 0, end: 0, left: 0, right: 1 },
@@ -275,19 +275,51 @@ test('move tokens top', () => {
   ])
 })
 
-test('move tokens bottom', () => {
+test('move simple tokens bottom', () => {
   const result = parse(
     `0
 2
 3`,
     { move: { target: 1, offset: +1 } },
   )
-  const content = Array.from(values(result.content))
+  const content = toSortedArray(result.content)
   expect(content).toEqual([
     [{ type: 'text', start: 0, end: 0, left: 0, right: 1 }],
     [
       { type: 'text', start: 1, end: 1, left: 0, right: 1 },
       { type: 'text', start: 2, end: 2, left: 0, right: 1 },
+    ],
+  ])
+})
+
+test('move complex tokens bottom', () => {
+  const result = parse(
+    `// PORTAL #1
+1
+// /PORTAL #1
+2
+// WARP #1
+3
+4`,
+    { move: { target: 4, offset: +3 } },
+  )
+  const content = toSortedArray(result.content)
+  console.log(content)
+  expect(content).toEqual([
+    [{ type: 'opening', for: '1', start: 0, end: 0, left: 0, right: 12 }],
+    [{ type: 'ending', for: '1', start: 2, end: 2, left: 0, right: 13 }],
+    [{ type: 'text', start: 3, end: 3, left: 0, right: 1 }],
+    [{ type: 'text', start: 5, end: 5, left: 0, right: 1 }],
+    [{ type: 'text', start: 6, end: 6, left: 0, right: 1 }],
+    [
+      {
+        type: 'destination',
+        for: '1',
+        start: 4,
+        end: 4,
+        left: 0,
+        right: 10,
+      },
     ],
   ])
 })
