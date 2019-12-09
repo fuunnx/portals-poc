@@ -131,7 +131,6 @@ export function intent({ DOM, selection, state }: Sources) {
     mouseDown$,
     togglePreview$,
     startMoving$,
-    // movePortal$,
   }
 
   function move$() {
