@@ -1,6 +1,6 @@
 import './buffer.scss'
 import { VNodeStyle } from 'snabbdom/modules/style'
-import { VNode, textarea } from '@cycle/dom'
+import { VNode } from '@cycle/dom'
 
 interface BufferElement {
   id?: string | number
@@ -43,8 +43,9 @@ export function Buffer({
     }
   }
 
+  // don't use textarea, selection can't be measured on textareas
   return (
-    <textarea
+    <pre
       data-buffer={id}
       key={key || `id-${start}-${end}`}
       style={Object.assign(
@@ -64,7 +65,8 @@ export function Buffer({
       scrollLeft={12 * left}
       wrap="off"
       hook={{ insert: hook, update: hook }}
-      value={value + '\n'}
-    ></textarea>
+    >
+      {value + '\n'}
+    </pre>
   )
 }

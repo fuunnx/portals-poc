@@ -13,10 +13,9 @@ export class SelectionSource implements ISelectionSource {
   }
 
   public selections(): Stream<Selection> {
-    const selection$ = fromEvent(this.document, 'selectionchange').map(
-      () => this.document.getSelection() as Selection,
-    )
-
+    const selection$ = fromEvent(this.document, 'selectionchange').map(() => {
+      return this.document.getSelection() as Selection
+    })
     return adapt(selection$)
   }
 }

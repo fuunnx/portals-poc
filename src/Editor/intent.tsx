@@ -2,9 +2,10 @@ import xs, { Stream } from 'xstream'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { Sources, State } from './index'
 import { init } from '../libs/array'
-import { Dict, Token } from 'src/lang'
+import { Token } from 'src/lang'
 
-export function intent({ DOM, selection, state }: Sources) {
+export function intent(sources: Sources) {
+  const { DOM, selection, state, time } = sources
   const togglePreview$ = DOM.select('[action="toggle-preview"]')
     .events('click')
     .mapTo((st: State) => ({ ...st, disabled: !st.disabled }))
@@ -20,35 +21,36 @@ export function intent({ DOM, selection, state }: Sources) {
         .mapTo(null),
     )
     .startWith(null)
+    .compose(dropRepeats())
 
-  const currentRange$ = selection
-    .selections()
-    .map(selec => {
-      if (selec.type !== 'Range') return undefined
-      return selec.getRangeAt(0)
-    })
-    .filter(Boolean) as Stream<Range>
+  const currentRange$ = selection.selections().map(selec => {
+    if (!selec.rangeCount) return undefined
+    const range = selec.getRangeAt(0)
+    if (range.collapsed) return undefined
 
-  const activeRange$ = currentRange$
-    .take(1)
-    .map(first => {
-      return xs
-        .combine(currentRange$, movable$)
-        .fold((currentRange, [nexRange, movable]) => {
-          if (movable) return currentRange
-          else return nexRange
-        }, first)
-    })
-    .flatten()
+    return { startOffset: range.startOffset, endOffset: range.endOffset }
+  })
+
+  const activeRange$ = xs
+    .combine(currentRange$.compose(time.debounce(100)), movable$)
+    .fold((currentRange: Range | undefined, [nexRange, movable]) => {
+      if (movable) return currentRange
+      else return nexRange
+    }, undefined)
 
   const range$ = xs
     .combine(
       activeRange$,
       state.stream.map(x => x.buffer).compose(dropRepeats()),
     )
-    .map(([range, buffer]): Array<[number, Token]> | undefined => {
-      const start = init(buffer.slice(0, range.startOffset).split('\n')).length
-      const end = buffer.slice(0, range.endOffset).split('\n').length
+    .map(([range, buffer]: [Range, string]):
+      | Array<[number, Token]>
+      | undefined => {
+      if (!range) return
+
+      const start =
+        buffer.slice(0, range.startOffset - 1).split('\n').length - 1
+      const end = buffer.slice(0, range.endOffset - 1).split('\n').length - 1
 
       return [
         [

@@ -29,9 +29,6 @@ export function parse(
   const portals = referencePortals(indexedTokens, operations && operations.move)
   const ctx = indexedTokens.reduce(
     (context, [index, token]) => {
-      if (index === -1) {
-        console.log(token)
-      }
       let targetIndex = index
       if (operations && operations.move) {
         if (index === operations.move.target) {
