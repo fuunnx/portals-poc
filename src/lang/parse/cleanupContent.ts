@@ -7,14 +7,13 @@ export interface CleanPortal extends Omit<Portal, 'content'> {
 }
 
 export interface CleanContext
-  extends Omit<Omit<Context, 'content'>, 'portals'> {
+  extends Omit<Omit<Omit<Context, 'content'>, 'portals'>, 'buffer'> {
   content: Array<Symbols>
   portals: Dict<CleanPortal>
 }
 
 export function cleanupContent(context: Context): CleanContext {
   return {
-    ...context,
     portals: map(portal => {
       return {
         ...portal,

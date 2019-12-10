@@ -64,6 +64,7 @@ export function parse(
 
   return {
     ...ctx,
+    buffer: text,
     portals: map(computePortalSize, ctx.portals),
   }
 }

@@ -304,7 +304,7 @@ test('move complex tokens bottom', () => {
     { move: { target: 4, offset: +3 } },
   )
   const content = toSortedArray(result.content)
-  console.log(content)
+
   expect(content).toEqual([
     [{ type: 'opening', for: '1', start: 0, end: 0, left: 0, right: 12 }],
     [{ type: 'ending', for: '1', start: 2, end: 2, left: 0, right: 13 }],

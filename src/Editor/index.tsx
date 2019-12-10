@@ -6,7 +6,7 @@ import { VNode } from '@cycle/dom'
 import { StateSource } from '@cycle/state'
 import { intent } from './intent'
 import { view } from './view'
-import { Token, Id } from '../lang'
+import { Token, parse, stringify } from '../lang'
 import { initialState } from './initialState'
 import dropRepeats from 'xstream/extra/dropRepeats'
 
@@ -80,6 +80,20 @@ export function Editor(sources: Sources): Sinks {
         ...curr,
         copiable: Boolean(copiable),
       })),
+
+      intents.commit$.mapTo(currState => {
+        const parsed = parse(currState.buffer, {
+          add: currState.movable ? currState.range : [],
+          move: currState.transform,
+        })
+
+        return {
+          ...currState,
+          movable: false,
+          transform: undefined,
+          buffer: stringify(parsed),
+        }
+      }),
     ),
   }
 }

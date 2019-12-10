@@ -122,6 +122,8 @@ export function intent({ DOM, selection, state }: Sources) {
     })
     .flatten() as Stream<{ id: number; x: number; y: number }>
 
+  const commit$ = mouseDown$.drop(1).filter(x => x === null)
+
   return {
     input$: DOM.select('document').events('input'),
     create$: xs.empty(),
@@ -131,6 +133,7 @@ export function intent({ DOM, selection, state }: Sources) {
     mouseDown$,
     togglePreview$,
     startMoving$,
+    commit$,
   }
 
   function move$() {

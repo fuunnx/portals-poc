@@ -15,6 +15,7 @@ export type Content = SortedMapStructure<number, Symbols>
 export type PortalsDict = Dict<Portal>
 
 export interface Context {
+  buffer: string
   content: Content
   portals: Dict<Portal>
 }
