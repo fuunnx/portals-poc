@@ -1,22 +1,27 @@
-import { Context } from '../types'
+import { Context, Content, Symbol } from '../types'
 import { toSortedArray } from '../../libs/SortedMap'
-import { flatten } from 'ramda'
-import { toArray } from '@collectable/sorted-map/'
+
+const SEPARATOR = '\n'
 
 export function stringify(context: Context): string {
-  const lines = context.buffer.split('\n')
+  const lines = context.buffer.split(SEPARATOR)
 
-  type Pair = [number, Symbol]
-  flatten(toArray(context.content)).reduce((acc, [index, symbol]) => {
-    if (symbol.type === 'opening') {
-    }
-    return [index, symbol]
-  }, [])
-
-  return flatten()
+  return flattenSymbols(context.content)
     .map(symbol => {
-      console.log(symbol)
-      return lines.slice(symbol.start, (symbol.end || 0) + 1).join('\n')
+      return lines.slice(symbol.start, (symbol.end || 0) + 1).join(SEPARATOR)
     })
-    .join('\n')
+    .join(SEPARATOR)
+
+  function flattenSymbols(content: Content): Symbol[] {
+    return toSortedArray(content).reduce((acc, symbols) => {
+      symbols.forEach(symbol => {
+        acc.push(symbol)
+        if (symbol.type === 'opening') {
+          acc.push(...flattenSymbols(context.portals[symbol.for].content))
+        }
+      })
+
+      return acc
+    }, [])
+  }
 }
