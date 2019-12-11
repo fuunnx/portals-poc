@@ -28,7 +28,11 @@ export function intent(sources: Sources) {
     const range = selec.getRangeAt(0)
     if (range.collapsed) return undefined
 
-    return { startOffset: range.startOffset, endOffset: range.endOffset }
+    // making a copy is necessary because the range can be mutated from outside
+    return {
+      startOffset: range.startOffset,
+      endOffset: range.endOffset,
+    }
   })
 
   const activeRange$ = xs
@@ -48,8 +52,7 @@ export function intent(sources: Sources) {
       | undefined => {
       if (!range) return
 
-      const start =
-        buffer.slice(0, range.startOffset - 1).split('\n').length - 1
+      const start = buffer.slice(0, range.startOffset).split('\n').length - 1
       const end = buffer.slice(0, range.endOffset - 1).split('\n').length - 1
 
       return [
@@ -63,19 +66,19 @@ export function intent(sources: Sources) {
           },
         ],
         [
+          start,
+          {
+            tag: 'warp',
+            portal: 'selectionRange',
+            original: null,
+          },
+        ],
+        [
           end,
           {
             tag: 'portal',
             portal: 'selectionRange',
             pos: 'end',
-            original: null,
-          },
-        ],
-        [
-          start,
-          {
-            tag: 'warp',
-            portal: 'selectionRange',
             original: null,
           },
         ],

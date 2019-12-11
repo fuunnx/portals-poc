@@ -71,8 +71,8 @@ Hum
     portals: {
       '1': {
         id: '1',
-        start: 2,
-        end: 4,
+        start: 1,
+        end: 5,
         left: 0,
         right: 10,
         content: [[{ type: 'text', start: 2, end: 4, left: 0, right: 10 }]],
@@ -99,7 +99,6 @@ How are you ?
   })
 })
 
-// Balec aussi
 test('nested', () => {
   expect(
     cleanupContent(
@@ -138,8 +137,8 @@ How are you ?
     portals: {
       '1': {
         id: '1',
-        start: 2,
-        end: 5,
+        start: 1,
+        end: 6,
         content: [
           [{ type: 'text', start: 2, end: 2, left: 0, right: 5 }],
           [{ type: 'opening', start: 3, end: 3, left: 0, right: 12, for: '2' }],
@@ -152,8 +151,8 @@ How are you ?
 
       '2': {
         id: '2',
-        start: 4,
-        end: 4,
+        start: 3,
+        end: 5,
         content: [[{ type: 'text', start: 4, end: 4, left: 0, right: 4 }]],
         warped: true,
         left: 0,

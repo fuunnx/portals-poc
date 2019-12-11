@@ -12,7 +12,6 @@ export function referencePortals(
         index = index + move.offset
       }
 
-      let tokenHeight = 1
       if (token.tag === 'text' || !token.portal) {
         return dict
       }
@@ -33,7 +32,7 @@ export function referencePortals(
           content: fromArray([]),
           ...dict[token.portal],
           id: token.portal,
-          start: index + tokenHeight,
+          start: index,
         }
       }
 
@@ -41,7 +40,7 @@ export function referencePortals(
         dict[token.portal] = {
           content: fromArray([]),
           ...dict[token.portal],
-          end: index - tokenHeight,
+          end: index,
         }
       }
 
