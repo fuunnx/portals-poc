@@ -85,6 +85,19 @@ export function intent(sources: Sources) {
       ]
     })
 
+  const currentHoveredLine$ = DOM.select('[data-buffer]')
+    .events('mousemove')
+    .map((event: MouseEvent) => {
+      const target = event.target as HTMLElement
+      return {
+        id: parseInt(target.dataset.buffer || ''),
+        line:
+          Math.floor((event.y - target.getBoundingClientRect().top) / 25) +
+          parseInt(target.dataset.offsetStart || '0'),
+      }
+    })
+    .remember()
+
   const mouseDown$ = xs
     .merge(
       DOM.select('document').events('mousedown'),
@@ -117,11 +130,18 @@ export function intent(sources: Sources) {
             y: event.clientY,
           }
 
-          return move$().map(e => ({
-            id: parseInt((event.target as HTMLElement).dataset.buffer || ''),
-            x: e.clientX - start.x,
-            y: e.clientY - start.y,
-          }))
+          const id = parseInt(
+            (event.target as HTMLElement).dataset.buffer || '',
+          )
+
+          return move$()
+            .filter(x => x.id !== id)
+            .map(currentlyHovered => ({
+              id,
+              // x: e.clientX - start.x,
+              x: 0,
+              y: currentlyHovered.line,
+            }))
         })
         .flatten()
     })
@@ -142,13 +162,11 @@ export function intent(sources: Sources) {
   }
 
   function move$() {
-    return DOM.select('document')
-      .events('mousemove')
-      .endWhen(
-        xs.merge(
-          DOM.select('document').events('mouseup'),
-          DOM.select('window').events('blur'),
-        ),
-      )
+    return currentHoveredLine$.endWhen(
+      xs.merge(
+        DOM.select('document').events('mouseup'),
+        DOM.select('window').events('blur'),
+      ),
+    )
   }
 }

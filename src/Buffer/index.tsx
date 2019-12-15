@@ -46,7 +46,10 @@ export function Buffer({
   // don't use textarea, selection can't be measured on textareas
   return (
     <pre
-      data-buffer={id}
+      data={{
+        buffer: id,
+        offsetStart: start,
+      }}
       key={key || `id-${start}-${end}`}
       style={Object.assign(
         {

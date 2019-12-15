@@ -65,7 +65,7 @@ export function Editor(sources: Sources): Sinks {
           transform: Number.isFinite(transform.id)
             ? {
                 target: transform.id,
-                offset: Math.round(transform.y / 25),
+                offset: transform.y - transform.id,
               }
             : undefined,
         }
