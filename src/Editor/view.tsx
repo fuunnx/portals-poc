@@ -10,7 +10,6 @@ import { equals } from 'ramda'
 import { cleanupContent } from '../lang/parse'
 import { CleanPortal, CleanContext } from 'src/lang/parse/cleanupContent'
 import { TextLine } from 'src/lang/parse/Line'
-import { last } from 'src/libs/array'
 
 export function view(state$: Stream<State>): Stream<VNode> {
   return state$

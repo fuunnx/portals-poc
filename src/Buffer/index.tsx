@@ -27,9 +27,22 @@ export function Buffer({
   width = 0,
   id,
 }: BufferElement) {
+  const printed = value
+    .split('\n')
+    .slice(start, end + 1)
+    .join('\n')
+
+  const startOffset = value
+    .split('\n')
+    .slice(0, start)
+    .join('\n').length
+
   function hook(vnode: VNode) {
     if (vnode.elm) {
       let elm = vnode.elm as HTMLElement
+      if (elm.innerText.trim() !== printed.trim()) {
+        elm.innerText = printed
+      }
 
       requestAnimationFrame(() => {
         elm.scrollTop = 25 * start
@@ -48,7 +61,10 @@ export function Buffer({
     <pre
       data={{
         buffer: id,
-        offsetStart: start,
+        lineOffset: start,
+        startOffset,
+        endOffset: startOffset + printed.length,
+        value,
       }}
       key={key || `id-${start}-${end}`}
       style={Object.assign(
@@ -67,9 +83,10 @@ export function Buffer({
       scrollTop={25 * start}
       scrollLeft={12 * left}
       wrap="off"
-      hook={{ insert: hook, update: hook }}
-    >
-      {value + '\n'}
-    </pre>
+      hook={{
+        insert: hook,
+        update: hook,
+      }}
+    ></pre>
   )
 }

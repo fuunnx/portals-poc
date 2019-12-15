@@ -40,7 +40,6 @@ export function Editor(sources: Sources): Sinks {
   const vdom$: Stream<VNode> = view(state.stream)
 
   const input$ = intents.input$
-    .map(ev => (ev.target as HTMLInputElement).value || '')
     .compose(dropRepeats())
     .map(buffer => (currState: State) => {
       return {

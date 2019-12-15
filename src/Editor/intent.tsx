@@ -3,6 +3,7 @@ import dropRepeats from 'xstream/extra/dropRepeats'
 import { Sources, State } from './index'
 import { init } from '../libs/array'
 import { Token } from 'src/lang'
+import { calcPosition } from 'src/lang/parse/Line'
 
 export function intent(sources: Sources) {
   const { DOM, selection, state, time } = sources
@@ -28,10 +29,16 @@ export function intent(sources: Sources) {
     const range = selec.getRangeAt(0)
     if (range.collapsed) return undefined
 
+    const startContainer = range.startContainer.parentNode as HTMLElement
+    const endContainer = range.endContainer.parentNode as HTMLElement
+
     // making a copy is necessary because the range can be mutated from outside
     return {
-      startOffset: range.startOffset,
-      endOffset: range.endOffset,
+      startOffset:
+        range.startOffset +
+        parseInt(startContainer?.dataset?.startOffset || ''),
+      endOffset:
+        range.endOffset + parseInt(endContainer?.dataset?.startOffset || ''),
     }
   })
 
@@ -89,11 +96,12 @@ export function intent(sources: Sources) {
     .events('mousemove')
     .map((event: MouseEvent) => {
       const target = event.target as HTMLElement
+      console.log(target.dataset.lineOffset)
       return {
         id: parseInt(target.dataset.buffer || ''),
         line:
-          Math.floor((event.y - target.getBoundingClientRect().top) / 25) +
-          parseInt(target.dataset.offsetStart || '0'),
+          Math.round((event.y - target.getBoundingClientRect().top) / 25) +
+          parseInt(target.dataset.lineOffset || '0'),
       }
     })
     .remember()
@@ -133,6 +141,7 @@ export function intent(sources: Sources) {
           const id = parseInt(
             (event.target as HTMLElement).dataset.buffer || '',
           )
+          console.log(id)
 
           return move$()
             .filter(x => x.id !== id)
@@ -149,8 +158,22 @@ export function intent(sources: Sources) {
 
   const commit$ = mouseDown$.drop(1).filter(x => x === null)
 
+  const edit$ = DOM.select('[data-buffer]')
+    .events('input')
+    .map(event => {
+      const target = event.target as HTMLElement
+      const startOffset = parseInt(target.dataset.startOffset || '')
+      const endOffset = parseInt(target.dataset.endOffset || '')
+      const value = target.dataset.value || ''
+      const newValue = target.innerText
+
+      return (
+        value.slice(0, startOffset + 1) + newValue + value.slice(endOffset + 1)
+      )
+    })
+
   return {
-    input$: DOM.select('document').events('input'),
+    input$: edit$,
     create$: xs.empty(),
     range$,
     movable$,
