@@ -1,53 +1,53 @@
 .editor {
-  position: relative;
+	position: relative;
 }
 
 .editor-wrapper.-movable {
-  user-select: none;
+	user-select: none;
 }
 
 .portal {
-  & {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: calc(var(--width) * var(--ch));
-    transform: translate(
-      calc(var(--left) * var(--ch)),
-      calc(var(--top) * var(--lh))
-    );
-    transition: 0.2s ease-out;
-    box-shadow: 2px 2px 5px 5px rgba(0, 100, 255, 0.1);
-    background: var(--background-color);
-  }
-  &.-movable {
-    top: calc(-1 * var(--lh) / 4);
-    left: calc(-1 * var(--lh) / 4);
-    border: calc(var(--lh) / 4) solid var(--background-color);
-    box-shadow: 0 0 0 calc(var(--lh) / 4) var(--primary-color);
-    box-sizing: content-box;
-    cursor: grab;
-  }
+	& {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: calc(var(--width) * var(--ch));
+		transform: translate(
+			calc(var(--left) * var(--ch)),
+			calc(var(--top) * var(--lh))
+		);
+		transition: 0.2s ease-out;
+		box-shadow: 2px 2px 5px 5px rgba(0, 100, 255, 0.1);
+		background: var(--background-color);
+	}
+	&.-movable {
+		top: calc(-1 * var(--lh) / 4);
+		left: calc(-1 * var(--lh) / 4);
+		border: calc(var(--lh) / 4) solid var(--background-color);
+		box-shadow: 0 0 0 calc(var(--lh) / 4) var(--primary-color);
+		box-sizing: content-box;
+		cursor: grab;
+	}
 }
 
 .buffer {
-  transition: 0.2s ease-out;
+	transition: 0.2s ease-out;
 }
 
 .buffer.-opening,
 .buffer.-ending {
-  background: var(--primary-color-dark);
-  color: rgba(255, 255, 255, 0.5);
+	background: var(--primary-color-dark);
+	color: rgba(255, 255, 255, 0.5);
 }
 
 .portal-instance {
-  & {
-    box-shadow: 0 0 0 calc(var(--lh) / 8) var(--primary-color),
-      2px 5px 10px 5px rgba(0, 0, 0, 0.2);
-  }
-  & > .buffer.-destination {
-    background: var(--primary-color-dark);
-    color: rgba(255, 255, 255, 0.5);
-    cursor: grab;
-  }
+	& {
+		box-shadow: 0 0 0 calc(var(--lh) / 8) var(--primary-color),
+			2px 5px 10px 5px rgba(0, 0, 0, 0.2);
+	}
+	& > .buffer.-destination {
+		background: var(--primary-color-dark);
+		color: rgba(255, 255, 255, 0.5);
+		cursor: grab;
+	}
 }

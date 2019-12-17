@@ -4,10 +4,14 @@
   "private": true,
   "devDependencies": {
     "@types/ramda": "github:types/npm-ramda#dist",
+    "@typescript-eslint/eslint-plugin": "^2.9.0",
+    "@typescript-eslint/eslint-plugin-tslint": "^2.9.0",
+    "@typescript-eslint/parser": "^2.9.0",
     "cross-spawn": "^6.0.5",
     "cycle-restart": "^0.2.3",
     "cycle-scripts-one-fits-all": "^7.2.1",
     "cyclejs-test-helpers": "^2.0.0",
+    "eslint": "^6.7.2",
     "html-looks-like": "^1.0.3",
     "husky": "^0.14.3",
     "jest": "^24.8.0",
@@ -54,7 +58,8 @@
     "build": "cycle-scripts build",
     "eject": "cycle-scripts eject",
     "clean": "cycle-scripts clean",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "prettier": "prettier --config .prettierrc --write 'src/**/*{.ts,.tsx,.css,.scss}'"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

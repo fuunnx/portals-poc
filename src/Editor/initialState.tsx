@@ -1,11 +1,11 @@
 import { State } from './index'
 
 export const initialState: State = {
-  range: undefined,
-  movable: false,
-  copiable: false,
-  disabled: false,
-  buffer: `
+	range: undefined,
+	movable: false,
+	copiable: false,
+	disabled: false,
+	buffer: `
   // PORTAL #fibonnaci
   function fibonnaci (n) {
       // PORTAL #2

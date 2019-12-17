@@ -11,31 +11,31 @@ import { updates } from './updates'
 
 // Types
 export interface Sources extends BaseSources {
-  state: StateSource<State>
+	state: StateSource<State>
 }
 
 export interface Sinks extends BaseSinks {
-  state?: Stream<Reducer>
+	state?: Stream<Reducer>
 }
 
 // State
 export interface State {
-  buffer: string
-  range: Array<[number, Token]> | undefined
-  movable: boolean
-  copiable: boolean
-  disabled: boolean
-  transform?: {
-    target: number
-    offset: number
-  }
+	buffer: string
+	range: Array<[number, Token]> | undefined
+	movable: boolean
+	copiable: boolean
+	disabled: boolean
+	transform?: {
+		target: number
+		offset: number
+	}
 }
 
 export type Reducer = (prev: State) => State | undefined
 
 export function Editor(sources: Sources): Sinks {
-  return {
-    DOM: view(sources.state.stream),
-    state: updates(intent(sources)),
-  }
+	return {
+		DOM: view(sources.state.stream),
+		state: updates(intent(sources)),
+	}
 }
