@@ -1,26 +1,36 @@
 import xs, { Stream, MemoryStream } from 'xstream'
 import dropRepeats from 'xstream/extra/dropRepeats'
-import { Sources, State } from './index'
-import { Token } from 'src/lang'
+import { Sources } from './index'
 import { equals } from 'ramda'
 
-export function intent(sources: Sources) {
+export type Intents = {
+  input$: Stream<string>
+  range$: Stream<{start: number, end: number}>
+  movable$: MemoryStream<boolean>
+  copiable$: MemoryStream<boolean>
+  startMoving$: Stream<{ id: number; x: number; y: number }>
+  togglePreview$: Stream<null>
+  commit$: Stream<null>
+}
+
+export function intent(sources: Sources): Intents {
   const { DOM, selection, state, time } = sources
   const togglePreview$ = DOM.select('[action="toggle-preview"]')
     .events('click')
-    .mapTo((st: State) => ({ ...st, disabled: !st.disabled }))
+    .mapTo(null)
 
   const movable$ = xs
     .merge(
       DOM.select('document')
         .events('keydown')
-        .filter((e: KeyboardEvent) => e.key === 'Meta'),
+        .filter((e: KeyboardEvent) => e.key === 'Meta')
+        .mapTo(true),
       DOM.select('document')
         .events('keyup')
         .filter((e: KeyboardEvent) => e.key === 'Meta')
-        .mapTo(null),
+        .mapTo(false),
     )
-    .startWith(null)
+    .startWith(false)
     .compose(dropRepeats())
 
   const currentRange$ = selection.selections().map(selec => {
@@ -54,42 +64,15 @@ export function intent(sources: Sources) {
       state.stream.map(x => x.buffer).compose(dropRepeats()),
     )
     .map(([range, buffer]: [Range, string]):
-      | Array<[number, Token]>
+      | { start: number, end: number }
       | undefined => {
       if (!range) return
 
       const start = buffer.slice(0, range.startOffset).split('\n').length - 1
       const end = buffer.slice(0, range.endOffset - 1).split('\n').length - 1
 
-      return [
-        [
-          start,
-          {
-            tag: 'portal',
-            portal: 'selectionRange',
-            pos: 'start',
-            original: null,
-          },
-        ],
-        [
-          start,
-          {
-            tag: 'warp',
-            portal: 'selectionRange',
-            original: null,
-          },
-        ],
-        [
-          end,
-          {
-            tag: 'portal',
-            portal: 'selectionRange',
-            pos: 'end',
-            original: null,
-          },
-        ],
-      ]
-    })
+      return { start, end }
+    }) as Stream<{start: number, end: number}>
 
   const currentHoveredLine$ = DOM.select('[data-buffer]')
     .events('mousemove')
@@ -108,24 +91,25 @@ export function intent(sources: Sources) {
 
   const mouseDown$ = xs
     .merge(
-      DOM.select('document').events('mousedown'),
+      DOM.select('document').events('mousedown').mapTo(true),
       DOM.select('document')
         .events('mouseup')
-        .mapTo(null),
+        .mapTo(false),
     )
-    .startWith(null)
+    .startWith(false)
 
   const copiable$ = xs
     .merge(
       DOM.select('document')
         .events('keydown')
-        .filter((e: KeyboardEvent) => e.key === 'Alt'),
+        .filter((e: KeyboardEvent) => e.key === 'Alt')
+        .mapTo(true),
       DOM.select('document')
         .events('keyup')
         .filter((e: KeyboardEvent) => e.key === 'Alt')
-        .mapTo(null),
+        .mapTo(false),
     )
-    .startWith(null)
+    .startWith(false)
 
   let startMoving$ =  DOM.select('[data-buffer]')
     .events('mousedown')
@@ -147,11 +131,11 @@ export function intent(sources: Sources) {
           y: currentlyHovered.line,
         }))
     })
-    .flatten() as Stream<{ id: number; x: number; y: number }>
+    .flatten()
 
-  const commit$ = mouseDown$.drop(1).filter(x => x === null)
+  const commit$ = mouseDown$.drop(1).filter(x => x === null).mapTo(null)
 
-  const edit$ = DOM.select('[data-buffer]')
+  const input$ = DOM.select('[data-buffer]')
     .events('input')
     .map(event => {
       const target = event.target as HTMLElement
@@ -166,14 +150,12 @@ export function intent(sources: Sources) {
     })
 
   return {
-    input$: edit$,
-    create$: xs.empty(),
     range$,
     movable$,
     copiable$,
-    mouseDown$,
     togglePreview$,
     startMoving$,
+    input$,
     commit$,
   }
 
