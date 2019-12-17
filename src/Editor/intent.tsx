@@ -96,7 +96,6 @@ export function intent(sources: Sources) {
     .events('mousemove')
     .map((event: MouseEvent) => {
       const target = event.target as HTMLElement
-      console.log(target.dataset.lineOffset)
       return {
         id: parseInt(target.dataset.buffer || ''),
         line:
@@ -141,7 +140,6 @@ export function intent(sources: Sources) {
           const id = parseInt(
             (event.target as HTMLElement).dataset.buffer || '',
           )
-          console.log(id)
 
           return move$()
             .filter(x => x.id !== id)
