@@ -10,23 +10,27 @@ interface BufferElement {
   start?: number
   left?: number
   end?: number
-  movable: Boolean
+  movable: boolean
   value?: string
   width?: number
+  namespace: string[]
 }
 
-export function Buffer({
-  key,
-  className,
-  style = {},
-  movable,
-  start = 0,
-  left = 0,
-  end = 0,
-  value = '',
-  width = 0,
-  id,
-}: BufferElement) {
+export function Buffer(props: BufferElement) {
+  const {
+    key,
+    className,
+    style = {},
+    movable,
+    start = 0,
+    left = 0,
+    end = 0,
+    value = '',
+    width = 0,
+    id,
+    namespace,
+  } = props
+
   const printed = value
     .split('\n')
     .slice(start, end + 1)
@@ -66,6 +70,7 @@ export function Buffer({
         endOffset: startOffset + printed.length,
         value,
       }}
+      props-namespace={namespace}
       key={key || `id-${start}-${end}`}
       style={Object.assign(
         {

@@ -1,9 +1,8 @@
-import xs, { Stream } from 'xstream'
+import xs, { Stream, MemoryStream } from 'xstream'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { Sources, State } from './index'
-import { init } from '../libs/array'
 import { Token } from 'src/lang'
-import { calcPosition } from 'src/lang/parse/Line'
+import { equals } from 'ramda'
 
 export function intent(sources: Sources) {
   const { DOM, selection, state, time } = sources
@@ -101,9 +100,11 @@ export function intent(sources: Sources) {
         line:
           Math.round((event.y - target.getBoundingClientRect().top) / 25) +
           parseInt(target.dataset.lineOffset || '0'),
+        namespace: (target as any).namespace as string[]
       }
     })
-    .remember()
+    .compose(dropRepeats(equals))
+    .remember() as MemoryStream<{id: number, line: number, namespace: string[]}>
 
   const mouseDown$ = xs
     .merge(
@@ -126,31 +127,25 @@ export function intent(sources: Sources) {
     )
     .startWith(null)
 
-  let startMoving$ = movable$
-    .map(movable => {
-      if (!movable) return xs.empty()
-      return DOM.select('[data-buffer]')
-        .events('mousedown')
-        .map((event: MouseEvent) => {
-          const start = {
-            x: event.clientX,
-            y: event.clientY,
-          }
+  let startMoving$ =  DOM.select('[data-buffer]')
+    .events('mousedown')
+    .map((event: MouseEvent) => {
+      const start = {
+        x: event.clientX,
+        y: event.clientY,
+      }
+      const target = (event.target as HTMLElement)
+      const id = parseInt(target.dataset.buffer || '')
 
-          const id = parseInt(
-            (event.target as HTMLElement).dataset.buffer || '',
-          )
-
-          return move$()
-            .filter(x => x.id !== id)
-            .map(currentlyHovered => ({
-              id,
-              // x: e.clientX - start.x,
-              x: 0,
-              y: currentlyHovered.line,
-            }))
-        })
-        .flatten()
+      const namespace = (target as any).namespace as string[]
+      return move$()
+        .filter(hovered => hovered.id !== id && !hovered.namespace.join(',').startsWith(namespace.join(',')))
+        .map(currentlyHovered => ({
+          id,
+          // x: e.clientX - start.x,
+          x: 0,
+          y: currentlyHovered.line,
+        }))
     })
     .flatten() as Stream<{ id: number; x: number; y: number }>
 

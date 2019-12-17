@@ -32,7 +32,7 @@ type CharCount = number
 export type Id = string
 
 export interface Portal {
-  id?: Id
+  id: Id
   start: LineCount
   end: LineCount
   left: CharCount
