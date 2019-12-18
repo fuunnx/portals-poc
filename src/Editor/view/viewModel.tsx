@@ -1,6 +1,6 @@
-import { State } from './index'
-import { parse } from '../lang'
-import { cleanupContent } from '../lang/parse'
+import { State } from '../index'
+import { parse } from '../../lang'
+import { cleanupContent } from '../../lang/parse'
 import { TextLine } from 'src/lang/parse/Line'
 
 export function viewModel(state: State) {

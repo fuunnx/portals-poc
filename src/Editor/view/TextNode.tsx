@@ -1,5 +1,5 @@
 import { isNil } from 'ramda'
-import { Buffer } from '../Buffer'
+import { Buffer } from './Buffer'
 
 type TextNodeProps = {
   start: number

@@ -1,9 +1,19 @@
-import xs from 'xstream'
+import xs, { Stream, MemoryStream } from 'xstream'
 import dropRepeats from 'xstream/extra/dropRepeats'
-import { Sources } from './index'
+import { Sources } from '../index'
 
-export function getDocumentStatus(sources: Sources) {
+export type Intents = {
+  movable$: MemoryStream<boolean>
+  copiable$: MemoryStream<boolean>
+  togglePreview$: Stream<null>
+}
+
+export function intent(sources: Sources): Intents {
   const { DOM } = sources
+
+  const togglePreview$ = DOM.select('[action="toggle-preview"]')
+    .events('click')
+    .mapTo(null)
 
   const movable$ = xs
     .merge(
@@ -18,17 +28,6 @@ export function getDocumentStatus(sources: Sources) {
     )
     .startWith(false)
     .compose(dropRepeats())
-
-  const mouseDown$ = xs
-    .merge(
-      DOM.select('document')
-        .events('mousedown')
-        .mapTo(true),
-      DOM.select('document')
-        .events('mouseup')
-        .mapTo(false),
-    )
-    .startWith(false)
 
   const copiable$ = xs
     .merge(
@@ -46,6 +45,6 @@ export function getDocumentStatus(sources: Sources) {
   return {
     movable$,
     copiable$,
-    mouseDown$,
+    togglePreview$,
   }
 }

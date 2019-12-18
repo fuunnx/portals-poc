@@ -1,4 +1,6 @@
-import { State } from './index'
+import './editor.scss'
+
+import { State } from '../index'
 import { Stream } from 'xstream'
 import { VNode } from '@cycle/dom'
 import dropRepeats from 'xstream/extra/dropRepeats'

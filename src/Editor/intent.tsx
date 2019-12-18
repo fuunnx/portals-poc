@@ -1,32 +1,28 @@
 import { Sources } from './index'
-import { getPortalMoves } from './getPortalMoves'
-import xs, { Stream, MemoryStream } from 'xstream'
-import { getDocumentStatus } from './getDocumentStatus'
-import { getSelectionRange } from './getSelectionRange'
+import xs, { Stream } from 'xstream'
 
 export type Intents = {
   input$: Stream<string>
-  range$: Stream<{ start: number; end: number }>
-  movable$: MemoryStream<boolean>
-  copiable$: MemoryStream<boolean>
-  startMoving$: Stream<{ id: number; x: number; y: number }>
-  togglePreview$: Stream<null>
   commit$: Stream<null>
 }
 
 export function intent(sources: Sources): Intents {
   const { DOM } = sources
 
-  const status = getDocumentStatus(sources)
-  const startMoving$ = getPortalMoves(sources)
+  const mouseDown$ = xs
+    .merge(
+      DOM.select('document')
+        .events('mousedown')
+        .mapTo(true),
+      DOM.select('document')
+        .events('mouseup')
+        .mapTo(false),
+    )
+    .startWith(false)
 
-  const togglePreview$ = DOM.select('[action="toggle-preview"]')
-    .events('click')
-    .mapTo(null)
-
-  const commit$ = status.mouseDown$
-    .drop(1)
+  const commit$ = mouseDown$
     .filter(x => x === false)
+    .drop(1)
     .mapTo(null)
 
   const input$ = DOM.select('[data-buffer]')
@@ -43,19 +39,7 @@ export function intent(sources: Sources): Intents {
       )
     })
 
-  const range$ = xs
-    .combine(getSelectionRange(sources), status.movable$)
-    .fold((currentRange: Range | undefined, [nexRange, movable]) => {
-      if (movable) return currentRange
-      else return nexRange
-    }, undefined)
-    .filter(Boolean) as Stream<{ start: number; end: number }>
-
   return {
-    ...status,
-    togglePreview$,
-    range$,
-    startMoving$,
     input$,
     commit$,
   }

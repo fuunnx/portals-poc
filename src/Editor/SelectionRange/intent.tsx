@@ -1,12 +1,17 @@
-import xs from 'xstream'
+import xs, { Stream } from 'xstream'
 import dropRepeats from 'xstream/extra/dropRepeats'
-import { Sources } from './index'
+import { Sources } from '../index'
 import { equals } from 'ramda'
+import { SelectedChars } from '.'
 
-export function getSelectionRange(sources: Sources) {
-  const { selection, state } = sources
+export type Intents = {
+  range$: Stream<SelectedChars | undefined>
+}
 
-  const currentRange$ = selection
+export function intent(sources: Sources) {
+  const { selection } = sources
+
+  const range$ = selection
     .selections()
     .map(selec => {
       if (!selec.rangeCount) return undefined
@@ -24,24 +29,9 @@ export function getSelectionRange(sources: Sources) {
           range.endOffset + parseInt(endContainer.dataset.startOffset || ''),
       }
     })
-    .compose(dropRepeats(equals))
+    .compose(dropRepeats(equals)) as Stream<SelectedChars | undefined>
 
-  const range$ = xs
-    .combine(
-      currentRange$,
-      state.stream.map(x => x.buffer).compose(dropRepeats()),
-    )
-    .map(([range, buffer]: [Range, string]):
-      | {
-          start: number
-          end: number
-        }
-      | undefined => {
-      if (!range) return
-      const start = buffer.slice(0, range.startOffset).split('\n').length - 1
-      const end = buffer.slice(0, range.endOffset - 1).split('\n').length - 1
-      return { start, end }
-    })
-
-  return range$
+  return {
+    range$,
+  }
 }

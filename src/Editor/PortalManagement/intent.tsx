@@ -1,6 +1,6 @@
-import xs, { MemoryStream } from 'xstream'
+import xs, { MemoryStream, Stream } from 'xstream'
 import dropRepeats from 'xstream/extra/dropRepeats'
-import { Sources } from './index'
+import { Sources } from '../index'
 import { equals } from 'ramda'
 
 type HoveredLine = {
@@ -9,7 +9,11 @@ type HoveredLine = {
   namespace: string[]
 }
 
-export function getPortalMoves(sources: Sources) {
+export type Intents = {
+  dragging$: Stream<{ id: number; x: number; y: number }>
+}
+
+export function intent(sources: Sources) {
   const { DOM } = sources
 
   const currentHoveredLine$ = DOM.select('[data-buffer]')
@@ -27,7 +31,7 @@ export function getPortalMoves(sources: Sources) {
     .compose(dropRepeats(equals))
     .remember() as MemoryStream<HoveredLine>
 
-  const startMoving$ = DOM.select('[data-buffer]')
+  const dragging$ = DOM.select('[data-buffer]')
     .events('mousedown')
     .map((event: MouseEvent) => {
       const target = event.target as HTMLElement
@@ -47,7 +51,9 @@ export function getPortalMoves(sources: Sources) {
     })
     .flatten()
 
-  return startMoving$
+  return {
+    dragging$,
+  }
 
   function move$() {
     return currentHoveredLine$.endWhen(

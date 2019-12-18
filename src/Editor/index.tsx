@@ -1,11 +1,12 @@
-import './editor.scss'
-
 import { view } from './view'
 import { Token } from '../lang'
-import { Stream } from 'xstream'
 import { intent } from './intent'
+import { Status } from './Status'
 import { updates } from './updates'
+import xs, { Stream } from 'xstream'
 import { StateSource } from '@cycle/state'
+import { SelectionRange } from './SelectionRange'
+import { PortalManagement } from './PortalManagement'
 import { BaseSources, BaseSinks } from '../interfaces'
 
 // Types
@@ -33,8 +34,18 @@ export interface State {
 export type Reducer = (prev: State) => State | undefined
 
 export function Editor(sources: Sources): Sinks {
+  const portalManagement = PortalManagement(sources)
+  const selectionRange = SelectionRange(sources)
+  const status = Status(sources)
+
+  const update$ = updates(intent(sources))
   return {
     DOM: view(sources.state.stream),
-    state: updates(intent(sources)),
+    state: xs.merge(
+      update$,
+      portalManagement.state,
+      selectionRange.state,
+      status.state,
+    ),
   }
 }

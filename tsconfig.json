@@ -12,6 +12,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "strict": true,
+    "strictNullChecks": true,
     "esModuleInterop": true,
     "strictFunctionTypes": false,
     "allowJs": true,
