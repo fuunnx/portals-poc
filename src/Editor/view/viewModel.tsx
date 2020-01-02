@@ -22,7 +22,8 @@ export function viewModel(state: State) {
 
   let context = parse(state.buffer, {
     add: state.movable ? state.range : [],
-    move: state.transform,
+    move: state.copiable ? undefined : state.transform,
+    copy: state.copiable ? state.transform : undefined,
   })
 
   return {

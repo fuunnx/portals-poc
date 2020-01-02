@@ -22,7 +22,8 @@ export function updates(intents: Intents) {
   const commit$ = intents.commit$.mapTo((currState: State) => {
     const parsed = parse(currState.buffer, {
       add: currState.movable ? currState.range : [],
-      move: currState.transform,
+      move: currState.copiable ? undefined : currState.transform,
+      copy: currState.copiable ? currState.transform : undefined,
     })
 
     return {

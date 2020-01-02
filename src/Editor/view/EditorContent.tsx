@@ -4,7 +4,7 @@ import { TextNode } from './TextNode'
 import { CleanContext } from 'src/lang/parse/cleanupContent'
 import { RenderPortalInstance } from './RenderPortalInstance'
 
-const OFFSET = 10
+const OFFSET = 20
 
 type EditorContentProps = CleanContext & {
   buffer: string

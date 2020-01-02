@@ -1,4 +1,4 @@
-import { map, flatten } from 'ramda'
+import { map, flatten, pipe } from 'ramda'
 import { tokenize } from './tokenize'
 export { cleanupContent } from './cleanupContent'
 import { referencePortals } from './referencePortals'
@@ -14,6 +14,7 @@ export function parse(
   operations?: {
     add?: TokensMap
     move?: { target: number; offset: number }
+    copy?: { target: number; offset: number }
   },
 ): Context {
   const tokens = text.split('\n').map((line, index) => [index, tokenize(line)])
@@ -26,13 +27,20 @@ export function parse(
   const portals = referencePortals(indexedTokens, operations && operations.move)
   const ctx = indexedTokens.reduce(
     (context, [index, token]) => {
-      let targetIndex = index
-      if (operations && operations.move) {
-        if (index === operations.move.target) {
-          targetIndex = index + operations.move.offset
+      function push(symbol: Symbol) {
+        let ctx = context
+        if (operations?.move && index === operations.move.target) {
+          ctx = pushWithContext(ctx, index + operations.move.offset)(symbol)
+        } else {
+          ctx = pushWithContext(ctx, index)(symbol)
         }
+
+        if (operations?.copy && index === operations.copy.target) {
+          ctx = pushWithContext(ctx, index + operations.copy.offset)(symbol)
+        }
+
+        return ctx
       }
-      const push = pushWithContext(context, targetIndex)
 
       if (token.tag === 'text' || !token.portal || !portals[token.portal]) {
         return push(TextLine(index, token))
