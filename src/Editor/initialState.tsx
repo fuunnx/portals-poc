@@ -6,7 +6,7 @@ export const initialState: State = {
   copiable: false,
   disabled: false,
   buffer: `
-// PORTAL #fibonnaci
+// PORTAL #1
 function fibonnaci (n) {
     // PORTAL #2
     if (n === 1) {
@@ -16,7 +16,7 @@ function fibonnaci (n) {
     // PORTAL #3
     return n + fibonnaci(n - 1)
     // /PORTAL #3
-    // WARP #2
+    // WARP #2, WARP #3
 }
 // /PORTAL #fibonnaci
 
@@ -24,7 +24,6 @@ fibonnaci(5) // = 15
 
 
 // WARP #fibonnaci
-// WARP #card
 
 html\`
 <grid columns="3">

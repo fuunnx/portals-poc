@@ -17,7 +17,15 @@ export function parse(
     copy?: { target: number; offset: number }
   },
 ): Context {
-  const tokens = text.split('\n').map((line, index) => [index, tokenize(line)])
+  const tokens = text
+    .split('\n')
+    .map((line, index) => {
+      return tokenize(line).map(token => [index, token])
+    })
+    .reduce((acc, x) => {
+      acc.push(...x)
+      return acc
+    }, [])
 
   const indexedTokens = [
     ...tokens,

@@ -11,6 +11,7 @@ type EditorContentProps = CleanContext & {
   left?: number
   movable: boolean
   namespace: string[]
+  targetted?: number
 }
 
 export function EditorContent(props: EditorContentProps) {
@@ -21,29 +22,41 @@ export function EditorContent(props: EditorContentProps) {
     left: parentLeft = 0,
     movable,
     namespace,
+    targetted,
   } = props
 
-  const children = flatten(content).map(EditorChildFromLine)
+  const children = content.map(line => {
+    return <div className="editor-line">{line.map(EditorChild)}</div>
+  })
 
   return <div className="editor">{children}</div>
 
-  function EditorChildFromLine(line: Symbol) {
-    if (line.type === 'text') {
-      return TextNode({ ...line, left: parentLeft, movable, namespace, buffer })
+  function EditorChild(symbol: Symbol) {
+    if (symbol.type === 'text') {
+      return TextNode({
+        ...symbol,
+        left: parentLeft,
+        movable,
+        namespace,
+        buffer,
+      })
     }
 
-    const matchingPortal = portals[line.for]
-    const left = Math.max(0, Math.min(line.left, matchingPortal.left) - OFFSET)
+    const matchingPortal = portals[symbol.for]
+    const left = Math.max(
+      0,
+      Math.min(symbol.left, matchingPortal.left) - OFFSET,
+    )
     const width =
-      Math.max(line.right, matchingPortal.right) - left + 1 + 2 * OFFSET
+      Math.max(symbol.right, matchingPortal.right) - left + 1 + 2 * OFFSET
 
-    if (line.type === 'opening' || line.type === 'ending') {
-      return TextNode({ ...line, left, width, movable, namespace, buffer })
+    if (symbol.type === 'opening' || symbol.type === 'ending') {
+      return TextNode({ ...symbol, left, width, movable, namespace, buffer })
     }
 
-    if (line.type === 'destination') {
+    if (symbol.type === 'destination') {
       if (matchingPortal) {
-        return RenderPortalInstance(line, {
+        return RenderPortalInstance(symbol, {
           ...matchingPortal,
           left,
           width,
@@ -51,9 +64,11 @@ export function EditorContent(props: EditorContentProps) {
           namespace,
           buffer,
           portals,
+          targetted,
         })
       }
-      return TextNode({ ...line, left, width, movable, namespace, buffer })
+
+      return TextNode({ ...symbol, left, width, movable, namespace, buffer })
     }
 
     return null

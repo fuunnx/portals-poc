@@ -10,6 +10,7 @@ type PortaProps = CleanPortal & {
   namespace: string[]
   portals: Dict<CleanPortal>
   buffer: string
+  targetted?: number
 }
 
 export function RenderPortalInstance(line: Destination, portal: PortaProps) {
@@ -25,10 +26,13 @@ export function RenderPortalInstance(line: Destination, portal: PortaProps) {
     }
   }
 
+  const isTargetted = portal.targetted === line.start
+
   let namespace = portal.namespace.concat([portal.id])
+
   return (
     <div
-      class={{ 'portal-instance': true }}
+      class={{ 'portal-instance': true, '-targetted': isTargetted }}
       style={{
         'margin-left': `calc(var(--ch) * ${portal.left})`,
         'max-width': `calc(var(--ch) * ${portal.width})`,

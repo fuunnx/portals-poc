@@ -17,6 +17,7 @@ export function viewModel(state: State) {
       ],
       portals: {},
       movable: state.movable,
+      targetted: undefined,
     }
   }
 
@@ -30,5 +31,6 @@ export function viewModel(state: State) {
     buffer: state.buffer,
     ...cleanupContent(context),
     movable: state.movable,
+    targetted: state.transform?.target,
   }
 }
