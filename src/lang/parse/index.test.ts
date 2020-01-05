@@ -1,12 +1,25 @@
 import 'jest'
 
 import { parse } from './index'
-import { cleanupContent } from './cleanupContent'
-import { Token } from '../types'
+import { cleanupContext } from './cleanupContent'
+import { Token, Context, Symbol, Content } from '../types'
 import { toSortedArray } from '../../libs/SortedMap'
+import { map } from 'ramda'
+
+function cleanup(context: Context): any {
+  return cleanupContext(context, symbol => {
+    delete symbol.id
+    return symbol
+  })
+}
+
+// TODO use this util for better tests, currently left, right etc. make lot of noise in my tests
+const mapContent = <T = any>(mapper: (sym: Symbol) => T) => (
+  content: Content,
+) => map(map(mapper))
 
 test('empty text', () => {
-  expect(cleanupContent(parse(''))).toEqual({
+  expect(cleanup(parse(''))).toEqual({
     portals: {},
     content: [[{ type: 'text', start: 0, end: 0, left: 0, right: 0 }]],
   })
@@ -14,7 +27,7 @@ test('empty text', () => {
 
 test('no annotations', () => {
   expect(
-    cleanupContent(
+    cleanup(
       parse(`
 Hello guys
 
@@ -29,7 +42,7 @@ How are you ?
 
 test('simple', () => {
   expect(
-    cleanupContent(
+    cleanup(
       parse(`
 // PORTAL #1
 Hello guys
@@ -46,7 +59,7 @@ How are you ?
 
 test('with target', () => {
   expect(
-    cleanupContent(
+    cleanup(
       parse(`
 // PORTAL #1
 Hello guys
@@ -84,7 +97,7 @@ Hum
 
 test('malformed', () => {
   expect(
-    cleanupContent(
+    cleanup(
       parse(`
 // PORTAL #1
 Hello guys
@@ -101,7 +114,7 @@ How are you ?
 
 test('nested', () => {
   expect(
-    cleanupContent(
+    cleanup(
       parse(`
 // PORTAL #1
 Hello
@@ -163,7 +176,7 @@ How are you ?
 })
 
 test('left indentation', () => {
-  const result = cleanupContent(
+  const result = cleanup(
     parse(`
   // PORTAL #1
       abcd
@@ -188,6 +201,7 @@ test('add virtual tokens', () => {
     [
       0,
       {
+        id: '0',
         tag: 'warp',
         portal: 'selectionRange',
         original: null,
@@ -196,6 +210,7 @@ test('add virtual tokens', () => {
     [
       0,
       {
+        id: '1',
         tag: 'portal',
         portal: 'selectionRange',
         pos: 'start',
@@ -205,6 +220,7 @@ test('add virtual tokens', () => {
     [
       0,
       {
+        id: '2',
         tag: 'portal',
         portal: 'selectionRange',
         pos: 'end',
@@ -213,7 +229,7 @@ test('add virtual tokens', () => {
     ],
   ]
 
-  let result = cleanupContent(parse('', { add: toAdd }))
+  let result = cleanup(parse('', { add: toAdd }))
   expect(result).toEqual({
     portals: {
       selectionRange: {
@@ -262,15 +278,15 @@ test('move tokens top', () => {
     `0
 2
 3`,
-    { move: { target: 1, offset: -1 } },
+    { move: { id: '1', target: 0 } },
   )
   const content = toSortedArray(result.content)
   expect(content).toEqual([
     [
-      { type: 'text', start: 0, end: 0, left: 0, right: 1 },
-      { type: 'text', start: 1, end: 1, left: 0, right: 1 },
+      { id: '0', type: 'text', start: 0, end: 0, left: 0, right: 1 },
+      { id: '1', type: 'text', start: 1, end: 1, left: 0, right: 1 },
     ],
-    [{ type: 'text', start: 2, end: 2, left: 0, right: 1 }],
+    [{ id: '2', type: 'text', start: 2, end: 2, left: 0, right: 1 }],
   ])
 })
 
@@ -279,14 +295,14 @@ test('move simple tokens bottom', () => {
     `0
 2
 3`,
-    { move: { target: 1, offset: +1 } },
+    { move: { id: '1', target: 2 } },
   )
   const content = toSortedArray(result.content)
   expect(content).toEqual([
-    [{ type: 'text', start: 0, end: 0, left: 0, right: 1 }],
+    [{ id: '0', type: 'text', start: 0, end: 0, left: 0, right: 1 }],
     [
-      { type: 'text', start: 1, end: 1, left: 0, right: 1 },
-      { type: 'text', start: 2, end: 2, left: 0, right: 1 },
+      { id: '1', type: 'text', start: 1, end: 1, left: 0, right: 1 },
+      { id: '2', type: 'text', start: 2, end: 2, left: 0, right: 1 },
     ],
   ])
 })
@@ -300,18 +316,39 @@ test('move complex tokens bottom', () => {
 // WARP #1
 3
 4`,
-    { move: { target: 4, offset: +3 } },
+    { move: { id: '4', target: 7 } },
   )
   const content = toSortedArray(result.content)
 
   expect(content).toEqual([
-    [{ type: 'opening', for: '1', start: 0, end: 0, left: 0, right: 12 }],
-    [{ type: 'ending', for: '1', start: 2, end: 2, left: 0, right: 13 }],
-    [{ type: 'text', start: 3, end: 3, left: 0, right: 1 }],
-    [{ type: 'text', start: 5, end: 5, left: 0, right: 1 }],
-    [{ type: 'text', start: 6, end: 6, left: 0, right: 1 }],
     [
       {
+        id: '0',
+        type: 'opening',
+        for: '1',
+        start: 0,
+        end: 0,
+        left: 0,
+        right: 12,
+      },
+    ],
+    [
+      {
+        id: '2',
+        type: 'ending',
+        for: '1',
+        start: 2,
+        end: 2,
+        left: 0,
+        right: 13,
+      },
+    ],
+    [{ id: '3', type: 'text', start: 3, end: 3, left: 0, right: 1 }],
+    [{ id: '5', type: 'text', start: 5, end: 5, left: 0, right: 1 }],
+    [{ id: '6', type: 'text', start: 6, end: 6, left: 0, right: 1 }],
+    [
+      {
+        id: '4',
         type: 'destination',
         for: '1',
         start: 4,
@@ -324,9 +361,7 @@ test('move complex tokens bottom', () => {
 })
 
 test('multiple tokens per line', () => {
-  expect(
-    cleanupContent(parse(`// PORTAL #1, /PORTAL #1, WARP #1`)).content,
-  ).toEqual([
+  expect(cleanup(parse(`// PORTAL #1, /PORTAL #1, WARP #1`)).content).toEqual([
     [
       { type: 'opening', start: 0, end: 0, left: 0, right: 12, for: '1' },
       { type: 'ending', start: 0, end: 0, left: 1, right: 11, for: '1' },

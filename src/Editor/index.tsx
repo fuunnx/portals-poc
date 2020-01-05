@@ -1,5 +1,5 @@
 import { view } from './view'
-import { Token } from '../lang'
+import { Token, Id } from '../lang'
 import { intent } from './intent'
 import { Status } from './Status'
 import { updates } from './updates'
@@ -26,8 +26,8 @@ export interface State {
   copiable: boolean
   disabled: boolean
   transform?: {
+    id: Id
     target: number
-    offset: number
   }
 }
 

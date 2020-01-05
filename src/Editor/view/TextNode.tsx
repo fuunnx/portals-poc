@@ -2,6 +2,7 @@ import { isNil } from 'ramda'
 import { Buffer } from './Buffer'
 
 type TextNodeProps = {
+  id: string
   start: number
   end?: number
   type?: string
@@ -16,7 +17,7 @@ export function TextNode(x: TextNodeProps) {
   if (isNil(x.end)) return null
   return (
     <Buffer
-      id={x.start}
+      id={x.id}
       className={`-${x.type}`}
       value={x.buffer}
       start={x.start}

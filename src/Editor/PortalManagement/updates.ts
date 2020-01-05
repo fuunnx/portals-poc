@@ -5,10 +5,10 @@ export function updates(intents: Intents) {
   return intents.dragging$.map(transform => (curr: State) => {
     return {
       ...curr,
-      transform: Number.isFinite(transform.id)
+      transform: transform.id
         ? {
-            target: transform.id,
-            offset: transform.y - transform.id,
+            id: transform.id,
+            target: transform.y - 0.5,
           }
         : undefined,
     }

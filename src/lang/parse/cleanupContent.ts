@@ -1,75 +1,85 @@
-import { map, last } from 'ramda'
-import { Context, Portal, Dict, Content, Symbols } from '../types'
+import { map, last, identity } from 'ramda'
+import { Context, Portal, Dict, Content, Symbols, Symbol } from '../types'
 import { toSortedArray } from '../../libs/SortedMap'
 
 export interface CleanPortal extends Omit<Portal, 'content'> {
-	content: Array<Symbols>
+  content: Array<Symbols>
 }
 
 export interface CleanContext
-	extends Omit<Omit<Omit<Context, 'content'>, 'portals'>, 'buffer'> {
-	content: Array<Symbols>
-	portals: Dict<CleanPortal>
+  extends Omit<Omit<Omit<Context, 'content'>, 'portals'>, 'buffer'> {
+  content: Array<Symbols>
+  portals: Dict<CleanPortal>
 }
 
-export function cleanupContent(context: Context): CleanContext {
-	return {
-		portals: map(portal => {
-			return {
-				...portal,
-				start: makeFinite(portal.start),
-				end: makeFinite(portal.end),
-				left: makeFinite(portal.left),
-				right: makeFinite(portal.right),
-				content: cleanup(portal.content),
-			}
-		}, context.portals),
-		content: cleanup(context.content),
-	}
+type SymbolMapper<T = any> = {
+  (symbol: Symbol): T
+}
 
-	function cleanup(content: Content): Array<Symbols> {
-		return toSortedArray(content)
-			.reduce((acc, symbols) => {
-				const prevs = last(acc)
+export function cleanupContext(
+  context: Context,
+  mapperFn: SymbolMapper<Symbol> = identity,
+): CleanContext {
+  return {
+    portals: map(portal => {
+      return {
+        ...portal,
+        start: makeFinite(portal.start),
+        end: makeFinite(portal.end),
+        left: makeFinite(portal.left),
+        right: makeFinite(portal.right),
+        content: cleanupContent(portal.content, mapperFn),
+      }
+    }, context.portals),
+    content: cleanupContent(context.content, mapperFn),
+  }
+}
 
-				if (
-					!prevs ||
-					prevs.some(x => x.type !== 'text') ||
-					symbols.some(x => x.type !== 'text')
-				) {
-					acc.push(symbols)
-					return acc
-				}
+export function cleanupContent(
+  content: Content,
+  mapperFn: SymbolMapper<Symbol> = identity,
+): Array<Symbols> {
+  return toSortedArray(content)
+    .reduce((acc, symbols) => {
+      const prevs = last(acc)
 
-				const prev = last(prevs)
+      if (
+        !prevs ||
+        prevs.some(x => x.type !== 'text') ||
+        symbols.some(x => x.type !== 'text')
+      ) {
+        acc.push(symbols)
+        return acc
+      }
 
-				if (!prev) {
-					acc.push(symbols)
-					return acc
-				}
+      const prev = last(prevs)
 
-				symbols.forEach(curr => {
-					prev.start = Math.min(prev.start, curr.start) || 0
-					prev.end = Math.max(0, prev.end || 0, curr.end || 0)
-					prev.left = Math.min(prev.left, curr.left) || 0
-					prev.right = Math.max(0, prev.right, curr.right)
-				})
-				return acc
-			}, [] as Array<Symbols>)
-			.map(symbols =>
-				symbols.map(symbol => {
-					return {
-						...symbol,
-						start: makeFinite(symbol.start),
-						end: makeFinite(symbol.end),
-						left: makeFinite(symbol.left),
-						right: makeFinite(symbol.right),
-					}
-				}),
-			)
-	}
+      if (!prev) {
+        acc.push(symbols)
+        return acc
+      }
+
+      symbols.forEach(curr => {
+        prev.start = Math.min(prev.start, curr.start) || 0
+        prev.end = Math.max(0, prev.end || 0, curr.end || 0)
+        prev.left = Math.min(prev.left, curr.left) || 0
+        prev.right = Math.max(0, prev.right, curr.right)
+      })
+      return acc
+    }, [] as Array<Symbols>)
+    .map(symbols =>
+      symbols.map(symbol => {
+        return mapperFn({
+          ...symbol,
+          start: makeFinite(symbol.start),
+          end: makeFinite(symbol.end),
+          left: makeFinite(symbol.left),
+          right: makeFinite(symbol.right),
+        })
+      }),
+    )
 }
 
 function makeFinite(num: any): number {
-	return Number.isFinite(num) ? num : 0
+  return Number.isFinite(num) ? num : 0
 }

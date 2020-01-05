@@ -1,7 +1,7 @@
 import { State } from '../index'
 import { parse } from '../../lang'
-import { cleanupContent } from '../../lang/parse'
 import { TextLine } from 'src/lang/parse/Line'
+import { cleanupContext } from 'src/lang/parse/cleanupContent'
 
 export function viewModel(state: State) {
   if (state.disabled) {
@@ -10,7 +10,7 @@ export function viewModel(state: State) {
       content: [
         [
           {
-            ...TextLine(0, { tag: 'text', original: state.buffer }),
+            ...TextLine(0, { id: '0', tag: 'text', original: state.buffer }),
             end: state.buffer.split('\n').length + 1,
           },
         ],
@@ -29,7 +29,7 @@ export function viewModel(state: State) {
 
   return {
     buffer: state.buffer,
-    ...cleanupContent(context),
+    ...cleanupContext(context),
     movable: state.movable,
     targetted: state.transform?.target,
   }

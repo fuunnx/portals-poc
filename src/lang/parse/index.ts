@@ -3,7 +3,7 @@ import { tokenize } from './tokenize'
 export { cleanupContent } from './cleanupContent'
 import { referencePortals } from './referencePortals'
 import { fromArray, update } from '@collectable/sorted-map'
-import { Context, Portal, Symbol, Token, Content } from '../types'
+import { Context, Portal, Symbol, Token, Content, Id } from '../types'
 import { TextLine, DestinationLine, OpeningLine, EndingLine } from './Line'
 import { toSortedArray } from '../../libs/SortedMap'
 
@@ -13,38 +13,29 @@ export function parse(
   text: string,
   operations?: {
     add?: TokensMap
-    move?: { target: number; offset: number }
-    copy?: { target: number; offset: number }
+    move?: { id: Id; target: number }
+    copy?: { id: Id; target: number }
   },
 ): Context {
-  const tokens = text
-    .split('\n')
-    .map((line, index) => {
-      return tokenize(line).map(token => [index, token])
-    })
-    .reduce((acc, x) => {
-      acc.push(...x)
-      return acc
-    }, [])
-
+  const tokens = tokenize(text)
   const indexedTokens = [
     ...tokens,
     ...((operations && operations.add) || []),
   ].map(([k, v]) => [Number(k), v] as [number, Token]) // <-- fuck you typescript
 
-  const portals = referencePortals(indexedTokens, operations && operations.move)
+  const portals = referencePortals(indexedTokens)
   const ctx = indexedTokens.reduce(
     (context, [index, token]) => {
       function push(symbol: Symbol) {
         let ctx = context
-        if (operations?.move && index === operations.move.target) {
-          ctx = pushWithContext(ctx, index + operations.move.offset)(symbol)
+        if (operations?.move && token.id === operations.move.id) {
+          ctx = pushWithContext(ctx, operations.move.target)(symbol)
         } else {
           ctx = pushWithContext(ctx, index)(symbol)
         }
 
-        if (operations?.copy && index === operations.copy.target) {
-          ctx = pushWithContext(ctx, index + operations.copy.offset)(symbol)
+        if (operations?.copy && token.id === operations.copy.id) {
+          ctx = pushWithContext(ctx, operations.copy.target)(symbol)
         }
 
         return ctx

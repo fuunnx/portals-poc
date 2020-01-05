@@ -2,15 +2,16 @@ import xs, { MemoryStream, Stream } from 'xstream'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { Sources } from '../index'
 import { equals } from 'ramda'
+import { Id } from 'src/lang'
 
 type HoveredLine = {
-  id: number
+  id: Id
   line: number
   namespace: string[]
 }
 
 export type Intents = {
-  dragging$: Stream<{ id: number; x: number; y: number }>
+  dragging$: Stream<{ id: Id; x: number; y: number }>
 }
 
 export function intent(sources: Sources) {
@@ -21,7 +22,7 @@ export function intent(sources: Sources) {
     .map((event: MouseEvent) => {
       const target = event.target as HTMLElement
       return {
-        id: parseInt(target.dataset.buffer || ''),
+        id: target.dataset.buffer || '',
         line:
           Math.round((event.y - target.getBoundingClientRect().top) / 25) +
           parseInt(target.dataset.lineOffset || '0'),
@@ -35,7 +36,7 @@ export function intent(sources: Sources) {
     .events('mousedown')
     .map((event: MouseEvent) => {
       const target = event.target as HTMLElement
-      const id = parseInt(target.dataset.buffer || '')
+      const id = target.dataset.buffer || ''
       const namespace = (target as any).namespace as string[]
       return move$()
         .filter(
