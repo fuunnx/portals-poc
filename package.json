@@ -81,8 +81,11 @@
     "xstream-sample": "^1.0.0"
   },
   "scripts": {
+    "format": "prettier --write '{src,test}/**/*.{js,jsx,ts,tsx}'",
     "start": "cross-env NODE_ENV=development webpack-dev-server --config configs/webpack.config.js",
-    "test": "cross-env NODE_ENV=test nyc mocha-webpack --colors --webpack-config configs/webpack.config.js src/components/**/*.{jsx,js,ts,tsx} test/**/*.test.{js,jsx,ts,tsx} cycle-selection-driver/e2e/**/*.test.{js,jsx,ts,tsx}",
+    "test": "jest --watch --notify --runInBand",
+    "postinstall": "patch-package",
+    "prettier": "prettier --config .prettierrc --write 'src/**/*{.ts,.tsx,.css,.scss}'",
     "build": "cross-env NODE_ENV=production webpack --config configs/webpack.config.js",
     "clean": "rimraf build .nyc_output coverage"
   },
