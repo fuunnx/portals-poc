@@ -278,7 +278,7 @@ test('move tokens top', () => {
     `0
 2
 3`,
-    { move: { id: '1', target: 0 } },
+    { move: { id: '1', lineIndex: 0, columnIndex: 0 } },
   )
   const content = toSortedArray(result.content)
   expect(content).toEqual([
@@ -295,7 +295,7 @@ test('move simple tokens bottom', () => {
     `0
 2
 3`,
-    { move: { id: '1', target: 2 } },
+    { move: { id: '1', lineIndex: 2, columnIndex: 0 } },
   )
   const content = toSortedArray(result.content)
   expect(content).toEqual([
@@ -316,7 +316,7 @@ test('move complex tokens bottom', () => {
 // WARP #1
 3
 4`,
-    { move: { id: '4', target: 7 } },
+    { move: { id: '4', lineIndex: 7, columnIndex: 0 } },
   )
   const content = toSortedArray(result.content)
 

@@ -13,8 +13,8 @@ export function parse(
   text: string,
   operations?: {
     add?: TokensMap
-    move?: { id: Id; target: number }
-    copy?: { id: Id; target: number }
+    move?: { id: Id; lineIndex: number; columnIndex: number }
+    copy?: { id: Id; lineIndex: number; columnIndex: number }
   },
 ): Context {
   const tokens = tokenize(text)
@@ -29,13 +29,13 @@ export function parse(
       function push(symbol: Symbol) {
         let ctx = context
         if (operations?.move && token.id === operations.move.id) {
-          ctx = pushWithContext(ctx, operations.move.target)(symbol)
+          ctx = pushWithContext(ctx, operations.move.lineIndex)(symbol)
         } else {
           ctx = pushWithContext(ctx, index)(symbol)
         }
 
         if (operations?.copy && token.id === operations.copy.id) {
-          ctx = pushWithContext(ctx, operations.copy.target)(symbol)
+          ctx = pushWithContext(ctx, operations.copy.lineIndex)(symbol)
         }
 
         return ctx

@@ -5,6 +5,7 @@ export const initialState: State = {
   movable: false,
   copiable: false,
   disabled: false,
+  draggedElement: undefined,
   buffer: `
 // PORTAL #1
 function fibonnaci (n) {

@@ -25,10 +25,11 @@ export interface State {
   movable: boolean
   copiable: boolean
   disabled: boolean
-  draggedElement: Id
+  draggedElement?: Id
   transform?: {
     id: Id
-    target: number
+    lineIndex: number
+    columnIndex: number
   }
 }
 

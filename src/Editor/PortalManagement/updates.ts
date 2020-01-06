@@ -1,8 +1,8 @@
 import { Intents } from './intent'
-import { State } from '..'
-import xs from 'xstream'
+import { State, Reducer } from '..'
+import xs, { Stream } from 'xstream'
 
-export function updates(intents: Intents) {
+export function updates(intents: Intents): Stream<Reducer> {
   return xs.merge(
     intents.selectedElement$.map(id => (curr: State) => {
       return {
@@ -13,12 +13,7 @@ export function updates(intents: Intents) {
     intents.dragging$.map(transform => (curr: State) => {
       return {
         ...curr,
-        transform: transform.id
-          ? {
-              id: transform.id,
-              target: transform.y - 0.5,
-            }
-          : undefined,
+        transform: transform.id ? transform : undefined,
       }
     }),
   )

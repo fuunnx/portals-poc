@@ -6,13 +6,14 @@ import { Id } from 'src/lang'
 
 type HoveredLine = {
   id: Id
-  line: number
+  lineIndex: number
+  columnIndex: number
   namespace: string[]
 }
 
 export type Intents = {
-  dragging$: Stream<{ id: Id; x: number; y: number }>
-  selectedElement$: Stream<Id>
+  dragging$: Stream<{ id: Id; columnIndex: number; lineIndex: number }>
+  selectedElement$: Stream<Id | undefined>
 }
 
 export function intent(sources: Sources) {
@@ -20,18 +21,30 @@ export function intent(sources: Sources) {
 
   const currentHoveredLine$ = DOM.select('[data-buffer]')
     .events('mousemove')
-    .map((event: MouseEvent) => {
+    .map(event => {
       const target = event.target as HTMLElement
       return {
         id: target.dataset.buffer || '',
-        line:
+        lineIndex:
           Math.round((event.y - target.getBoundingClientRect().top) / 25) +
-          parseInt(target.dataset.lineOffset || '0'),
+          (parseFloat(target.dataset.lineOffset || '') || 0) -
+          0.5,
+        columnIndex: parseFloat(target.dataset.columnIndex || '') || 0,
         namespace: (target as any).namespace as string[],
       }
     })
     .compose(dropRepeats(equals))
     .remember() as MemoryStream<HoveredLine>
+
+  const currentHoveredColumn$ = DOM.select('[data-dropzone]')
+    .events('mouseover')
+    .map(event => {
+      const target = event.target as HTMLElement
+      return {
+        lineIndex: parseFloat(target.dataset.lineIndex || '') || 0,
+        columnIndex: parseFloat(target.dataset.columnIndex || '') || 0,
+      }
+    })
 
   const dragStart$ = DOM.select('[data-buffer]')
     .events('mousedown')
@@ -45,20 +58,24 @@ export function intent(sources: Sources) {
 
   const dragging$ = dragStart$
     .map(({ id, namespace }) => {
-      return currentHoveredLine$
-        .endWhen(dragEnd$)
-        .filter(
-          hovered =>
-            hovered.id !== id &&
-            !hovered.namespace.join(',').startsWith(namespace.join(',')),
+      return xs
+        .merge(
+          currentHoveredLine$.filter(
+            hovered =>
+              hovered.id !== id &&
+              !hovered.namespace.join(',').startsWith(namespace.join(',')),
+          ),
+          currentHoveredColumn$,
         )
+        .endWhen(dragEnd$)
         .map(currentlyHovered => ({
           id,
-          x: 0,
-          y: currentlyHovered.line,
+          columnIndex: currentlyHovered.columnIndex,
+          lineIndex: currentlyHovered.lineIndex,
         }))
     })
     .flatten()
+    .debug('dragging')
 
   const dragEnd$ = xs.merge(
     DOM.select('document').events('mouseup'),

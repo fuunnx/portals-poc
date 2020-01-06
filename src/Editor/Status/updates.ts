@@ -1,8 +1,8 @@
 import { Intents } from './intent'
-import xs from 'xstream'
-import { State } from '..'
+import xs, { Stream } from 'xstream'
+import { State, Reducer } from '..'
 
-export function updates(intents: Intents) {
+export function updates(intents: Intents): Stream<Reducer> {
   const togglePreview$ = intents.togglePreview$.mapTo((st: State) => ({
     ...st,
     disabled: !st.disabled,

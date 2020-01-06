@@ -74,6 +74,8 @@
     width: calc(4 * var(--ch));
     height: 100%;
     position: absolute;
+    z-index: 10;
+
     &.-left {
       left: 0;
     }
@@ -83,12 +85,12 @@
 
     &:hover {
       background: var(--secondary-color);
-      opacity: 1;
+      opacity: 0.9;
     }
   }
 
   &:not(.-targettable) .dropzone {
-    display: none;
+    display: block;
   }
 }
 

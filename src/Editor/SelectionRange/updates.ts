@@ -1,9 +1,10 @@
 import { Intents } from './intent'
-import { State } from '..'
+import { State, Reducer } from '..'
 import { Token } from 'src/lang'
 import { SelectedLines } from '.'
+import { Stream } from 'xstream'
 
-export function updates(intents: Intents) {
+export function updates(intents: Intents): Stream<Reducer> {
   return intents.range$.map(range => (state: State) => {
     if (state.movable) return state
     if (!range) return { ...state, range: undefined }

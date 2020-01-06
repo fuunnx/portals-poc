@@ -31,7 +31,7 @@ export function EditorContent(props: EditorContentProps) {
 
   return <div className="editor">{children}</div>
 
-  function EditorChild(symbol: Symbol) {
+  function EditorChild(symbol: Symbol, index: number) {
     if (symbol.type === 'text') {
       return TextNode({
         ...symbol,
@@ -56,7 +56,7 @@ export function EditorContent(props: EditorContentProps) {
 
     if (symbol.type === 'destination') {
       if (matchingPortal) {
-        return RenderPortalInstance(symbol, {
+        return RenderPortalInstance(index, symbol, {
           ...matchingPortal,
           left,
           width,

@@ -13,7 +13,11 @@ type PortaProps = CleanPortal & {
   targetted?: string
 }
 
-export function RenderPortalInstance(line: Destination, context: PortaProps) {
+export function RenderPortalInstance(
+  index: number,
+  line: Destination,
+  context: PortaProps,
+) {
   function hook(vnode: VNode) {
     if (vnode.elm) {
       let elm = vnode.elm as HTMLElement
@@ -34,7 +38,7 @@ export function RenderPortalInstance(line: Destination, context: PortaProps) {
       class={{
         'portal-instance': true,
         '-targetted': isTargetted,
-        '-targettable': context.targetted && !isTargetted,
+        '-targettable': Boolean(context.targetted && !isTargetted),
       }}
       style={{
         'margin-left': `calc(var(--ch) * ${context.left})`,
@@ -44,8 +48,22 @@ export function RenderPortalInstance(line: Destination, context: PortaProps) {
       scrollLeft={context.left * 12}
       hook={{ insert: hook, update: hook }}
     >
-      <div data-dropzone="left" className="dropzone -left"></div>
-      <div data-dropzone="right" className="dropzone -right"></div>
+      <div
+        data={{
+          dropzone: 'left',
+          lineIndex: line.start,
+          columnIndex: index - 0.5,
+        }}
+        className="dropzone -left"
+      ></div>
+      <div
+        data={{
+          dropzone: 'right',
+          lineIndex: line.start,
+          columnIndex: index + 0.5,
+        }}
+        className="dropzone -right"
+      ></div>
       {TextNode({
         ...line,
         left: context.left,
