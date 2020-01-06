@@ -1,9 +1,8 @@
 import 'jest'
 
 import { parse } from './index'
-import { cleanupContext } from './cleanupContent'
+import { cleanupContext, to2dArray } from './cleanupContent'
 import { Token, Context, Symbol, Content } from '../types'
-import { toSortedArray } from '../../libs/SortedMap'
 import { map } from 'ramda'
 
 function cleanup(context: Context): any {
@@ -280,7 +279,7 @@ test('move tokens top', () => {
 3`,
     { move: { id: '1', lineIndex: 0, columnIndex: 0 } },
   )
-  const content = toSortedArray(result.content)
+  const content = to2dArray(result.content)
   expect(content).toEqual([
     [
       { id: '0', type: 'text', start: 0, end: 0, left: 0, right: 1 },
@@ -297,7 +296,7 @@ test('move simple tokens bottom', () => {
 3`,
     { move: { id: '1', lineIndex: 2, columnIndex: 0 } },
   )
-  const content = toSortedArray(result.content)
+  const content = to2dArray(result.content)
   expect(content).toEqual([
     [{ id: '0', type: 'text', start: 0, end: 0, left: 0, right: 1 }],
     [
@@ -318,7 +317,7 @@ test('move complex tokens bottom', () => {
 4`,
     { move: { id: '4', lineIndex: 7, columnIndex: 0 } },
   )
-  const content = toSortedArray(result.content)
+  const content = to2dArray(result.content)
 
   expect(content).toEqual([
     [
@@ -366,6 +365,22 @@ test('multiple tokens per line', () => {
       { type: 'opening', start: 0, end: 0, left: 0, right: 12, for: '1' },
       { type: 'ending', start: 0, end: 0, left: 1, right: 11, for: '1' },
       { type: 'destination', start: 0, end: 0, left: 1, right: 8, for: '1' },
+    ],
+  ])
+})
+
+test('move tokens right', () => {
+  expect(
+    cleanup(
+      parse(`// PORTAL #1, /PORTAL #1, WARP #1`, {
+        move: { id: '0', lineIndex: 0, columnIndex: 2 },
+      }),
+    ).content,
+  ).toEqual([
+    [
+      { type: 'ending', start: 0, end: 0, left: 1, right: 11, for: '1' },
+      { type: 'destination', start: 0, end: 0, left: 1, right: 8, for: '1' },
+      { type: 'opening', start: 0, end: 0, left: 0, right: 12, for: '1' },
     ],
   ])
 })

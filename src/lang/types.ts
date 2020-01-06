@@ -10,7 +10,7 @@ export interface NumDict<T> {
 }
 
 export type Symbol = Placeholder | Destination | Text | Opening | Ending
-export type Symbols = Array<Symbol>
+export type Symbols = SortedMapStructure<number, Symbol>
 export type Content = SortedMapStructure<number, Symbols>
 export type PortalsDict = Dict<Portal>
 

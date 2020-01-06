@@ -3,12 +3,12 @@ import { Context, Portal, Dict, Content, Symbols, Symbol } from '../types'
 import { toSortedArray } from '../../libs/SortedMap'
 
 export interface CleanPortal extends Omit<Portal, 'content'> {
-  content: Array<Symbols>
+  content: Symbol[][]
 }
 
 export interface CleanContext
   extends Omit<Omit<Omit<Context, 'content'>, 'portals'>, 'buffer'> {
-  content: Array<Symbols>
+  content: Symbol[][]
   portals: Dict<CleanPortal>
 }
 
@@ -35,11 +35,15 @@ export function cleanupContext(
   }
 }
 
+export function to2dArray(content: Content): Symbol[][] {
+  return map(toSortedArray, toSortedArray(content))
+}
+
 export function cleanupContent(
   content: Content,
   mapperFn: SymbolMapper<Symbol> = identity,
-): Array<Symbols> {
-  return toSortedArray(content)
+): Symbol[][] {
+  return to2dArray(content)
     .reduce((acc, symbols) => {
       const prevs = last(acc)
 
@@ -66,7 +70,7 @@ export function cleanupContent(
         prev.right = Math.max(0, prev.right, curr.right)
       })
       return acc
-    }, [] as Array<Symbols>)
+    }, [] as Symbol[][])
     .map(symbols =>
       symbols.map(symbol => {
         return mapperFn({

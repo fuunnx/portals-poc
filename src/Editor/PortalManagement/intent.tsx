@@ -75,7 +75,6 @@ export function intent(sources: Sources) {
         }))
     })
     .flatten()
-    .debug('dragging')
 
   const dragEnd$ = xs.merge(
     DOM.select('document').events('mouseup'),

@@ -6,7 +6,7 @@ import {
   Destination,
   Ending,
 } from '../types'
-import { toSortedArray } from '../../libs/SortedMap'
+import { to2dArray } from '../parse/cleanupContent'
 
 const SEPARATOR = '\n'
 
@@ -25,7 +25,7 @@ export function stringify(context: Context): string {
   return flattenSymbols(context.content).join(SEPARATOR)
 
   function flattenSymbols(content: Content): string[] {
-    return toSortedArray(content).reduce((acc: string[], symbols) => {
+    return to2dArray(content).reduce((acc: string[], symbols) => {
       let line = symbols
         .map(symbol => toString[symbol.type](symbol as any))
         .join(', ')

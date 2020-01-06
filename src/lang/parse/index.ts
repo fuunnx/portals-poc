@@ -1,10 +1,11 @@
-import { map, flatten, pipe } from 'ramda'
+import { map, flatten } from 'ramda'
 import { tokenize } from './tokenize'
 export { cleanupContent } from './cleanupContent'
 import { referencePortals } from './referencePortals'
-import { fromArray, update } from '@collectable/sorted-map'
+import { fromArray, update, set, has } from '@collectable/sorted-map'
 import { Context, Portal, Symbol, Token, Content, Id } from '../types'
 import { TextLine, DestinationLine, OpeningLine, EndingLine } from './Line'
+import { to2dArray } from './cleanupContent'
 import { toSortedArray } from '../../libs/SortedMap'
 
 type TokensMap = Array<[number, Token]>
@@ -29,13 +30,21 @@ export function parse(
       function push(symbol: Symbol) {
         let ctx = context
         if (operations?.move && token.id === operations.move.id) {
-          ctx = pushWithContext(ctx, operations.move.lineIndex)(symbol)
+          ctx = pushWithContext(
+            ctx,
+            operations.move.lineIndex,
+            operations.move.columnIndex,
+          )(symbol)
         } else {
-          ctx = pushWithContext(ctx, index)(symbol)
+          ctx = pushWithContext(ctx, index, 0)(symbol)
         }
 
         if (operations?.copy && token.id === operations.copy.id) {
-          ctx = pushWithContext(ctx, operations.copy.lineIndex)(symbol)
+          ctx = pushWithContext(
+            ctx,
+            operations.copy.lineIndex,
+            operations.copy.columnIndex,
+          )(symbol)
         }
 
         return ctx
@@ -65,13 +74,14 @@ export function parse(
 
   return {
     ...ctx,
+    content: ctx.content,
     buffer: text,
     portals: map(computePortalSize, ctx.portals),
   }
 }
 
 function computePortalSize(portal: Portal): Portal {
-  const content = flatten(toSortedArray(portal.content)) as Symbol[]
+  const content = flatten(to2dArray(portal.content)) as Symbol[]
 
   const right = content.reduce((max, curr) => {
     return Math.max(max, curr.right)
@@ -88,17 +98,25 @@ function computePortalSize(portal: Portal): Portal {
   }
 }
 
-function pushWithContext(context: Context, index: number) {
+function pushWithContext(
+  context: Context,
+  lineIndex: number,
+  columnIndex: number,
+) {
   function _push(container: Context, x: Symbol): Context
   function _push(container: Portal, x: Symbol): Portal
-  function _push(container: { content: Content }, x: Symbol) {
+  function _push(container: { content: Content }, symbol: Symbol) {
     container.content = update(
-      symbols => {
-        if (!symbols) return [x]
-        symbols.push(x)
-        return symbols
+      (symbols = fromArray([])) => {
+        let index = columnIndex
+        let topIndex = Math.floor(columnIndex + 1)
+        while (has(index, symbols)) {
+          index = (index + topIndex) / 2
+        }
+
+        return set(index, symbol, symbols)
       },
-      index,
+      lineIndex,
       container.content,
     )
     return container
@@ -106,7 +124,7 @@ function pushWithContext(context: Context, index: number) {
 
   return function push(toPush: Symbol): Context {
     let openedPortals = Object.values(context.portals).filter(portal => {
-      return portal.start <= index && index <= portal.end
+      return portal.start <= lineIndex && lineIndex <= portal.end
     })
 
     let found = undefined

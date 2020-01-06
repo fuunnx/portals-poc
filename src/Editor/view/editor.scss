@@ -90,7 +90,7 @@
   }
 
   &:not(.-targettable) .dropzone {
-    display: block;
+    display: none;
   }
 }
 
