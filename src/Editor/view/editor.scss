@@ -31,13 +31,27 @@
 }
 
 .buffer {
-  transition: 0.2s ease-out;
-}
+  &:focus {
+    outline: none;
+  }
+  &.-destination,
+  &.-opening,
+  &.-ending {
+    & {
+      background: var(--primary-color-dark);
+      color: rgba(255, 255, 255, 0.5);
+      border-radius: var(--small-radius);
+      transition: 0.2s ease-out;
+    }
 
-.buffer.-opening,
-.buffer.-ending {
-  background: var(--primary-color-dark);
-  color: rgba(255, 255, 255, 0.5);
+    &:hover {
+      background: var(--secondary-color);
+      color: white;
+    }
+  }
+  &.-destination {
+    cursor: grab;
+  }
 }
 
 .portal-instance {
@@ -45,14 +59,36 @@
     --accent-color: var(--primary-color);
     box-shadow: 0 0 0 calc(var(--lh) / 8) var(--accent-color),
       2px 5px 10px 5px rgba(0, 0, 0, 0.2);
+    position: relative;
+    border-radius: var(--small-radius);
   }
-  & > .buffer.-destination {
-    background: var(--primary-color-dark);
-    color: rgba(255, 255, 255, 0.5);
-    cursor: grab;
-  }
+
   &.-targetted {
     --accent-color: var(--secondary-color);
+    pointer-events: none;
+  }
+
+  & > .dropzone {
+    background: var(--primary-color);
+    opacity: 0.5;
+    width: calc(4 * var(--ch));
+    height: 100%;
+    position: absolute;
+    &.-left {
+      left: 0;
+    }
+    &.-right {
+      right: 0;
+    }
+
+    &:hover {
+      background: var(--secondary-color);
+      opacity: 1;
+    }
+  }
+
+  &:not(.-targettable) .dropzone {
+    display: none;
   }
 }
 

@@ -11,7 +11,7 @@ type EditorContentProps = CleanContext & {
   left?: number
   movable: boolean
   namespace: string[]
-  targetted?: number
+  targetted?: string
 }
 
 export function EditorContent(props: EditorContentProps) {

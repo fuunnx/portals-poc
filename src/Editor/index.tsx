@@ -25,6 +25,7 @@ export interface State {
   movable: boolean
   copiable: boolean
   disabled: boolean
+  draggedElement: Id
   transform?: {
     id: Id
     target: number

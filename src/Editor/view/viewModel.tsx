@@ -31,6 +31,6 @@ export function viewModel(state: State) {
     buffer: state.buffer,
     ...cleanupContext(context),
     movable: state.movable,
-    targetted: state.transform?.target,
+    targetted: state.draggedElement,
   }
 }

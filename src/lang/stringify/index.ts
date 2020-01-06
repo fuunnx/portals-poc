@@ -31,7 +31,7 @@ export function stringify(context: Context): string {
         .join(', ')
 
       if (symbols.some(x => x.type !== 'text')) {
-        acc.push(' '.repeat(symbols[0].left) + `// ${line}`)
+        acc.push(' '.repeat(Math.max(0, symbols[0].left)) + `// ${line}`)
       } else {
         acc.push(line)
       }

@@ -12,6 +12,7 @@ type HoveredLine = {
 
 export type Intents = {
   dragging$: Stream<{ id: Id; x: number; y: number }>
+  selectedElement$: Stream<Id>
 }
 
 export function intent(sources: Sources) {
@@ -32,13 +33,20 @@ export function intent(sources: Sources) {
     .compose(dropRepeats(equals))
     .remember() as MemoryStream<HoveredLine>
 
-  const dragging$ = DOM.select('[data-buffer]')
+  const dragStart$ = DOM.select('[data-buffer]')
     .events('mousedown')
     .map((event: MouseEvent) => {
       const target = event.target as HTMLElement
       const id = target.dataset.buffer || ''
       const namespace = (target as any).namespace as string[]
-      return move$()
+
+      return { id, namespace }
+    })
+
+  const dragging$ = dragStart$
+    .map(({ id, namespace }) => {
+      return currentHoveredLine$
+        .endWhen(dragEnd$)
         .filter(
           hovered =>
             hovered.id !== id &&
@@ -52,16 +60,18 @@ export function intent(sources: Sources) {
     })
     .flatten()
 
+  const dragEnd$ = xs.merge(
+    DOM.select('document').events('mouseup'),
+    DOM.select('window').events('blur'),
+  )
+
+  const selectedElement$ = xs.merge(
+    dragStart$.map(x => x.id),
+    dragEnd$.mapTo(undefined),
+  )
+
   return {
     dragging$,
-  }
-
-  function move$() {
-    return currentHoveredLine$.endWhen(
-      xs.merge(
-        DOM.select('document').events('mouseup'),
-        DOM.select('window').events('blur'),
-      ),
-    )
+    selectedElement$,
   }
 }

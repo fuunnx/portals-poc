@@ -10,51 +10,56 @@ type PortaProps = CleanPortal & {
   namespace: string[]
   portals: Dict<CleanPortal>
   buffer: string
-  targetted?: number
+  targetted?: string
 }
 
-export function RenderPortalInstance(line: Destination, portal: PortaProps) {
+export function RenderPortalInstance(line: Destination, context: PortaProps) {
   function hook(vnode: VNode) {
     if (vnode.elm) {
       let elm = vnode.elm as HTMLElement
       requestAnimationFrame(() => {
-        elm.scrollLeft = 12 * portal.left
+        elm.scrollLeft = 12 * context.left
       })
       elm.onscroll = () => {
-        elm.scrollLeft = 12 * portal.left
+        elm.scrollLeft = 12 * context.left
       }
     }
   }
 
-  const isTargetted = portal.targetted === line.start
-
-  let namespace = portal.namespace.concat([portal.id])
+  const isTargetted = context.targetted === line.id
+  let namespace = context.namespace.concat([context.id])
 
   return (
     <div
-      class={{ 'portal-instance': true, '-targetted': isTargetted }}
+      class={{
+        'portal-instance': true,
+        '-targetted': isTargetted,
+        '-targettable': context.targetted && !isTargetted,
+      }}
       style={{
-        'margin-left': `calc(var(--ch) * ${portal.left})`,
-        'max-width': `calc(var(--ch) * ${portal.width})`,
+        'margin-left': `calc(var(--ch) * ${context.left})`,
+        'max-width': `calc(var(--ch) * ${context.width})`,
         overflow: 'hidden',
       }}
-      scrollLeft={portal.left * 12}
+      scrollLeft={context.left * 12}
       hook={{ insert: hook, update: hook }}
     >
+      <div data-dropzone="left" className="dropzone -left"></div>
+      <div data-dropzone="right" className="dropzone -right"></div>
       {TextNode({
         ...line,
-        left: portal.left,
-        width: portal.width,
-        movable: portal.movable,
+        left: context.left,
+        width: context.width,
+        movable: context.movable,
         namespace,
-        buffer: portal.buffer,
+        buffer: context.buffer,
       })}
       {EditorContent({
-        content: portal.content,
-        portals: portal.portals,
-        buffer: portal.buffer,
-        left: portal.left,
-        movable: portal.movable,
+        content: context.content,
+        portals: context.portals,
+        buffer: context.buffer,
+        left: context.left,
+        movable: context.movable,
         namespace,
       })}
     </div>
