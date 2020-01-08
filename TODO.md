@@ -1,4 +1,9 @@
 - [x] alt + drag drop
-- [ ] side by side
+- [x] side by side
 - [ ] move and drop selection
-
+- [ ] delete portal when dropped inside its original position
+- [ ] make special nodes editable again
+- [ ] style toggle preview mode
+- [ ] add shortcut for toggle preview mode
+- [ ] use a third party code editor instead of `<pre>`
+- [ ] add transitions
