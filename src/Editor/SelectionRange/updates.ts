@@ -3,6 +3,7 @@ import { State, Reducer } from '..'
 import { Token } from 'src/lang'
 import { SelectedLines } from '.'
 import { Stream } from 'xstream'
+import randomWords from 'random-words'
 
 export function updates(intents: Intents): Stream<Reducer> {
   return intents.range$.map(range => (state: State) => {
@@ -21,13 +22,15 @@ export function updates(intents: Intents): Stream<Reducer> {
 }
 
 function SelectionRange(range: SelectedLines): [number, Token][] | undefined {
+  const portalId = randomWords(2).join('-')
+
   return [
     [
       range.start,
       {
-        id: 'selectionRange-start',
+        id: `${portalId}-start`,
         tag: 'portal',
-        portal: 'selectionRange',
+        portal: portalId,
         pos: 'start',
         original: null,
       },
@@ -35,18 +38,18 @@ function SelectionRange(range: SelectedLines): [number, Token][] | undefined {
     [
       range.start,
       {
-        id: 'selectionRange-warp',
+        id: `${portalId}-warp`,
         tag: 'warp',
-        portal: 'selectionRange',
+        portal: portalId,
         original: null,
       },
     ],
     [
       range.end === range.start ? range.start + 1 : range.end,
       {
-        id: 'selectionRange-end',
+        id: `${portalId}-end`,
         tag: 'portal',
-        portal: 'selectionRange',
+        portal: portalId,
         pos: 'end',
         original: null,
       },
