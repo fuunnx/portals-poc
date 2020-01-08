@@ -46,7 +46,7 @@ export function intent(sources: Sources) {
       }
     })
 
-  const dragStart$ = DOM.select('[data-buffer]')
+  const dragStart$ = DOM.select('[data-buffer][data-draggable=true]')
     .events('mousedown')
     .map((event: MouseEvent) => {
       const target = event.target as HTMLElement
@@ -63,7 +63,8 @@ export function intent(sources: Sources) {
           currentHoveredLine$.filter(
             hovered =>
               hovered.id !== id &&
-              !hovered.namespace.join(',').startsWith(namespace.join(',')),
+              (!namespace.length ||
+                !hovered.namespace.join(',').startsWith(namespace.join(','))),
           ),
           currentHoveredColumn$,
         )

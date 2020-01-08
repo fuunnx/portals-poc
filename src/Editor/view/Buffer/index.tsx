@@ -69,6 +69,7 @@ export function Buffer(props: BufferElement) {
         startOffset,
         endOffset: startOffset + printed.length,
         value,
+        draggable: movable,
       }}
       props-namespace={namespace}
       key={key || id}
