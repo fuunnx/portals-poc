@@ -10,8 +10,7 @@
   max-width: var(--computedWidth);
 
   resize: none;
-  overflow-x: hidden;
-  overflow-y: scroll;
+  overflow: hidden;
   display: block;
 
   line-height: var(--lh);
