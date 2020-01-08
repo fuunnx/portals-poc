@@ -17,7 +17,7 @@ export type Intents = {
 }
 
 export function intent(sources: Sources) {
-  const { DOM } = sources
+  const { DOM, time } = sources
 
   const bufferSelector = '[data-buffer]'
   const currentHoveredLine$ = DOM.select('[data-line-index]')
@@ -78,7 +78,8 @@ export function intent(sources: Sources) {
               (!namespace.length ||
                 !hovered.namespace.join(',').startsWith(namespace.join(','))),
           ),
-          currentHoveredColumn$,
+          // so it takes precedence over hoveredLine events
+          currentHoveredColumn$.compose(time.delay(0)),
         )
         .endWhen(dragEnd$)
         .map(currentlyHovered => ({
