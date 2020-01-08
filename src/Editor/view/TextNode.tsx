@@ -7,6 +7,7 @@ type TextNodeProps = {
   end?: number
   type?: string
   left?: number
+  right?: number
   width?: number
   movable: boolean
   namespace: string[]
@@ -15,6 +16,8 @@ type TextNodeProps = {
 
 export function TextNode(x: TextNodeProps) {
   if (isNil(x.end)) return null
+  if (!x.left && !x.right) return null
+
   return (
     <Buffer
       id={x.id}

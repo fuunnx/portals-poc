@@ -6,7 +6,6 @@ import { fromArray, update, set, has } from '@collectable/sorted-map'
 import { Context, Portal, Symbol, Token, Content, Id } from '../types'
 import { TextLine, DestinationLine, OpeningLine, EndingLine } from './Line'
 import { to2dArray } from './cleanupContent'
-import { toSortedArray } from '../../libs/SortedMap'
 
 type TokensMap = Array<[number, Token]>
 

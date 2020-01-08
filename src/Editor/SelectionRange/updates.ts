@@ -25,6 +25,7 @@ function SelectionRange(range: SelectedLines): [number, Token][] | undefined {
     [
       range.start,
       {
+        id: 'selectionRange-start',
         tag: 'portal',
         portal: 'selectionRange',
         pos: 'start',
@@ -34,14 +35,16 @@ function SelectionRange(range: SelectedLines): [number, Token][] | undefined {
     [
       range.start,
       {
+        id: 'selectionRange-warp',
         tag: 'warp',
         portal: 'selectionRange',
         original: null,
       },
     ],
     [
-      range.end,
+      range.end === range.start ? range.start + 1 : range.end,
       {
+        id: 'selectionRange-end',
         tag: 'portal',
         portal: 'selectionRange',
         pos: 'end',

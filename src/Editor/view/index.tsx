@@ -17,7 +17,12 @@ export function view(state$: Stream<State>): Stream<VNode> {
       const content = EditorContent({ ...state, namespace: [] })
 
       return (
-        <div class={{ 'editor-wrapper': true, '-movable': state.movable }}>
+        <div
+          class={{
+            'editor-wrapper': true,
+            '-movable': Boolean(state.movable || state.targetted),
+          }}
+        >
           <button attrs-action="toggle-preview">TOGGLE PREVIEW</button>
           {content}
         </div>

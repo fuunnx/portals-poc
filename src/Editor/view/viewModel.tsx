@@ -1,5 +1,5 @@
 import { State } from '../index'
-import { parse } from '../../lang'
+import { parse, stringify } from '../../lang'
 import { TextLine } from 'src/lang/parse/Line'
 import { cleanupContext } from 'src/lang/parse/cleanupContent'
 

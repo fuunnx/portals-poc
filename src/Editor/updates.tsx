@@ -26,11 +26,14 @@ export function updates(intents: Intents) {
       copy: currState.copiable ? currState.transform : undefined,
     })
 
+    const newBuffer = stringify(parsed)
+
     return {
       ...currState,
       movable: false,
       transform: undefined,
-      buffer: stringify(parsed),
+      buffer: newBuffer,
+      range: newBuffer !== currState.buffer ? undefined : currState.range,
     }
   })
 
