@@ -43,7 +43,6 @@ export function Buffer(props: BufferElement) {
   function hook(vnode: VNode) {
     if (vnode.elm) {
       let elm = vnode.elm as HTMLElement
-      console.log(elm.innerText)
       requestAnimationFrame(() => {
         elm.scrollTop = 25 * start
         elm.scrollLeft = 12 * left
