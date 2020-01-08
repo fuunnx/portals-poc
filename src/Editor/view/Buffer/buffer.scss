@@ -22,4 +22,8 @@
   font-family: monospace;
 
   transition: height 1s ease-out;
+
+  & > .line {
+    height: var(--lh);
+  }
 }

@@ -31,10 +31,9 @@ export function Buffer(props: BufferElement) {
     namespace,
   } = props
 
-  const printed = value
-    .split('\n')
-    .slice(start, end + 1)
-    .join('\n')
+  const printedLines = value.split('\n').slice(start, end + 1)
+
+  const printed = printedLines.join('\n')
 
   const startOffset = value
     .split('\n')
@@ -44,10 +43,7 @@ export function Buffer(props: BufferElement) {
   function hook(vnode: VNode) {
     if (vnode.elm) {
       let elm = vnode.elm as HTMLElement
-      if (elm.innerText.trim() !== printed.trim()) {
-        elm.innerText = printed
-      }
-
+      console.log(elm.innerText)
       requestAnimationFrame(() => {
         elm.scrollTop = 25 * start
         elm.scrollLeft = 12 * left
@@ -93,6 +89,12 @@ export function Buffer(props: BufferElement) {
         insert: hook,
         update: hook,
       }}
-    ></pre>
+    >
+      {printedLines.map((line, index) => (
+        <div className="line" data-lineIndex={start + index}>
+          {line || '\r'}
+        </div>
+      ))}
+    </pre>
   )
 }

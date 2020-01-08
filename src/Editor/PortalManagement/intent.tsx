@@ -19,39 +19,51 @@ export type Intents = {
 export function intent(sources: Sources) {
   const { DOM } = sources
 
-  const currentHoveredLine$ = DOM.select('[data-buffer]')
+  const bufferSelector = '[data-buffer]'
+  const currentHoveredLine$ = DOM.select('[data-line-index]')
     .events('mousemove')
     .map(event => {
+      const parentBuffer = getClosestParent(
+        event.target,
+        bufferSelector,
+      ) as HTMLElement
+
       const target = event.target as HTMLElement
       return {
-        id: target.dataset.buffer || '',
-        lineIndex:
-          Math.round((event.y - target.getBoundingClientRect().top) / 25) +
-          (parseFloat(target.dataset.lineOffset || '') || 0) -
-          0.5,
-        columnIndex: parseFloat(target.dataset.columnIndex || '') || 0,
-        namespace: (target as any).namespace as string[],
+        id: parentBuffer?.dataset.buffer || '',
+        lineIndex: (parseFloat(target.dataset.lineIndex || '0') || 0) - 0.5,
+        columnIndex: parseFloat(target.dataset.columnIndex || '0') || 0,
+        namespace: ((parentBuffer as any)?.namespace || []) as string[],
       }
     })
     .compose(dropRepeats(equals))
     .remember() as MemoryStream<HoveredLine>
 
-  const currentHoveredColumn$ = DOM.select('[data-dropzone]')
+  const dropZoneSelector = '[data-dropzone]'
+  const currentHoveredColumn$ = DOM.select(dropZoneSelector)
     .events('mouseover')
     .map(event => {
-      const target = event.target as HTMLElement
+      const target = getClosestParent(
+        event.target,
+        dropZoneSelector,
+      ) as HTMLElement
+
       return {
         lineIndex: parseFloat(target.dataset.lineIndex || '') || 0,
         columnIndex: parseFloat(target.dataset.columnIndex || '') || 0,
       }
     })
 
-  const dragStart$ = DOM.select('[data-buffer][data-draggable=true]')
+  let draggableSelector = '[data-buffer][data-draggable=true]'
+  const dragStart$ = DOM.select(draggableSelector)
     .events('mousedown')
     .map((event: MouseEvent) => {
-      const target = event.target as HTMLElement
-      const id = target.dataset.buffer || ''
-      const namespace = (target as any).namespace as string[]
+      const target = getClosestParent(
+        event.target,
+        draggableSelector,
+      ) as HTMLElement
+      const id = target?.dataset.buffer || ''
+      const namespace = ((target as any).namespace || []) as string[]
 
       return { id, namespace }
     })
@@ -91,4 +103,16 @@ export function intent(sources: Sources) {
     dragging$,
     selectedElement$,
   }
+}
+
+function getClosestParent(
+  element: (Node & HTMLElement) | EventTarget | null,
+  selector: string,
+): Node | null {
+  let el = element as any
+  while (!el?.matches?.(selector)) {
+    if (!el) return null
+    el = el.parentNode
+  }
+  return el
 }

@@ -1,0 +1,22 @@
+diff --git a/node_modules/snabbdom/es/snabbdom.js b/node_modules/snabbdom/es/snabbdom.js
+index d66a36f..bcf955c 100644
+--- a/node_modules/snabbdom/es/snabbdom.js
++++ b/node_modules/snabbdom/es/snabbdom.js
+@@ -46,7 +46,7 @@ export function init(modules, domApi) {
+         return function rmCb() {
+             if (--listeners === 0) {
+                 var parent_1 = api.parentNode(childElm);
+-                api.removeChild(parent_1, childElm);
++                parent_1 && childElm && api.removeChild(parent_1, childElm);
+             }
+         };
+     }
+@@ -147,7 +147,7 @@ export function init(modules, domApi) {
+                     }
+                 }
+                 else { // Text node
+-                    api.removeChild(parentElm, ch.elm);
++                    parentElm && ch.elm && api.removeChild(parentElm, ch.elm);
+                 }
+             }
+         }

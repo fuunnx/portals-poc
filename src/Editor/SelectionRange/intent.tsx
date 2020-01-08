@@ -18,15 +18,15 @@ export function intent(sources: Sources) {
       const range = selec.getRangeAt(0)
       if (range.collapsed) return undefined
       // there are cross browser issues that need to be solved (firefox for eg)
-      const startContainer = range.startContainer.parentNode as HTMLElement
-      const endContainer = range.endContainer.parentNode as HTMLElement
+      const startBuffer = getContainer(range.startContainer)
+      const endBuffer = getContainer(range.endContainer)
       // making a copy is necessary because the range can be mutated from outside
+
       return {
-        startOffset:
-          range.startOffset +
-          parseInt(startContainer.dataset.startOffset || ''),
-        endOffset:
-          range.endOffset + parseInt(endContainer.dataset.startOffset || ''),
+        lineStart: parseInt(startBuffer.dataset?.lineIndex || '0'),
+        lineEnd: parseInt(endBuffer.dataset?.lineIndex || '0'),
+        columnStart: range.startOffset,
+        endOffset: range.endOffset,
       }
     })
     .compose(dropRepeats(equals)) as Stream<SelectedChars | undefined>
@@ -34,4 +34,11 @@ export function intent(sources: Sources) {
   return {
     range$,
   }
+}
+
+function getContainer(element: any): any {
+  while (!element.dataset?.lineIndex && element.parentNode) {
+    element = element.parentNode
+  }
+  return element
 }

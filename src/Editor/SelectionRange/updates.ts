@@ -10,13 +10,9 @@ export function updates(intents: Intents): Stream<Reducer> {
     if (state.movable) return state
     if (!range) return { ...state, range: undefined }
 
-    const { buffer } = state
-    const start = buffer.slice(0, range.startOffset).split('\n').length - 1
-    const end = buffer.slice(0, range.endOffset - 1).split('\n').length - 1
-
     return {
       ...state,
-      range: SelectionRange({ start, end }),
+      range: SelectionRange({ start: range.lineStart, end: range.lineEnd }),
     }
   })
 }
@@ -45,7 +41,7 @@ function SelectionRange(range: SelectedLines): [number, Token][] | undefined {
       },
     ],
     [
-      range.end === range.start ? range.start + 1 : range.end,
+      range.end,
       {
         id: `${portalId}-end`,
         tag: 'portal',
