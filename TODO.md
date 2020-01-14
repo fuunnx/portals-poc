@@ -7,3 +7,4 @@
 - [ ] add shortcut for toggle preview mode
 - [ ] use a third party code editor instead of `<pre>`
 - [ ] add transitions
+- [ ] resize portal from edges
