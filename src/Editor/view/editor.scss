@@ -44,13 +44,10 @@
       transition: 0.2s ease-out;
     }
 
-    &:hover {
+    &.-movable:hover {
       background: var(--secondary-color);
       color: white;
     }
-  }
-  &.-destination {
-    cursor: grab;
   }
 }
 

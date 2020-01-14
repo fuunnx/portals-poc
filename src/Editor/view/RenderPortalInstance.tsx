@@ -53,6 +53,7 @@ export function RenderPortalInstance(
           dropzone: 'left',
           lineIndex: line.start,
           columnIndex: index - 0.5,
+          // draggable: context.movable,
         }}
         className="dropzone -left"
       ></div>

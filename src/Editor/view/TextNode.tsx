@@ -27,7 +27,7 @@ export function TextNode(x: TextNodeProps) {
       end={x.end}
       width={x.width}
       left={x.left}
-      movable={x.type !== 'text'}
+      movable={x.movable && x.type !== 'text'}
       namespace={x.namespace}
     />
   )
