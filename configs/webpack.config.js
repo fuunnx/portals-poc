@@ -81,7 +81,7 @@ module.exports = webpackMerge(
         outputPath: appPath('public'),
       }),
       new webpack.ProvidePlugin({
-        Snabbdom: 'snabbdom-pragma',
+        Snabbdom: 'src/pragma.ts',
       }),
     ]),
     env('development', [

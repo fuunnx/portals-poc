@@ -58,6 +58,7 @@
       2px 5px 10px 5px rgba(0, 0, 0, 0.2);
     position: relative;
     border-radius: var(--small-radius);
+    transition: 0.2s linear;
   }
 
   &.-targetted {

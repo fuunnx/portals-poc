@@ -9,11 +9,28 @@ declare module 'random-words' {
   export default function randomWords(count: number): string[]
 }
 
-// declare namespace SnabbdomPragma {
-//   type Children = VNode[] | VNode | string | number
-//   type CircularChildren = Children | Children[]
+declare module 'snabbdom-pragma' {
+  import { VNodeData, VNode } from 'snabbdom/vnode'
 
-//   type Component = (props: VNodeData, children: CircularChildren[]) => VNode
+  type Children = VNode[] | VNode | string | number
+  type CircularChildren = Children | Children[]
 
-//   export function createElement(sel: string | Component, data: null | VNodeData, ...children: CircularChildren[]): VNode
-// }
+  type Component = (props: VNodeData, children: CircularChildren[]) => VNode
+  type CreateElement = {
+    (
+      sel: string | Component,
+      data: null | VNodeData,
+      ...children: CircularChildren[]
+    ): VNode
+  }
+
+  export function createElement(
+    sel: string | Component,
+    data: null | VNodeData,
+    ...children: CircularChildren[]
+  ): VNode
+
+  export function createElementWithModules(modules: {
+    [name: string]: string
+  }): CreateElement
+}

@@ -36,6 +36,9 @@ export function RenderPortalInstance(
   return (
     <div
       id={line.id}
+      // hero={{
+      //   id: line.id,
+      // }}
       class={{
         'portal-instance': true,
         '-targetted': isTargetted,
