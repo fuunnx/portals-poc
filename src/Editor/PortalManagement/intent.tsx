@@ -30,7 +30,7 @@ export function intent(sources: Sources) {
 
       const target = event.target as HTMLElement
       return {
-        id: parentBuffer?.dataset.buffer || '',
+        id: parentBuffer?.id || '',
         lineIndex: (parseFloat(target.dataset.lineIndex || '0') || 0) - 0.5,
         columnIndex: parseFloat(target.dataset.columnIndex || '0') || 0,
         namespace: ((parentBuffer as any)?.namespace || []) as string[],
@@ -54,7 +54,7 @@ export function intent(sources: Sources) {
       }
     })
 
-  let draggableSelector = '[data-buffer][data-draggable=true]'
+  let draggableSelector = '[data-draggable=true]'
   const dragStart$ = DOM.select(draggableSelector)
     .events('mousedown')
     .map((event: MouseEvent) => {
@@ -62,11 +62,12 @@ export function intent(sources: Sources) {
         event.target,
         draggableSelector,
       ) as HTMLElement
-      const id = target?.dataset.buffer || ''
-      const namespace = ((target as any).namespace || []) as string[]
+      const id = target?.id || ''
+      const namespace = ((target as any)?.namespace || []) as string[]
 
       return { id, namespace }
     })
+    .debug('draggable')
 
   const dragging$ = dragStart$
     .map(({ id, namespace }) => {

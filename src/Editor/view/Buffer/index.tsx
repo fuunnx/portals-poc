@@ -58,8 +58,9 @@ export function Buffer(props: BufferElement) {
   // don't use textarea, selection can't be measured on textareas
   return (
     <pre
+      id={id}
       data={{
-        buffer: id,
+        buffer: true,
         lineOffset: start,
         startOffset,
         endOffset: startOffset + printed.length,

@@ -35,6 +35,7 @@ export function RenderPortalInstance(
 
   return (
     <div
+      id={line.id}
       class={{
         'portal-instance': true,
         '-targetted': isTargetted,
@@ -45,15 +46,18 @@ export function RenderPortalInstance(
         'max-width': `calc(var(--ch) * ${context.width})`,
         overflow: 'hidden',
       }}
+      namespace={namespace}
       scrollLeft={context.left * 12}
       hook={{ insert: hook, update: hook }}
+      data={{
+        draggable: context.movable,
+      }}
     >
       <div
         data={{
           dropzone: 'left',
           lineIndex: line.start,
           columnIndex: index - 0.5,
-          // draggable: context.movable,
         }}
         className="dropzone -left"
       ></div>
