@@ -26,7 +26,7 @@ export function intent(sources: Sources) {
         lineStart: parseInt(startBuffer.dataset?.lineIndex || '0'),
         lineEnd: parseInt(endBuffer.dataset?.lineIndex || '0'),
         columnStart: range.startOffset,
-        endOffset: range.endOffset,
+        columnEnd: range.endOffset,
       }
     })
     .compose(dropRepeats(equals)) as Stream<SelectedChars | undefined>

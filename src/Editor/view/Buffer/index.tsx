@@ -61,7 +61,7 @@ export function Buffer(props: BufferElement) {
       id={id}
       data={{
         buffer: true,
-        lineOffset: start,
+        lineIndex: start,
         startOffset,
         endOffset: startOffset + printed.length,
         value,
