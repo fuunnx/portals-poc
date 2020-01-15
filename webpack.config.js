@@ -1,4 +1,5 @@
 const path = require('path')
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
 
 const appPath = (...names) => path.join(process.cwd(), ...names)
 
@@ -17,4 +18,5 @@ module.exports = {
     clientLogLevel: 'warning',
     stats: 'normal',
   },
+  plugins: [new MonacoWebpackPlugin()],
 }

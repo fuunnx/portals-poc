@@ -61,6 +61,17 @@ module.exports = webpackMerge(
         env('production', [extractText('[name].[hash].css')]),
       ],
     ),
+    match(
+      ['*.css'],
+      [
+        css(),
+        postcss({
+          plugins: [autoprefixer()],
+        }),
+
+        env('production', [extractText('[name].[hash].css')]),
+      ],
+    ),
     match(['*.eot', '*.ttf', '*.woff', '*.woff2'], [file()]),
     match(
       ['*.gif', '*.jpg', '*.jpeg', '*.png', '*.svg', '*.webp'],
