@@ -4,6 +4,7 @@ import { State, Reducer } from './index'
 import { initialState } from './initialState'
 import { parse, stringify } from '../lang'
 import dropRepeats from 'xstream/extra/dropRepeats'
+import { stateToAST } from './view/viewModel'
 
 export function updates(intents: Intents) {
   const init$ = xs.of<Reducer>(prevState =>
@@ -20,20 +21,13 @@ export function updates(intents: Intents) {
     })
 
   const commit$ = intents.commit$.mapTo((currState: State) => {
-    const parsed = parse(currState.buffer, {
-      add: currState.movable ? currState.range : [],
-      move: currState.copiable ? undefined : currState.transform,
-      copy: currState.copiable ? currState.transform : undefined,
-    })
-
-    const newBuffer = stringify(parsed)
+    const newBuffer = stringify(stateToAST(currState))
 
     return {
       ...currState,
       movable: false,
       transform: undefined,
       buffer: newBuffer,
-      range: newBuffer !== currState.buffer ? undefined : currState.range,
     }
   })
 

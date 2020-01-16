@@ -67,7 +67,6 @@ export function intent(sources: Sources) {
 
       return { id, namespace }
     })
-    .debug('draggable')
 
   const dragging$ = dragStart$
     .map(({ id, namespace }) => {

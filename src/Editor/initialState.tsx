@@ -1,11 +1,11 @@
 import { State } from './index'
 
 export const initialState: State = {
-  range: undefined,
   movable: false,
   copiable: false,
   disabled: false,
   draggedElement: undefined,
+  selection: undefined,
   buffer: `
 // PORTAL #1
 function fibonnaci (n) {

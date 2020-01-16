@@ -8,6 +8,7 @@ import { StateSource } from '@cycle/state'
 import { SelectionRange } from './SelectionRange'
 import { PortalManagement } from './PortalManagement'
 import { BaseSources, BaseSinks } from '../interfaces'
+import { Selection } from 'monaco-editor'
 
 // Types
 export interface Sources extends BaseSources {
@@ -21,11 +22,11 @@ export interface Sinks extends BaseSinks {
 // State
 export interface State {
   buffer: string
-  range: Array<[number, Token]> | undefined
   movable: boolean
   copiable: boolean
   disabled: boolean
   draggedElement?: Id
+  selection?: Selection
   transform?: {
     id: Id
     lineIndex: number

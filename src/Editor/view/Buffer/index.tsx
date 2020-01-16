@@ -1,7 +1,7 @@
 import './buffer.scss'
 import { VNodeStyle } from 'snabbdom/modules/style'
 import { VNode } from '@cycle/dom'
-import { editor, IDisposable } from 'monaco-editor'
+import { editor, IDisposable, Emitter } from 'monaco-editor'
 
 interface BufferElement {
   id?: string | number
@@ -80,6 +80,9 @@ export function Buffer(props: BufferElement) {
 
       elm._editor = _editor
     }
+    _editor.onDidChangeCursorSelection(e => {
+      emit(elm, 'monaco-selectionchange', e)
+    })
 
     if (_editor.getValue() !== value) {
       makeModel(value)
@@ -122,8 +125,25 @@ export function Buffer(props: BufferElement) {
       hook={{
         insert: hook,
         update: hook,
+        remove: vnode => {
+          let elm = vnode.elm as any
+          let _editor = elm?._editor as editor.IStandaloneCodeEditor
+          _editor?.dispose()
+          let _subscription = elm?._subscription as IDisposable
+          _subscription?.dispose()
+        },
       }}
     ></code>
+  )
+}
+
+function emit<T extends Object = Object>(
+  elm: HTMLElement,
+  eventName: string,
+  detail: T,
+) {
+  elm.dispatchEvent(
+    new CustomEvent<T>(eventName, { detail, bubbles: true }),
   )
 }
 

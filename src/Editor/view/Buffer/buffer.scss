@@ -8,7 +8,7 @@
     margin: 0;
     margin-left: calc(var(--left) * var(--ch));
     width: 100%;
-    max-width: var(--computedWidth);
+    min-width: var(--computedWidth);
 
     resize: none;
     overflow: hidden;
