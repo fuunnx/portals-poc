@@ -17,6 +17,17 @@ interface BufferElement {
   namespace: string[]
 }
 
+let model: editor.ITextModel
+function makeModel(value: string) {
+  model = model || editor.createModel(value, 'javascript')
+
+  if (model.getValue() !== value) {
+    model.setValue(value)
+  }
+
+  return model
+}
+
 export function Buffer(props: BufferElement) {
   const {
     key,
@@ -46,27 +57,40 @@ export function Buffer(props: BufferElement) {
       return
     }
 
-    let _editor = (vnode.elm as any)._editor as editor.IStandaloneCodeEditor
-    let _subscription = (vnode.elm as any)._subscription as IDisposable
+    let elm = vnode.elm as any
+    let _editor = elm._editor as editor.IStandaloneCodeEditor
+    let _subscription = elm._subscription as IDisposable
     if (!_editor) {
       _editor = editor.create(vnode.elm as HTMLElement, {
-        value,
         language: 'javascript',
-        roundedSelection: false,
+        roundedSelection: true,
         scrollBeyondLastLine: false,
         readOnly: false,
         theme: 'vs-dark',
         lineNumbers: 'on',
+        scrollbar: {
+          vertical: 'hidden',
+        },
+        automaticLayout: true,
+        minimap: {
+          enabled: false,
+        },
+        model: makeModel(value),
       })
-      ;(vnode.elm as any)._editor = _editor
+
+      elm._editor = _editor
     }
 
-    _editor.setScrollTop(start * 15)
+    if (_editor.getValue() !== value) {
+      makeModel(value)
+    }
+
+    _editor.setScrollTop(start * 18)
     if (_subscription) {
       _subscription.dispose()
     }
-    ;(vnode.elm as any)._subscription = _editor.onDidScrollChange(() => {
-      _editor.setScrollTop(start * 15)
+    elm._subscription = _editor.onDidScrollChange(() => {
+      _editor.setScrollTop(start * 18)
     })
   }
 

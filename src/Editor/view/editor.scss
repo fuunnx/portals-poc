@@ -59,6 +59,7 @@
     position: relative;
     border-radius: var(--small-radius);
     transition: 0.2s linear;
+    min-width: 300px;
   }
 
   &.-targetted {
@@ -96,9 +97,49 @@
   & {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
   }
 
   & > * {
     flex: 1;
+  }
+}
+
+.toggle-button {
+  & {
+    position: fixed;
+    z-index: 10;
+    top: calc(0.5 * var(--lh));
+    right: calc(0.5 * var(--lh));
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  & > input {
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+  }
+
+  & > .background {
+    background: rgba(255, 255, 255, 0.75);
+    border-radius: calc(1 * var(--lh));
+    width: calc(2.5 * var(--lh));
+    height: calc(1 * var(--lh));
+  }
+
+  & > .button {
+    background: white;
+    border-radius: 50%;
+    box-shadow: 2px 2px 8px rgba(255, 255, 255, 0.5);
+    width: calc(1.5 * var(--lh));
+    height: calc(1.5 * var(--lh));
+    margin-left: calc(-1.5 * var(--lh));
+    transition: transform ease-out 0.2s;
+  }
+
+  & > input:checked ~ .button {
+    transform: translateX(calc(-1 * var(--lh)));
   }
 }

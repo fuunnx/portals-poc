@@ -29,18 +29,28 @@ export function intent(sources: Sources): Intents {
     .events('input')
     .map(event => {
       const target = event.target as HTMLElement
-      const startOffset = parseInt(target.dataset.startOffset || '')
-      const endOffset = parseInt(target.dataset.endOffset || '')
-      const value = target.dataset.value || ''
-      const newValue = target.innerText
+      const editor = (getClosestParent(target, '[data-buffer]') as any)._editor
 
-      return (
-        value.slice(0, startOffset + 1) + newValue + value.slice(endOffset + 1)
-      )
+      if (editor) {
+        return editor.getValue()
+      }
+      return ''
     })
 
   return {
     input$,
     commit$,
   }
+}
+
+function getClosestParent(
+  element: (Node & HTMLElement) | EventTarget | null,
+  selector: string,
+): Node | null {
+  let el = element as any
+  while (!el?.matches?.(selector)) {
+    if (!el) return null
+    el = el.parentNode
+  }
+  return el
 }

@@ -23,7 +23,15 @@ export function view(state$: Stream<State>): Stream<VNode> {
             '-movable': Boolean(state.movable || state.targetted),
           }}
         >
-          <button attrs-action="toggle-preview">TOGGLE PREVIEW</button>
+          <label className="toggle-button">
+            <input
+              type="checkbox"
+              attrs-action="toggle-preview"
+              checked={!state.disabled}
+            />
+            <div className="background" />
+            <div className="button" />
+          </label>
           {content}
         </div>
       )

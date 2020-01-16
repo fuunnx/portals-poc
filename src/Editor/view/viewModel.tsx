@@ -1,5 +1,5 @@
 import { State } from '../index'
-import { parse, stringify } from '../../lang'
+import { parse } from '../../lang'
 import { TextLine } from 'src/lang/parse/Line'
 import { cleanupContext } from 'src/lang/parse/cleanupContent'
 
@@ -18,6 +18,7 @@ export function viewModel(state: State) {
       portals: {},
       movable: state.movable,
       targetted: undefined,
+      disabled: true,
     }
   }
 
@@ -32,5 +33,6 @@ export function viewModel(state: State) {
     ...cleanupContext(context),
     movable: state.movable,
     targetted: state.draggedElement,
+    disabled: false,
   }
 }
