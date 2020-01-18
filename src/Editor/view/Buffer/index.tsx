@@ -1,7 +1,7 @@
 import './buffer.scss'
 import { VNodeStyle } from 'snabbdom/modules/style'
 import { VNode } from '@cycle/dom'
-import { editor, IDisposable, Emitter } from 'monaco-editor'
+import { editor, IDisposable, Selection } from 'monaco-editor'
 
 interface BufferElement {
   id?: string | number
@@ -15,6 +15,7 @@ interface BufferElement {
   value?: string
   width?: number
   namespace: string[]
+  selection?: Selection
 }
 
 let model: editor.ITextModel
@@ -41,6 +42,7 @@ export function Buffer(props: BufferElement) {
     width = 0,
     id,
     namespace,
+    selection,
   } = props
 
   const printedLines = value.split('\n').slice(start, end + 1)
@@ -80,6 +82,14 @@ export function Buffer(props: BufferElement) {
 
       elm._editor = _editor
     }
+    let editorSelection = _editor.getSelection()
+    if (
+      selection &&
+      editorSelection &&
+      !selection.equalsSelection(editorSelection)
+    ) {
+      _editor.setSelection(selection)
+    }
     _editor.onDidChangeCursorSelection(e => {
       emit(elm, 'monaco-selectionchange', e)
     })
@@ -89,11 +99,14 @@ export function Buffer(props: BufferElement) {
     }
 
     _editor.setScrollTop(start * 18)
+    _editor.setScrollLeft(left * 7.22)
+
     if (_subscription) {
       _subscription.dispose()
     }
     elm._subscription = _editor.onDidScrollChange(() => {
       _editor.setScrollTop(start * 18)
+      _editor.setScrollLeft(left * 7.22)
     })
   }
 
@@ -103,10 +116,6 @@ export function Buffer(props: BufferElement) {
       id={id}
       data={{
         buffer: true,
-        lineIndex: start,
-        startOffset,
-        endOffset: startOffset + printed.length,
-        // value,
         draggable: movable,
       }}
       props-namespace={namespace}
@@ -115,7 +124,7 @@ export function Buffer(props: BufferElement) {
         {
           '--height': String(end - start + 1),
           '--left': String(left || 0),
-          '--width': String(width || 999),
+          '--width': String(width || 0),
         },
         style,
       )}

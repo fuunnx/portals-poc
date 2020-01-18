@@ -3,6 +3,7 @@ import { Destination, Dict } from '../../lang'
 import { CleanPortal } from 'src/lang/parse/cleanupContent'
 import { EditorContent } from './EditorContent'
 import { TextNode } from './TextNode'
+import { Selection } from 'monaco-editor'
 
 type PortaProps = CleanPortal & {
   width: number
@@ -11,6 +12,7 @@ type PortaProps = CleanPortal & {
   portals: Dict<CleanPortal>
   buffer: string
   targetted?: string
+  selection?: Selection
 }
 
 export function RenderPortalInstance(
@@ -79,6 +81,7 @@ export function RenderPortalInstance(
         movable: context.movable,
         namespace,
         buffer: context.buffer,
+        selection: context.selection,
       })}
       {EditorContent({
         content: context.content,
@@ -87,6 +90,7 @@ export function RenderPortalInstance(
         left: context.left,
         movable: context.movable,
         namespace,
+        selection: context.selection,
       })}
     </div>
   )

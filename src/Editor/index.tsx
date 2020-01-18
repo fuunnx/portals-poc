@@ -3,12 +3,14 @@ import { Token, Id } from '../lang'
 import { intent } from './intent'
 import { Status } from './Status'
 import { updates } from './updates'
-import xs, { Stream } from 'xstream'
+import xs, { Stream, MemoryStream } from 'xstream'
 import { StateSource } from '@cycle/state'
 import { SelectionRange } from './SelectionRange'
 import { PortalManagement } from './PortalManagement'
 import { BaseSources, BaseSinks } from '../interfaces'
 import { Selection } from 'monaco-editor'
+import dropRepeats from 'xstream/extra/dropRepeats'
+import { equals } from 'ramda'
 
 // Types
 export interface Sources extends BaseSources {
@@ -43,7 +45,9 @@ export function Editor(sources: Sources): Sinks {
 
   const update$ = updates(intent(sources))
   return {
-    DOM: view(sources.state.stream),
+    DOM: view(
+      sources.state.stream.compose(dropRepeats(equals)) as MemoryStream<State>,
+    ),
     state: xs.merge(
       update$,
       portalManagement.state,

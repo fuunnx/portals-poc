@@ -8,18 +8,24 @@ import randomWords from 'random-words'
 export function stateToAST(state: State) {
   return parse(state.buffer, {
     add:
-      state.movable && state.selection ? SelectionRange(state.selection) : [],
+      (state.movable || state.copiable) && state.selection
+        ? SelectionRange(state.selection)
+        : [],
     move: state.copiable ? undefined : state.transform,
     copy: state.copiable ? state.transform : undefined,
   })
 }
 
 function SelectionRange(selection: Selection): [number, Token][] | undefined {
+  const { startLineNumber, endLineNumber, startColumn, endColumn } = selection
+  if (startLineNumber === endLineNumber && startColumn === endColumn) {
+    return []
+  }
   const portalId = randomWords(2).join('-')
 
   return [
     [
-      selection.startLineNumber - 1,
+      startLineNumber - 1,
       {
         id: `${portalId}-start`,
         tag: 'portal',
@@ -29,7 +35,7 @@ function SelectionRange(selection: Selection): [number, Token][] | undefined {
       },
     ],
     [
-      selection.startLineNumber - 1,
+      startLineNumber - 1,
       {
         id: `${portalId}-warp`,
         tag: 'warp',
@@ -38,7 +44,7 @@ function SelectionRange(selection: Selection): [number, Token][] | undefined {
       },
     ],
     [
-      selection.endLineNumber - 1,
+      endLineNumber - 1,
       {
         id: `${portalId}-end`,
         tag: 'portal',
@@ -63,17 +69,19 @@ export function viewModel(state: State) {
         ],
       ],
       portals: {},
-      movable: state.movable,
+      movable: false,
       targetted: undefined,
       disabled: true,
+      selection: state.selection,
     }
   }
 
   return {
     buffer: state.buffer,
     ...cleanupContext(stateToAST(state)),
-    movable: state.movable,
+    movable: state.movable || state.copiable,
     targetted: state.draggedElement,
     disabled: false,
+    selection: state.selection,
   }
 }

@@ -1,5 +1,6 @@
 import { isNil } from 'ramda'
 import { Buffer } from './Buffer'
+import { Selection } from 'monaco-editor'
 
 type TextNodeProps = {
   id: string
@@ -12,6 +13,7 @@ type TextNodeProps = {
   movable: boolean
   namespace: string[]
   buffer: string
+  selection?: Selection
 }
 
 export function TextNode(x: TextNodeProps) {
@@ -29,6 +31,7 @@ export function TextNode(x: TextNodeProps) {
       left={x.left}
       movable={x.movable && x.type !== 'text'}
       namespace={x.namespace}
+      selection={x.selection}
     />
   )
 }

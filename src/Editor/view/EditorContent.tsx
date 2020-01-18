@@ -3,8 +3,9 @@ import { Symbol } from 'src/lang'
 import { TextNode } from './TextNode'
 import { CleanContext } from 'src/lang/parse/cleanupContent'
 import { RenderPortalInstance } from './RenderPortalInstance'
+import { Selection } from 'monaco-editor'
 
-const OFFSET = 20
+const OFFSET = 0
 
 type EditorContentProps = CleanContext & {
   buffer: string
@@ -12,6 +13,7 @@ type EditorContentProps = CleanContext & {
   movable: boolean
   namespace: string[]
   targetted?: string
+  selection?: Selection
 }
 
 export function EditorContent(props: EditorContentProps) {
@@ -23,6 +25,7 @@ export function EditorContent(props: EditorContentProps) {
     movable,
     namespace,
     targetted,
+    selection,
   } = props
 
   const children = content.map(line => {
@@ -39,6 +42,7 @@ export function EditorContent(props: EditorContentProps) {
         movable,
         namespace,
         buffer,
+        selection,
       })
     }
 
@@ -51,7 +55,15 @@ export function EditorContent(props: EditorContentProps) {
       Math.max(symbol.right, matchingPortal.right) - left + 1 + 2 * OFFSET
 
     if (symbol.type === 'opening' || symbol.type === 'ending') {
-      return TextNode({ ...symbol, left, width, movable, namespace, buffer })
+      return TextNode({
+        ...symbol,
+        left,
+        width,
+        movable,
+        namespace,
+        buffer,
+        selection,
+      })
     }
 
     if (symbol.type === 'destination') {
@@ -65,10 +77,19 @@ export function EditorContent(props: EditorContentProps) {
           buffer,
           portals,
           targetted,
+          selection,
         })
       }
 
-      return TextNode({ ...symbol, left, width, movable, namespace, buffer })
+      return TextNode({
+        ...symbol,
+        left,
+        width,
+        movable,
+        namespace,
+        buffer,
+        selection,
+      })
     }
 
     return null
