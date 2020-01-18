@@ -44,15 +44,7 @@ export function Buffer(props: BufferElement) {
     namespace,
     selection,
   } = props
-
-  const printedLines = value.split('\n').slice(start, end + 1)
-
-  const printed = printedLines.join('\n')
-
-  const startOffset = value
-    .split('\n')
-    .slice(0, start)
-    .join('\n').length
+  const height = end - start + 1
 
   function hook(vnode: VNode) {
     if (!vnode.elm) {
@@ -73,7 +65,7 @@ export function Buffer(props: BufferElement) {
         scrollbar: {
           vertical: 'hidden',
         },
-        automaticLayout: true,
+        automaticLayout: false,
         minimap: {
           enabled: false,
         },
@@ -110,7 +102,6 @@ export function Buffer(props: BufferElement) {
     })
   }
 
-  // don't use textarea, selection can't be measured on textareas
   return (
     <code
       id={id}
@@ -122,9 +113,9 @@ export function Buffer(props: BufferElement) {
       key={key || id}
       style={Object.assign(
         {
-          '--height': String(end - start + 1),
-          '--left': String(left || 0),
-          '--width': String(width || 0),
+          '--height': String(height),
+          '--left': String(left),
+          '--width': String(width),
         },
         style,
       )}
@@ -155,60 +146,3 @@ function emit<T extends Object = Object>(
     new CustomEvent<T>(eventName, { detail, bubbles: true }),
   )
 }
-
-// function hook(vnode: VNode) {
-//   if (vnode.elm) {
-//     let elm = vnode.elm as HTMLElement
-//     requestAnimationFrame(() => {
-//       elm.scrollTop = 25 * start
-//       elm.scrollLeft = 12 * left
-//     })
-
-//     elm.onscroll = () => {
-//       elm.scrollTop = 25 * start
-//       elm.scrollLeft = 12 * left
-//     }
-//   }
-// }
-//  <pre
-//     id={id}
-//     data={{
-//       buffer: true,
-//       lineIndex: start,
-//       startOffset,
-//       endOffset: startOffset + printed.length,
-//       value,
-//       draggable: movable,
-//     }}
-//     props-namespace={namespace}
-//     key={key || id}
-//     style={Object.assign(
-//       {
-//         '--height': String(end - start + 1),
-//         '--left': String(left || 0),
-//         '--width': String(width || 999),
-//       },
-//       style,
-//     )}
-//     className={[className, 'buffer', movable && '-movable']
-//       .filter(Boolean)
-//       .join(' ')}
-//     attrs-contenteditable={!movable}
-//     attrs-spellcheck={false}
-//     scrollTop={25 * start}
-//     scrollLeft={12 * left}
-//     wrap="off"
-//     hook={{
-//       insert: vnode => {
-//         init(vnode)
-//         hook(vnode)
-//       },
-//       update: hook,
-//     }}
-//   >
-//     {printedLines.map((line, index) => (
-//       <div className="line" data-lineIndex={start + index}>
-//         {line || '\r'}
-//       </div>
-//     ))}
-//   </pre>

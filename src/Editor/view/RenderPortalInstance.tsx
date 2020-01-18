@@ -74,15 +74,6 @@ export function RenderPortalInstance(
         }}
         className="dropzone -right"
       ></div>
-      {TextNode({
-        ...line,
-        left: context.left,
-        width: context.width,
-        movable: context.movable,
-        namespace,
-        buffer: context.buffer,
-        selection: context.selection,
-      })}
       {EditorContent({
         content: context.content,
         portals: context.portals,

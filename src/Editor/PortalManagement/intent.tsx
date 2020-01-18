@@ -20,23 +20,37 @@ export function intent(sources: Sources) {
   const { DOM, time } = sources
 
   const bufferSelector = '[data-buffer]'
-  const currentHoveredLine$ = DOM.select('[data-line-index]')
+  const currentHoveredLine$ = DOM.select(bufferSelector)
     .events('mousemove')
     .map(event => {
+      const hoveredLine = getClosestParent(
+        event.target,
+        '.view-line',
+      ) as HTMLElement
+
       const parentBuffer = getClosestParent(
         event.target,
         bufferSelector,
       ) as HTMLElement
 
-      const target = event.target as HTMLElement
+      if (!hoveredLine || !parentBuffer) {
+        return
+      }
+
+      const lineIndex =
+        parseInt(hoveredLine.style.top) / parseInt(hoveredLine.style.height)
+
       return {
-        id: parentBuffer?.id || '',
-        lineIndex: (parseFloat(target.dataset.lineIndex || '0') || 0) - 0.5,
-        columnIndex: parseFloat(target.dataset.columnIndex || '0') || 0,
-        namespace: ((parentBuffer as any)?.namespace || []) as string[],
+        id: parentBuffer.id || '',
+        lineIndex: (lineIndex || 0) - 0.5,
+        columnIndex:
+          (parseInt(parentBuffer.dataset.columnIndex || '') || 0) - 0.5,
+        namespace: ((parentBuffer as any).namespace || []) as string[],
       }
     })
+    .filter(Boolean)
     .compose(dropRepeats(equals))
+    .debug('hovered')
     .remember() as MemoryStream<HoveredLine>
 
   const dropZoneSelector = '[data-dropzone]'

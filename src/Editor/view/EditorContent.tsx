@@ -1,4 +1,3 @@
-import { flatten } from 'ramda'
 import { Symbol } from 'src/lang'
 import { TextNode } from './TextNode'
 import { CleanContext } from 'src/lang/parse/cleanupContent'
@@ -29,21 +28,37 @@ export function EditorContent(props: EditorContentProps) {
   } = props
 
   const children = content.map(line => {
-    return <div className="editor-line">{line.map(EditorChild)}</div>
+    const children = line.map(EditorChild)
+    const thisLine = children.map(child => child.thisLine)
+    const nextLine = children.map(child => child.nextLine).filter(Boolean)
+    if (nextLine.length) {
+      return [Line(thisLine), Line(nextLine)]
+    }
+
+    return Line(thisLine)
   })
 
   return <div className="editor">{children}</div>
 
-  function EditorChild(symbol: Symbol, index: number) {
+  function Line(children: (JSX.Element | null | undefined)[]) {
+    return <div className="editor-line">{children}</div>
+  }
+
+  function EditorChild(
+    symbol: Symbol,
+    index: number,
+  ): { thisLine?: JSX.Element | null; nextLine?: JSX.Element } {
     if (symbol.type === 'text') {
-      return TextNode({
-        ...symbol,
-        left: parentLeft,
-        movable,
-        namespace,
-        buffer,
-        selection,
-      })
+      return {
+        thisLine: TextNode({
+          ...symbol,
+          left: parentLeft,
+          movable,
+          namespace,
+          buffer,
+          selection,
+        }),
+      }
     }
 
     const matchingPortal = portals[symbol.for]
@@ -55,33 +70,21 @@ export function EditorContent(props: EditorContentProps) {
       Math.max(symbol.right, matchingPortal.right) - left + 1 + 2 * OFFSET
 
     if (symbol.type === 'opening' || symbol.type === 'ending') {
-      return TextNode({
-        ...symbol,
-        left,
-        width,
-        movable,
-        namespace,
-        buffer,
-        selection,
-      })
-    }
-
-    if (symbol.type === 'destination') {
-      if (matchingPortal) {
-        return RenderPortalInstance(index, symbol, {
-          ...matchingPortal,
+      return {
+        thisLine: TextNode({
+          ...symbol,
           left,
           width,
           movable,
           namespace,
           buffer,
-          portals,
-          targetted,
           selection,
-        })
+        }),
       }
+    }
 
-      return TextNode({
+    if (symbol.type === 'destination') {
+      const destinationLine = TextNode({
         ...symbol,
         left,
         width,
@@ -90,8 +93,31 @@ export function EditorContent(props: EditorContentProps) {
         buffer,
         selection,
       })
+
+      if (matchingPortal) {
+        return {
+          thisLine: destinationLine,
+          nextLine: RenderPortalInstance(index, symbol, {
+            ...matchingPortal,
+            left,
+            width,
+            movable,
+            namespace,
+            buffer,
+            portals,
+            targetted,
+            selection,
+          }),
+        }
+      }
+
+      return {
+        thisLine: destinationLine,
+      }
     }
 
-    return null
+    return {
+      thisLine: null,
+    }
   }
 }
