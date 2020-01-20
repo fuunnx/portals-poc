@@ -2,7 +2,6 @@ import { VNode } from '@cycle/dom'
 import { Destination, Dict } from '../../lang'
 import { CleanPortal } from 'src/lang/parse/cleanupContent'
 import { EditorContent } from './EditorContent'
-import { TextNode } from './TextNode'
 import { Selection } from 'monaco-editor'
 
 type PortaProps = CleanPortal & {
