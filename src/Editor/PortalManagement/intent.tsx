@@ -50,7 +50,6 @@ export function intent(sources: Sources) {
     })
     .filter(Boolean)
     .compose(dropRepeats(equals))
-    .debug('hovered')
     .remember() as MemoryStream<HoveredLine>
 
   const dropZoneSelector = '[data-dropzone]'

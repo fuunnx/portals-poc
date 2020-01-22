@@ -1,6 +1,5 @@
 import './buffer.scss'
 import { VNodeStyle } from 'snabbdom/modules/style'
-import { code } from '@cycle/dom'
 import { editor as mEditor, Selection } from 'monaco-editor'
 import { makeSnabbdomElement, Dict } from 'cycle-element/src'
 
@@ -40,7 +39,7 @@ let model: mEditor.ITextModel
 export const CodeEditor = makeSnabbdomElement<CodeEditorProps>(
   elm => {
     model = model || mEditor.createModel('', 'javascript')
-    console.log(elm)
+
     let prevProps: Partial<CodeEditorProps> = {}
     let editor = mEditor.create(elm, {
       language: 'javascript',
@@ -105,7 +104,7 @@ export const CodeEditor = makeSnabbdomElement<CodeEditorProps>(
       },
     }
   },
-  { wrapperNode: code },
+  { wrapperNode: <code /> },
 )
 
 export function Buffer(props: BufferElement) {
