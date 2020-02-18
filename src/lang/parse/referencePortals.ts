@@ -20,19 +20,33 @@ export function referencePortals(tokens: Array<[number, Token]>) {
     }
 
     if (token.pos === 'start') {
+      let portal = dict[token.portal]
       dict[token.portal] = {
         content: fromArray([]),
-        ...dict[token.portal],
+        ...portal,
         id: token.portal,
-        start: index,
+        boundingRect: {
+          columnStart: -1,
+          columnEnd: -1,
+          lineEnd: -1,
+          ...portal?.boundingRect,
+          lineStart: index,
+        },
       }
     }
 
     if (token.pos === 'end') {
+      let portal = dict[token.portal]
       dict[token.portal] = {
         content: fromArray([]),
-        ...dict[token.portal],
-        end: index,
+        ...portal,
+        boundingRect: {
+          columnStart: -1,
+          columnEnd: -1,
+          lineStart: -1,
+          ...portal?.boundingRect,
+          lineEnd: index,
+        },
       }
     }
 
@@ -45,16 +59,25 @@ export function referencePortals(tokens: Array<[number, Token]>) {
 }
 
 function isComplete(x: any) {
-  return x && x.warped && x.content && !isNil(x.start) && !isNil(x.end)
+  return (
+    x &&
+    x.warped &&
+    x.content &&
+    x.boundingRect.lineStart !== -1 &&
+    x.boundingRect.lineEnd !== -1
+  )
 }
 
 function normalize(portal: Portal): Portal {
-  let { start, end } = portal
-  if (start - end === 2) {
+  let { lineStart, lineEnd } = portal.boundingRect
+  if (lineStart - lineEnd === 2) {
     return {
       ...portal,
-      start: start - 1,
-      end: end + 1,
+      boundingRect: {
+        ...portal.boundingRect,
+        lineStart: lineStart - 1,
+        lineEnd: lineEnd + 1,
+      },
     }
   }
   return portal

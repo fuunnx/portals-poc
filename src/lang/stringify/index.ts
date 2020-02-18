@@ -17,15 +17,15 @@ export function stringify(context: Context): string {
     opening: (symbol: Opening) => `PORTAL #${symbol.for}`,
     ending: (symbol: Ending) => `/PORTAL #${symbol.for}`,
     destination: (symbol: Destination) => `WARP #${symbol.for}`,
-    text: (symbol: Symbol) => {
+    text: ({ boundingRect }: Symbol) => {
       const text = lines
-        .slice(symbol.start, (symbol.end || 0) + 1)
+        .slice(boundingRect.lineStart, (boundingRect.lineEnd || 0) + 1)
         .join(SEPARATOR)
-      if (symbol.start !== symbol.end) {
+      if (boundingRect.lineStart !== boundingRect.lineEnd) {
         return text
       }
 
-      return text.slice(symbol.left, symbol.right + 1)
+      return text.slice(boundingRect.columnStart, boundingRect.columnEnd + 1)
     },
     placeholder: () => '',
   }
@@ -45,7 +45,7 @@ export function stringify(context: Context): string {
         .join('')
 
       if (symbols.some(x => x.type !== 'text')) {
-        const left = Math.max(0, symbols[0].left || 0)
+        const left = Math.max(0, symbols[0].boundingRect.columnStart || 0)
         acc.push(' '.repeat(Number.isFinite(left) ? left : 0) + `// ${line}`)
       } else {
         acc.push(line)

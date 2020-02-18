@@ -39,10 +39,16 @@ export function calcPosition(index: number, token: Token): Base {
   if (token.original === null) {
     return {
       id: '',
-      start: index,
-      end: undefined,
-      left: Infinity,
-      right: -Infinity,
+      boundingRect: {
+        lineStart: index,
+        lineEnd: Infinity,
+        columnStart: Infinity,
+        columnEnd: -Infinity,
+      },
+      position: {
+        line: index,
+        column: Infinity,
+      },
     }
   }
 
@@ -50,9 +56,15 @@ export function calcPosition(index: number, token: Token): Base {
     ((token.original.match(/^[\s]+/g) || [])[0] || '').length + token.left
   return {
     id: '',
-    start: index,
-    end: index,
-    left: left,
-    right: token.original.length + left,
+    boundingRect: {
+      lineStart: index,
+      lineEnd: index,
+      columnStart: left,
+      columnEnd: token.original.length + left,
+    },
+    position: {
+      line: index,
+      column: left,
+    },
   }
 }

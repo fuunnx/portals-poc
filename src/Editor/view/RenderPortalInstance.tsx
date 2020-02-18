@@ -16,44 +16,45 @@ type PortaProps = CleanPortal & {
 
 export function RenderPortalInstance(
   index: number,
-  line: Destination,
+  lineElement: Destination,
   context: PortaProps,
 ) {
-  const { left } = context
+  const { columnStart } = context.boundingRect
+  const { line } = lineElement.position
 
   function hook(vnode: VNode) {
     if (vnode.elm) {
       let elm = vnode.elm as HTMLElement
       requestAnimationFrame(() => {
-        elm.scrollLeft = 7.22 * left
+        elm.scrollLeft = 7.22 * columnStart
       })
       elm.onscroll = () => {
-        elm.scrollLeft = 7.22 * left
+        elm.scrollLeft = 7.22 * columnStart
       }
     }
   }
 
-  const isTargetted = context.targetted === line.id
+  const isTargetted = context.targetted === lineElement.id
   let namespace = context.namespace.concat([context.id])
 
   return (
     <div
-      id={line.id}
-      key={line.id}
+      id={lineElement.id}
+      key={lineElement.id}
       class={{
         'portal-instance': true,
         '-targetted': isTargetted,
         '-targettable': Boolean(context.targetted && !isTargetted),
       }}
       style={{
-        'margin-left': `calc(var(--ch) * ${context.left})`,
         'max-width': `calc(var(--ch) * ${context.width})`,
         overflow: 'hidden',
-        '--top': String(line.start + 1),
-        '--left': String(left),
+        '--top': String(line),
+        '--left': `${index * 300}px`,
+        'z-index': String(namespace.length * 10),
       }}
       namespace={namespace}
-      scrollLeft={context.left * 12}
+      scrollLeft={columnStart * 12}
       hook={{ insert: hook, update: hook }}
       data={{
         draggable: context.movable,
@@ -62,7 +63,7 @@ export function RenderPortalInstance(
       <div
         data={{
           dropzone: 'left',
-          lineIndex: line.start,
+          lineIndex: lineElement.boundingRect.lineStart,
           columnIndex: index - 0.5,
         }}
         className="dropzone -left"
@@ -70,7 +71,7 @@ export function RenderPortalInstance(
       <div
         data={{
           dropzone: 'right',
-          lineIndex: line.start,
+          lineIndex: lineElement.boundingRect.lineStart,
           columnIndex: index + 0.5,
         }}
         className="dropzone -right"
@@ -79,8 +80,8 @@ export function RenderPortalInstance(
         content: context.content,
         portals: context.portals,
         buffer: context.buffer,
-        start: context.start,
-        end: context.end,
+        start: context.boundingRect.lineStart,
+        end: context.boundingRect.lineEnd,
         movable: context.movable,
         namespace,
         selection: context.selection,

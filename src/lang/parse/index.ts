@@ -82,18 +82,21 @@ export function parse(
 function computePortalSize(portal: Portal): Portal {
   const content = flatten(to2dArray(portal.content)) as Symbol[]
 
-  const right = content.reduce((max, curr) => {
-    return Math.max(max, curr.right)
+  const columnStart = content.reduce((max, curr) => {
+    return Math.max(max, curr.boundingRect.columnStart)
   }, 0)
 
-  const left = content.reduce((min, curr) => {
-    return Math.min(min, curr.left)
+  const columnEnd = content.reduce((min, curr) => {
+    return Math.min(min, curr.boundingRect.columnEnd)
   }, Infinity)
 
   return {
     ...portal,
-    right,
-    left,
+    boundingRect: {
+      ...portal.boundingRect,
+      columnStart,
+      columnEnd,
+    },
   }
 }
 
@@ -113,7 +116,11 @@ function pushWithContext(
           index = (index + topIndex) / 2
         }
 
-        return set(index, symbol, symbols)
+        return set(
+          index,
+          { ...symbol, position: { line: lineIndex, column: index } },
+          symbols,
+        )
       },
       lineIndex,
       container.content,
@@ -123,7 +130,10 @@ function pushWithContext(
 
   return function push(toPush: Symbol): Context {
     let openedPortals = Object.values(context.portals).filter(portal => {
-      return portal.start <= lineIndex && lineIndex <= portal.end
+      return (
+        portal.boundingRect.lineStart <= lineIndex &&
+        lineIndex <= portal.boundingRect.lineEnd
+      )
     })
 
     let found = undefined
@@ -135,7 +145,10 @@ function pushWithContext(
         found = portal
         continue
       }
-      if (found.start <= portal.start && portal.end <= found.end) {
+      if (
+        found.boundingRect.lineStart <= portal.boundingRect.lineStart &&
+        portal.boundingRect.lineEnd <= found.boundingRect.lineEnd
+      ) {
         found = portal
       }
     }

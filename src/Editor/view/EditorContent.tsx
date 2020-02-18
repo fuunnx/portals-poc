@@ -32,6 +32,7 @@ export function EditorContent(props: EditorContentProps) {
 
   const children = content.map(line => {
     let x = 0
+    let y = 0
     return line.map((element, index) => {
       const { width, portal } = EditorChild(x, element, index)
       x += width
@@ -66,15 +67,24 @@ export function EditorContent(props: EditorContentProps) {
 
     const left = Math.max(
       0,
-      Math.min(symbol.left, matchingPortal.left) - OFFSET,
+      Math.min(
+        symbol.boundingRect.columnStart,
+        matchingPortal.boundingRect.columnStart,
+      ) - OFFSET,
     )
-    const width = Math.max(symbol.right, matchingPortal.right) - left + OFFSET
+    const width =
+      Math.max(
+        symbol.boundingRect.columnEnd,
+        matchingPortal.boundingRect.columnEnd,
+      ) -
+      left +
+      OFFSET
 
     return {
       width,
       portal: RenderPortalInstance(index, symbol, {
         ...matchingPortal,
-        left: left + offsetLeft,
+        // left: left + offsetLeft,
         width,
         movable,
         namespace,

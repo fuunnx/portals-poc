@@ -1,5 +1,13 @@
 import { map, last, identity } from 'ramda'
-import { Context, Portal, Dict, Content, Symbols, Symbol } from '../types'
+import {
+  Context,
+  Portal,
+  Dict,
+  Content,
+  Symbols,
+  Symbol,
+  BoundingRect,
+} from '../types'
 import { toSortedArray } from '../../libs/SortedMap'
 
 export interface CleanPortal extends Omit<Portal, 'content'> {
@@ -24,10 +32,7 @@ export function cleanupContext(
     portals: map(portal => {
       return {
         ...portal,
-        start: makeFinite(portal.start),
-        end: makeFinite(portal.end),
-        left: makeFinite(portal.left),
-        right: makeFinite(portal.right),
+        boundingRect: makeFiniteBounds(portal.boundingRect),
         content: cleanupContent(portal.content, mapperFn),
       }
     }, context.portals),
@@ -63,11 +68,14 @@ export function cleanupContent(
         return acc
       }
 
-      symbols.forEach(curr => {
-        prev.start = Math.min(prev.start, curr.start) || 0
-        prev.end = Math.max(0, prev.end || 0, curr.end || 0)
-        prev.left = Math.min(prev.left, curr.left) || 0
-        prev.right = Math.max(0, prev.right, curr.right)
+      let prevBR = prev.boundingRect
+      symbols.forEach((curr, columnIndex) => {
+        let currBR = curr.boundingRect
+        prevBR.lineStart = Math.min(prevBR.lineStart, currBR.lineStart) || 0
+        prevBR.lineEnd = Math.max(0, prevBR.lineEnd || 0, currBR.lineEnd || 0)
+        prevBR.columnStart =
+          Math.min(prevBR.columnStart, currBR.columnStart) || 0
+        prevBR.columnEnd = Math.max(0, prevBR.columnEnd, currBR.columnEnd)
       })
       return acc
     }, [] as Symbol[][])
@@ -75,10 +83,7 @@ export function cleanupContent(
       symbols.map(symbol => {
         return mapperFn({
           ...symbol,
-          start: makeFinite(symbol.start),
-          end: makeFinite(symbol.end),
-          left: makeFinite(symbol.left),
-          right: makeFinite(symbol.right),
+          boundingRect: makeFiniteBounds(symbol.boundingRect),
         })
       }),
     )
@@ -86,4 +91,13 @@ export function cleanupContent(
 
 function makeFinite(num: any): number {
   return Number.isFinite(num) ? num : 0
+}
+
+function makeFiniteBounds(boundingRect: BoundingRect): BoundingRect {
+  return {
+    lineStart: makeFinite(boundingRect.lineStart),
+    lineEnd: makeFinite(boundingRect.lineEnd),
+    columnStart: makeFinite(boundingRect.columnStart),
+    columnEnd: makeFinite(boundingRect.columnEnd),
+  }
 }

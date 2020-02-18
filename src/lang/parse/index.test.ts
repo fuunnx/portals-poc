@@ -8,6 +8,8 @@ import { map } from 'ramda'
 function cleanup(context: Context): any {
   return cleanupContext(context, symbol => {
     delete symbol.id
+    delete symbol.boundingRect
+    delete symbol.position
     return symbol
   })
 }
@@ -20,7 +22,7 @@ const mapContent = <T = any>(mapper: (sym: Symbol) => T) => (
 test('empty text', () => {
   expect(cleanup(parse(''))).toEqual({
     portals: {},
-    content: [[{ type: 'text', start: 0, end: 0, left: 0, right: 0 }]],
+    content: [[{ type: 'text' }]],
   })
 })
 
@@ -35,7 +37,7 @@ How are you ?
     ),
   ).toEqual({
     portals: {},
-    content: [[{ type: 'text', start: 0, end: 4, left: 0, right: 13 }]],
+    content: [[{ type: 'text' }]],
   })
 })
 
@@ -51,7 +53,7 @@ How are you ?
 `),
     ),
   ).toEqual({
-    content: [[{ type: 'text', start: 0, end: 6, left: 0, right: 13 }]],
+    content: [[{ type: 'text' }]],
     portals: {},
   })
 })
@@ -73,22 +75,24 @@ Hum
     ),
   ).toEqual({
     content: [
-      [{ type: 'text', start: 0, end: 0, left: 0, right: 0 }],
-      [{ type: 'opening', start: 1, end: 1, left: 0, right: 12, for: '1' }],
-      [{ type: 'ending', start: 5, end: 5, left: 0, right: 13, for: '1' }],
-      [{ type: 'text', start: 6, end: 7, left: 0, right: 13 }],
-      [{ type: 'destination', start: 8, end: 8, left: 0, right: 10, for: '1' }],
-      [{ type: 'text', start: 9, end: 10, left: 0, right: 3 }],
+      [{ type: 'text' }],
+      [{ type: 'opening', for: '1' }],
+      [{ type: 'ending', for: '1' }],
+      [{ type: 'text' }],
+      [{ type: 'destination', for: '1' }],
+      [{ type: 'text' }],
     ],
     portals: {
       '1': {
         id: '1',
-        start: 1,
-        end: 5,
-        left: 0,
-        right: 10,
-        content: [[{ type: 'text', start: 2, end: 4, left: 0, right: 10 }]],
+        content: [[{ type: 'text' }]],
         warped: true,
+        boundingRect: {
+          columnEnd: 5,
+          columnStart: 0,
+          lineEnd: 5,
+          lineStart: 1,
+        },
       },
     },
   })
@@ -106,7 +110,7 @@ How are you ?
 `),
     ),
   ).toEqual({
-    content: [[{ type: 'text', start: 0, end: 6, left: 0, right: 13 }]],
+    content: [[{ type: 'text' }]],
     portals: {},
   })
 })
@@ -129,46 +133,41 @@ How are you ?
     ),
   ).toEqual({
     content: [
-      [{ type: 'text', start: 0, end: 0, left: 0, right: 0 }],
-      [{ type: 'opening', start: 1, end: 1, left: 0, right: 12, for: '1' }],
-      [{ type: 'ending', start: 6, end: 6, left: 0, right: 13, for: '1' }],
-      [{ type: 'text', start: 7, end: 8, left: 0, right: 13 }],
-      [{ type: 'destination', start: 9, end: 9, left: 0, right: 10, for: '1' }],
-      [
-        {
-          type: 'destination',
-          start: 10,
-          end: 10,
-          left: 0,
-          right: 10,
-          for: '2',
-        },
-      ],
-      [{ type: 'text', start: 11, end: 11, left: 0, right: 0 }],
+      [{ type: 'text' }],
+      [{ type: 'opening', for: '1' }],
+      [{ type: 'ending', for: '1' }],
+      [{ type: 'text' }],
+      [{ type: 'destination', for: '1' }],
+      [{ type: 'destination', for: '2' }],
+      [{ type: 'text' }],
     ],
     portals: {
       '1': {
         id: '1',
-        start: 1,
-        end: 6,
         content: [
-          [{ type: 'text', start: 2, end: 2, left: 0, right: 5 }],
-          [{ type: 'opening', start: 3, end: 3, left: 0, right: 12, for: '2' }],
-          [{ type: 'ending', start: 5, end: 5, left: 0, right: 13, for: '2' }],
+          [{ type: 'text' }],
+          [{ type: 'opening', for: '2' }],
+          [{ type: 'ending', for: '2' }],
         ],
         warped: true,
-        left: 0,
-        right: 13,
+        boundingRect: {
+          columnEnd: 5,
+          columnStart: 0,
+          lineEnd: 6,
+          lineStart: 1,
+        },
       },
 
       '2': {
         id: '2',
-        start: 3,
-        end: 5,
-        content: [[{ type: 'text', start: 4, end: 4, left: 0, right: 4 }]],
+        content: [[{ type: 'text' }]],
         warped: true,
-        left: 0,
-        right: 4,
+        boundingRect: {
+          columnEnd: 4,
+          columnStart: 0,
+          lineEnd: 5,
+          lineStart: 3,
+        },
       },
     },
   })
@@ -236,12 +235,14 @@ test('add virtual tokens', () => {
     portals: {
       selectionRange: {
         id: 'selectionRange',
-        start: 0,
-        end: 0,
-        left: 0,
-        right: 0,
         warped: true,
-        content: [[{ type: 'text', start: 0, end: 0, left: 0, right: 0 }]],
+        content: [[{ type: 'text' }]],
+        boundingRect: {
+          columnEnd: 0,
+          columnStart: 0,
+          lineEnd: 0,
+          lineStart: 0,
+        },
       },
     },
     content: [
@@ -249,26 +250,14 @@ test('add virtual tokens', () => {
         {
           type: 'destination',
           for: 'selectionRange',
-          start: 0,
-          end: 0,
-          left: 0,
-          right: 0,
         },
         {
           type: 'opening',
           for: 'selectionRange',
-          start: 0,
-          end: 0,
-          left: 0,
-          right: 0,
         },
         {
           type: 'ending',
           for: 'selectionRange',
-          start: 0,
-          end: 0,
-          left: 0,
-          right: 0,
         },
       ],
     ],
@@ -282,13 +271,40 @@ test('move tokens top', () => {
 3`,
     { move: { id: '1', lineIndex: 0, columnIndex: 0 } },
   )
-  const content = to2dArray(result.content)
+  const content = map(
+    map((x: Symbol) => {
+      delete x.boundingRect
+      delete x.position.column
+      return x
+    }),
+  )(to2dArray(result.content))
+
   expect(content).toEqual([
     [
-      { id: '0', type: 'text', start: 0, end: 0, left: 0, right: 1 },
-      { id: '1', type: 'text', start: 1, end: 1, left: 0, right: 1 },
+      {
+        id: '0',
+        type: 'text',
+        position: {
+          line: 0,
+        },
+      },
+      {
+        id: '1',
+        type: 'text',
+        position: {
+          line: 0,
+        },
+      },
     ],
-    [{ id: '2', type: 'text', start: 2, end: 2, left: 0, right: 1 }],
+    [
+      {
+        id: '2',
+        type: 'text',
+        position: {
+          line: 2,
+        },
+      },
+    ],
   ])
 })
 
@@ -299,12 +315,39 @@ test('move simple tokens bottom', () => {
 3`,
     { move: { id: '1', lineIndex: 2, columnIndex: 0 } },
   )
-  const content = to2dArray(result.content)
+  const content = map(
+    map((x: Symbol) => {
+      delete x.boundingRect
+      delete x.position.column
+      return x
+    }),
+  )(to2dArray(result.content))
+
   expect(content).toEqual([
-    [{ id: '0', type: 'text', start: 0, end: 0, left: 0, right: 1 }],
     [
-      { id: '1', type: 'text', start: 1, end: 1, left: 0, right: 1 },
-      { id: '2', type: 'text', start: 2, end: 2, left: 0, right: 1 },
+      {
+        id: '0',
+        type: 'text',
+        position: {
+          line: 0,
+        },
+      },
+    ],
+    [
+      {
+        id: '1',
+        type: 'text',
+        position: {
+          line: 2,
+        },
+      },
+      {
+        id: '2',
+        type: 'text',
+        position: {
+          line: 2,
+        },
+      },
     ],
   ])
 })
@@ -320,7 +363,13 @@ test('move complex tokens bottom', () => {
 4`,
     { move: { id: '4', lineIndex: 7, columnIndex: 0 } },
   )
-  const content = to2dArray(result.content)
+  const content = map(
+    map((x: Symbol) => {
+      delete x.boundingRect
+      delete x.position
+      return x
+    }),
+  )(to2dArray(result.content))
 
   expect(content).toEqual([
     [
@@ -328,10 +377,6 @@ test('move complex tokens bottom', () => {
         id: '0',
         type: 'opening',
         for: '1',
-        start: 0,
-        end: 0,
-        left: 0,
-        right: 12,
       },
     ],
     [
@@ -339,35 +384,60 @@ test('move complex tokens bottom', () => {
         id: '2',
         type: 'ending',
         for: '1',
-        start: 2,
-        end: 2,
-        left: 0,
-        right: 13,
       },
     ],
-    [{ id: '3', type: 'text', start: 3, end: 3, left: 0, right: 1 }],
-    [{ id: '5', type: 'text', start: 5, end: 5, left: 0, right: 1 }],
-    [{ id: '6', type: 'text', start: 6, end: 6, left: 0, right: 1 }],
+    [{ id: '3', type: 'text' }],
+    [{ id: '5', type: 'text' }],
+    [{ id: '6', type: 'text' }],
     [
       {
         id: '4',
         type: 'destination',
         for: '1',
-        start: 4,
-        end: 4,
-        left: 0,
-        right: 10,
       },
     ],
   ])
 })
 
 test('multiple tokens per line', () => {
-  expect(cleanup(parse(`// PORTAL #1, /PORTAL #1, WARP #1`)).content).toEqual([
+  expect(
+    cleanupContext(parse(`// PORTAL #1, /PORTAL #1, WARP #1`), (x: Symbol) => {
+      delete x.id
+      delete x.position
+      return x
+    }).content,
+  ).toEqual([
     [
-      { type: 'opening', start: 0, end: 0, left: 0, right: 12, for: '1' },
-      { type: 'ending', start: 0, end: 0, left: 13, right: 24, for: '1' },
-      { type: 'destination', start: 0, end: 0, left: 24, right: 32, for: '1' },
+      {
+        type: 'opening',
+        boundingRect: {
+          lineStart: 0,
+          lineEnd: 0,
+          columnStart: 0,
+          columnEnd: 12,
+        },
+        for: '1',
+      },
+      {
+        type: 'ending',
+        boundingRect: {
+          lineStart: 0,
+          lineEnd: 0,
+          columnStart: 13,
+          columnEnd: 24,
+        },
+        for: '1',
+      },
+      {
+        type: 'destination',
+        boundingRect: {
+          lineStart: 0,
+          lineEnd: 0,
+          columnStart: 24,
+          columnEnd: 32,
+        },
+        for: '1',
+      },
     ],
   ])
 })
@@ -381,9 +451,9 @@ test('move tokens right', () => {
     ).content,
   ).toEqual([
     [
-      { type: 'ending', start: 0, end: 0, left: 13, right: 24, for: '1' },
-      { type: 'destination', start: 0, end: 0, left: 24, right: 32, for: '1' },
-      { type: 'opening', start: 0, end: 0, left: 0, right: 12, for: '1' },
+      { type: 'ending', for: '1' },
+      { type: 'destination', for: '1' },
+      { type: 'opening', for: '1' },
     ],
   ])
 })

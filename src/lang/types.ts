@@ -33,12 +33,21 @@ type LineCount = number
 type CharCount = number
 export type Id = string
 
+export interface BoundingRect {
+  lineStart: LineCount
+  lineEnd: LineCount
+  columnStart: CharCount
+  columnEnd: CharCount
+}
+
+export interface Position {
+  line: LineCount
+  column: CharCount
+}
+
 export interface Portal {
   id: Id
-  start: LineCount
-  end: LineCount
-  left: CharCount
-  right: CharCount
+  boundingRect: BoundingRect
   content: Content
   warped?: boolean
 }
@@ -73,8 +82,6 @@ interface Ref extends Base {
 
 export interface Base {
   id: Id
-  start: LineCount
-  end?: LineCount
-  left: CharCount
-  right: CharCount
+  boundingRect: BoundingRect
+  position: Position
 }

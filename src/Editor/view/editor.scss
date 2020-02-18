@@ -64,10 +64,7 @@
     top: 0;
     left: 0;
     width: calc(var(--width) * var(--ch));
-    transform: translate(
-      calc(var(--left) * var(--ch)),
-      calc(var(--top) * var(--lh))
-    );
+    transform: translate(var(--left), calc(var(--top) * var(--lh)));
     transition: 0.2s ease-out;
   }
 

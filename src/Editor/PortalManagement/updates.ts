@@ -10,7 +10,8 @@ export function updates(intents: Intents): Stream<Reducer> {
         draggedElement: id,
       }
     }),
-    intents.dragging$.map(transform => (curr: State) => {
+
+    intents.dragging$.debug('dragging').map(transform => (curr: State) => {
       return {
         ...curr,
         transform: transform.id ? transform : undefined,
