@@ -14,7 +14,12 @@ export function view(state$: Stream<State>): Stream<VNode> {
     .compose(dropRepeats(equals))
     .map(viewModel)
     .map(state => {
-      const content = EditorContent({ ...state, namespace: [] })
+      const content = EditorContent({
+        ...state,
+        namespace: [],
+        start: 0,
+        end: state.buffer.split('\n').length + 1,
+      })
 
       return (
         <div

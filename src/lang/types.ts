@@ -26,6 +26,7 @@ export interface Token {
   portal?: Id
   pos?: 'start' | 'end'
   original: string | null
+  left: number
 }
 
 type LineCount = number

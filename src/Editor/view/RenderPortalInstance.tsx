@@ -19,14 +19,16 @@ export function RenderPortalInstance(
   line: Destination,
   context: PortaProps,
 ) {
+  const { left } = context
+
   function hook(vnode: VNode) {
     if (vnode.elm) {
       let elm = vnode.elm as HTMLElement
       requestAnimationFrame(() => {
-        elm.scrollLeft = 12 * context.left
+        elm.scrollLeft = 7.22 * left
       })
       elm.onscroll = () => {
-        elm.scrollLeft = 12 * context.left
+        elm.scrollLeft = 7.22 * left
       }
     }
   }
@@ -37,9 +39,7 @@ export function RenderPortalInstance(
   return (
     <div
       id={line.id}
-      // hero={{
-      //   id: line.id,
-      // }}
+      key={line.id}
       class={{
         'portal-instance': true,
         '-targetted': isTargetted,
@@ -49,6 +49,8 @@ export function RenderPortalInstance(
         'margin-left': `calc(var(--ch) * ${context.left})`,
         'max-width': `calc(var(--ch) * ${context.width})`,
         overflow: 'hidden',
+        '--top': String(line.start + 1),
+        '--left': String(left),
       }}
       namespace={namespace}
       scrollLeft={context.left * 12}
@@ -77,7 +79,8 @@ export function RenderPortalInstance(
         content: context.content,
         portals: context.portals,
         buffer: context.buffer,
-        left: context.left,
+        start: context.start,
+        end: context.end,
         movable: context.movable,
         namespace,
         selection: context.selection,

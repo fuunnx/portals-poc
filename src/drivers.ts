@@ -2,6 +2,7 @@ import { makeDOMDriver } from '@cycle/dom'
 import { timeDriver } from '@cycle/time'
 import { withState } from '@cycle/state'
 import { selectionDriver } from './drivers/selectionDriver'
+import { init } from 'snabbdom'
 
 import { Component } from './interfaces'
 
@@ -21,6 +22,7 @@ const modules: Array<Module> = [
   DatasetModule,
   HeroModule,
 ]
+export const patch = init(modules)
 
 export type DriverThunk = Readonly<[string, () => any]> & [string, () => any] // work around readonly
 export type DriverThunkMapper = (t: DriverThunk) => DriverThunk

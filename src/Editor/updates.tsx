@@ -2,7 +2,7 @@ import xs from 'xstream'
 import { Intents } from './intent'
 import { State, Reducer } from './index'
 import { initialState } from './initialState'
-import { parse, stringify } from '../lang'
+import { stringify } from '../lang'
 import dropRepeats from 'xstream/extra/dropRepeats'
 import { stateToAST } from './view/viewModel'
 
@@ -23,6 +23,9 @@ export function updates(intents: Intents) {
   const commit$ = intents.commit$.mapTo((currState: State) => {
     const newBuffer = stringify(stateToAST(currState))
 
+    if (newBuffer === currState.buffer) {
+      return currState
+    }
     return {
       ...currState,
       movable: false,

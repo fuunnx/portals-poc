@@ -13,6 +13,7 @@ export function tokenize(text: string): Array<[number, Token]> {
     }, [])
 
   function tokenizeLine(line: string) {
+    let left = 0
     return line.split(',').map(_tokenize)
 
     function _tokenize(str: string) {
@@ -22,7 +23,9 @@ export function tokenize(text: string): Array<[number, Token]> {
         portal: undefined,
         pos: undefined,
         original: str,
+        left,
       }
+      left += str.length
 
       if (isComment(line)) {
         str.split(' ').forEach(word => {

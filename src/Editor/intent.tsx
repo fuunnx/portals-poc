@@ -1,5 +1,6 @@
 import { Sources } from './index'
 import xs, { Stream } from 'xstream'
+import { editor } from 'monaco-editor'
 
 export type Intents = {
   input$: Stream<string>
@@ -7,7 +8,7 @@ export type Intents = {
 }
 
 export function intent(sources: Sources): Intents {
-  const { DOM } = sources
+  const { DOM, time } = sources
 
   const mouseDown$ = xs
     .merge(
@@ -24,18 +25,14 @@ export function intent(sources: Sources): Intents {
     .filter(x => x === false)
     .drop(1)
     .mapTo(null)
+    .compose(time.debounce(16))
 
-  const input$ = DOM.select('[data-buffer]')
-    .events('input')
-    .map(event => {
-      const target = event.target as HTMLElement
-      const editor = (getClosestParent(target, '[data-buffer]') as any)._editor
-
-      if (editor) {
-        return editor.getValue()
-      }
-      return ''
-    })
+  const input$ = (DOM.events as any)('monaco-changemodelcontent').map(
+    (event: CustomEvent<editor.ITextModel>) => {
+      let model = event.detail
+      return model.getValue()
+    },
+  )
 
   return {
     input$,

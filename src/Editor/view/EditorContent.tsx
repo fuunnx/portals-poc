@@ -3,12 +3,14 @@ import { TextNode } from './TextNode'
 import { CleanContext } from 'src/lang/parse/cleanupContent'
 import { RenderPortalInstance } from './RenderPortalInstance'
 import { Selection } from 'monaco-editor'
+import { Buffer } from './Buffer'
 
-const OFFSET = 0
+const OFFSET = 4
 
 type EditorContentProps = CleanContext & {
   buffer: string
-  left?: number
+  start: number
+  end: number
   movable: boolean
   namespace: string[]
   targetted?: string
@@ -20,7 +22,8 @@ export function EditorContent(props: EditorContentProps) {
     content,
     portals,
     buffer,
-    left: parentLeft = 0,
+    start,
+    end,
     movable,
     namespace,
     targetted,
@@ -28,96 +31,58 @@ export function EditorContent(props: EditorContentProps) {
   } = props
 
   const children = content.map(line => {
-    const children = line.map(EditorChild)
-    const thisLine = children.map(child => child.thisLine)
-    const nextLine = children.map(child => child.nextLine).filter(Boolean)
-    if (nextLine.length) {
-      return [Line(thisLine), Line(nextLine)]
-    }
-
-    return Line(thisLine)
+    let x = 0
+    return line.map((element, index) => {
+      const { width, portal } = EditorChild(x, element, index)
+      x += width
+      return portal
+    })
   })
 
-  return <div className="editor">{children}</div>
+  return (
+    <div className="editor">
+      <Buffer
+        className={'-editor'}
+        value={buffer}
+        start={start}
+        end={end}
+        movable={false}
+        namespace={namespace}
+        selection={selection}
+      />
+      {children}
+    </div>
+  )
 
-  function Line(children: (JSX.Element | null | undefined)[]) {
-    return <div className="editor-line">{children}</div>
-  }
-
-  function EditorChild(
-    symbol: Symbol,
-    index: number,
-  ): { thisLine?: JSX.Element | null; nextLine?: JSX.Element } {
-    if (symbol.type === 'text') {
-      return {
-        thisLine: TextNode({
-          ...symbol,
-          left: parentLeft,
-          movable,
-          namespace,
-          buffer,
-          selection,
-        }),
-      }
+  function EditorChild(offsetLeft: number, symbol: Symbol, index: number) {
+    if (symbol.type !== 'destination') {
+      return { width: 0 }
     }
 
     const matchingPortal = portals[symbol.for]
+    if (!matchingPortal) {
+      return { width: 0 }
+    }
+
     const left = Math.max(
       0,
       Math.min(symbol.left, matchingPortal.left) - OFFSET,
     )
-    const width =
-      Math.max(symbol.right, matchingPortal.right) - left + 1 + 2 * OFFSET
+    const width = Math.max(symbol.right, matchingPortal.right) - left + OFFSET
 
-    if (symbol.type === 'opening' || symbol.type === 'ending') {
-      return {
-        thisLine: TextNode({
-          ...symbol,
-          left,
-          width,
-          movable,
-          namespace,
-          buffer,
-          selection,
-        }),
-      }
-    }
-
-    if (symbol.type === 'destination') {
-      const destinationLine = TextNode({
-        ...symbol,
-        left,
+    return {
+      width,
+      portal: RenderPortalInstance(index, symbol, {
+        ...matchingPortal,
+        left: left + offsetLeft,
         width,
         movable,
         namespace,
         buffer,
+        portals,
+        targetted,
         selection,
-      })
-
-      if (matchingPortal) {
-        return {
-          thisLine: destinationLine,
-          nextLine: RenderPortalInstance(index, symbol, {
-            ...matchingPortal,
-            left,
-            width,
-            movable,
-            namespace,
-            buffer,
-            portals,
-            targetted,
-            selection,
-          }),
-        }
-      }
-
-      return {
-        thisLine: destinationLine,
-      }
-    }
-
-    return {
-      thisLine: null,
+      }),
     }
   }
 }

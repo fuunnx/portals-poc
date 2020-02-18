@@ -2,6 +2,9 @@ import './buffer.scss'
 import { VNodeStyle } from 'snabbdom/modules/style'
 import { editor as mEditor, Selection } from 'monaco-editor'
 import { makeSnabbdomElement, Dict } from 'cycle-element/src'
+import { VNode, h } from '@cycle/dom'
+import { patch } from 'src/drivers'
+import merge from 'snabbdom-merge'
 
 interface BufferElement {
   id?: string | number
@@ -18,21 +21,12 @@ interface BufferElement {
   selection?: Selection
 }
 
-function makeModel(value: string) {
-  model = model || mEditor.createModel(value, 'javascript')
-
-  if (model.getValue() !== value) {
-    model.setValue(value)
-  }
-
-  return model
-}
-
 type CodeEditorProps = {
   selection?: Selection
   value: string
   start: number
   left: number
+  children?: VNode[]
 } & Dict
 
 let model: mEditor.ITextModel
@@ -63,13 +57,26 @@ export const CodeEditor = makeSnabbdomElement<CodeEditorProps>(
       editor.setScrollLeft((prevProps.left || 0) * 7.22)
     })
 
+    setTimeout(() => {
+      editor.setScrollTop((prevProps.start || 0) * 18)
+      editor.setScrollLeft((prevProps.left || 0) * 7.22)
+    })
+
     let onDidChangeCursorSelection = editor.onDidChangeCursorSelection(e => {
       emit(elm, 'monaco-selectionchange', e)
     })
 
+    editor.onDidChangeModelContent(e => {
+      emit(elm, 'monaco-changemodelcontent', model)
+    })
+
+    let vtree: VNode
+    let renderRoot = document.createElement('div')
+    elm.appendChild(renderRoot)
+
     return {
       update(props) {
-        const { selection, value, start, left } = props
+        const { selection, value, start, left, children } = props
 
         // == diff selection
         let editorSelection = editor.getSelection()
@@ -94,6 +101,13 @@ export const CodeEditor = makeSnabbdomElement<CodeEditorProps>(
           editor.setScrollLeft(left * 7.22)
         }
 
+        // // == diff children
+        // Promise.resolve().then(() => {
+        //   let newVtree = <div>{children}</div>
+        //   patch(vtree || renderRoot, newVtree)
+        //   vtree = newVtree
+        // })
+
         // == end
         prevProps = props
       },
@@ -104,7 +118,7 @@ export const CodeEditor = makeSnabbdomElement<CodeEditorProps>(
       },
     }
   },
-  { wrapperNode: <code /> },
+  { wrapperNode: <code data-monacoeditor /> },
 )
 
 export function Buffer(props: BufferElement) {
@@ -124,7 +138,7 @@ export function Buffer(props: BufferElement) {
   } = props
   const height = end - start + 1
 
-  return (
+  return merge(
     <CodeEditor
       id={id}
       selection={selection}
@@ -142,13 +156,15 @@ export function Buffer(props: BufferElement) {
           '--height': String(height),
           '--left': String(left),
           '--width': String(width),
+          'z-index': String(namespace.length),
         },
         style,
       )}
       className={[className, 'buffer', movable && '-movable']
         .filter(Boolean)
         .join(' ')}
-    />
+    />,
+    h('code', props),
   )
 }
 

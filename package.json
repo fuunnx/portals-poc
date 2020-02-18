@@ -80,6 +80,7 @@
     "random-words": "^1.1.0",
     "shakespeare-data": "^3.0.0",
     "snabbdom": "^0.7.4",
+    "snabbdom-merge": "0.0.4",
     "snabbdom-pragma": "^2.8.0",
     "switch-path": "^1.2.0",
     "xstream": "^11.11.0",

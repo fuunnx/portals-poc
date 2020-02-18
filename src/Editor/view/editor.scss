@@ -60,6 +60,15 @@
     border-radius: var(--small-radius);
     transition: 0.2s linear;
     min-width: 300px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: calc(var(--width) * var(--ch));
+    transform: translate(
+      calc(var(--left) * var(--ch)),
+      calc(var(--top) * var(--lh))
+    );
+    transition: 0.2s ease-out;
   }
 
   &.-targetted {

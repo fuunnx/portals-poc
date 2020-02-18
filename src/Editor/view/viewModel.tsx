@@ -63,7 +63,12 @@ export function viewModel(state: State) {
       content: [
         [
           {
-            ...TextLine(0, { id: '0', tag: 'text', original: state.buffer }),
+            ...TextLine(0, {
+              id: '0',
+              tag: 'text',
+              original: state.buffer,
+              left: 0,
+            }),
             end: state.buffer.split('\n').length + 1,
           },
         ],

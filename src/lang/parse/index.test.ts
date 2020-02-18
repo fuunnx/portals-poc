@@ -204,6 +204,7 @@ test('add virtual tokens', () => {
         tag: 'warp',
         portal: 'selectionRange',
         original: null,
+        left: 0,
       },
     ],
     [
@@ -214,6 +215,7 @@ test('add virtual tokens', () => {
         portal: 'selectionRange',
         pos: 'start',
         original: null,
+        left: 0,
       },
     ],
     [
@@ -224,6 +226,7 @@ test('add virtual tokens', () => {
         portal: 'selectionRange',
         pos: 'end',
         original: null,
+        left: 0,
       },
     ],
   ]
@@ -363,8 +366,8 @@ test('multiple tokens per line', () => {
   expect(cleanup(parse(`// PORTAL #1, /PORTAL #1, WARP #1`)).content).toEqual([
     [
       { type: 'opening', start: 0, end: 0, left: 0, right: 12, for: '1' },
-      { type: 'ending', start: 0, end: 0, left: 1, right: 11, for: '1' },
-      { type: 'destination', start: 0, end: 0, left: 1, right: 8, for: '1' },
+      { type: 'ending', start: 0, end: 0, left: 13, right: 24, for: '1' },
+      { type: 'destination', start: 0, end: 0, left: 24, right: 32, for: '1' },
     ],
   ])
 })
@@ -378,8 +381,8 @@ test('move tokens right', () => {
     ).content,
   ).toEqual([
     [
-      { type: 'ending', start: 0, end: 0, left: 1, right: 11, for: '1' },
-      { type: 'destination', start: 0, end: 0, left: 1, right: 8, for: '1' },
+      { type: 'ending', start: 0, end: 0, left: 13, right: 24, for: '1' },
+      { type: 'destination', start: 0, end: 0, left: 24, right: 32, for: '1' },
       { type: 'opening', start: 0, end: 0, left: 0, right: 12, for: '1' },
     ],
   ])
