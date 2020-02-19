@@ -7,20 +7,24 @@ import {
   Ending,
 } from '../types'
 import { to2dArray } from '../parse/cleanupContent'
-
-const SEPARATOR = '\n'
+import { verbs } from '../../config'
 
 export function stringify(context: Context): string {
-  const lines = context.buffer.split(SEPARATOR)
+  const lines = context.buffer.split('\n')
 
   const toString = {
-    opening: (symbol: Opening) => `PORTAL #${symbol.for}`,
-    ending: (symbol: Ending) => `/PORTAL #${symbol.for}`,
-    destination: (symbol: Destination) => `WARP #${symbol.for}`,
+    opening: (symbol: Opening) =>
+      `${verbs.portalStart} ${verbs.id}${symbol.for}`,
+
+    ending: (symbol: Ending) => `${verbs.portalEnd} ${verbs.id}${symbol.for}`,
+
+    destination: (symbol: Destination) =>
+      `${verbs.warp} ${verbs.id}${symbol.for}`,
+
     text: ({ boundingRect }: Symbol) => {
       const text = lines
         .slice(boundingRect.lineStart, (boundingRect.lineEnd || 0) + 1)
-        .join(SEPARATOR)
+        .join('\n')
       if (boundingRect.lineStart !== boundingRect.lineEnd) {
         return text
       }
@@ -30,7 +34,7 @@ export function stringify(context: Context): string {
     placeholder: () => '',
   }
 
-  return flattenSymbols(context.content).join(SEPARATOR)
+  return flattenSymbols(context.content).join('\n')
 
   function flattenSymbols(content: Content): string[] {
     return to2dArray(content).reduce((acc: string[], symbols) => {
@@ -46,7 +50,10 @@ export function stringify(context: Context): string {
 
       if (symbols.some(x => x.type !== 'text')) {
         const left = Math.max(0, symbols[0].boundingRect.columnStart || 0)
-        acc.push(' '.repeat(Number.isFinite(left) ? left : 0) + `// ${line}`)
+        acc.push(
+          ' '.repeat(Number.isFinite(left) ? left : 0) +
+            `${verbs.comment} ${line}`,
+        )
       } else {
         acc.push(line)
       }

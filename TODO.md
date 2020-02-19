@@ -4,7 +4,7 @@
 - [ ] delete portal when dropped inside its original position
 - [x] make special nodes editable again
 - [x] style toggle preview mode
-- [ ] add shortcut for toggle preview mode
+- [x] add shortcut for toggle preview mode
 - [x] use a third party code editor instead of `<pre>`
 - [x] add transitions
 - [ ] resize portal from edges

@@ -1,4 +1,5 @@
 import { Token } from '../types'
+import { verbs } from '../../config'
 
 export function tokenize(text: string): Array<[number, Token]> {
   let id = 0
@@ -29,19 +30,19 @@ export function tokenize(text: string): Array<[number, Token]> {
 
       if (isComment(line)) {
         str.split(' ').forEach(word => {
-          if (word === 'WARP') {
+          if (word === verbs.warp) {
             token.tag = 'warp'
           }
-          if (word === 'PORTAL') {
+          if (word === verbs.portalStart) {
             token.tag = 'portal'
             token.pos = 'start'
           }
-          if (word === '/PORTAL') {
+          if (word === verbs.portalEnd) {
             token.tag = 'portal'
             token.pos = 'end'
           }
-          if (token.tag && word.startsWith('#')) {
-            token.portal = word.replace(/^#/, '')
+          if (token.tag && word.startsWith(verbs.id)) {
+            token.portal = word.slice(verbs.id.length)
           }
         })
       }
@@ -52,5 +53,5 @@ export function tokenize(text: string): Array<[number, Token]> {
 }
 
 function isComment(str: string) {
-  return str.trim().startsWith('//')
+  return str.trim().startsWith(verbs.comment)
 }

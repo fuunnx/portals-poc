@@ -47,10 +47,10 @@ export function RenderPortalInstance(
         '-targettable': Boolean(context.targetted && !isTargetted),
       }}
       style={{
-        'max-width': `calc(var(--ch) * ${context.width})`,
         overflow: 'hidden',
-        '--top': String(line),
-        '--left': `${index * 300}px`,
+        width: '330px',
+        '--top': String(line + 1),
+        '--left': `${index * 330}px`,
         'z-index': String(namespace.length * 10),
       }}
       namespace={namespace}
