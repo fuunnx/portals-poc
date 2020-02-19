@@ -58,14 +58,13 @@
       2px 5px 10px 5px rgba(0, 0, 0, 0.2);
     position: relative;
     border-radius: var(--small-radius);
-    transition: 0.2s linear;
     min-width: 300px;
     position: absolute;
     top: 0;
     left: 0;
     width: calc(var(--width) * var(--ch));
     transform: translate(var(--left), calc(var(--top) * var(--lh)));
-    transition: 0.2s ease-out;
+    transition: 0.1s ease-out;
   }
 
   &.-targetted {

@@ -53,13 +53,14 @@ export const CodeEditor = makeSnabbdomElement<CodeEditorProps>(
     })
 
     let onDidScrollChange = editor.onDidScrollChange(() => {
-      editor.setScrollTop((prevProps.start || 0) * 18)
-      editor.setScrollLeft((prevProps.left || 0) * 7.22)
-    })
-
-    setTimeout(() => {
-      editor.setScrollTop((prevProps.start || 0) * 18)
-      editor.setScrollLeft((prevProps.left || 0) * 7.22)
+      const scrollTop = (prevProps.start || 0) * 18
+      const scrollLeft = (prevProps.left || 0) * 7.22
+      if (editor.getScrollTop() !== scrollTop) {
+        editor.setScrollTop(scrollTop)
+      }
+      if (editor.getScrollLeft() !== scrollLeft) {
+        editor.setScrollLeft(scrollLeft)
+      }
     })
 
     let onDidChangeCursorSelection = editor.onDidChangeCursorSelection(e => {
