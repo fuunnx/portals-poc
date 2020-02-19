@@ -1,8 +1,8 @@
 export const verbs = {
-  portalStart: 'PORTAL',
-  portalEnd: '/PORTAL',
-  warp: 'WARP',
-  id: '#',
+  portalStart: '[[',
+  portalEnd: ']]',
+  warp: 'invoke',
+  id: '_',
   comment: '//',
 }
 

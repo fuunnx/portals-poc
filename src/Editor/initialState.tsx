@@ -1,4 +1,25 @@
 import { State } from './index'
+import { verbs } from 'src/config'
+
+function id(name: string | number) {
+  return `${verbs.id}${name}`
+}
+
+function comment(...children: string[]) {
+  return `${verbs.comment} ${children.filter(Boolean).join(', ')}`
+}
+
+function portalStart(name: string | number) {
+  return `${verbs.portalStart} ${id(name)}`
+}
+
+function portalEnd(name: string | number) {
+  return `${verbs.portalEnd} ${id(name)}`
+}
+
+function warp(name: string | number) {
+  return `${verbs.warp} ${id(name)}`
+}
 
 export const initialState: State = {
   movable: false,
@@ -7,24 +28,24 @@ export const initialState: State = {
   draggedElement: undefined,
   selection: undefined,
   buffer: `
-// PORTAL #1
+${comment(portalStart(1))}
 function fibonnaci (n) {
-    // PORTAL #2
+    ${comment(portalStart(2))}
     if (n === 1) {
         return 1
     }
-    // /PORTAL #2
-    // PORTAL #3
+    ${comment(portalEnd(2))}
+    ${comment(portalStart(3))}
     return n + fibonnaci(n - 1)
-    // /PORTAL #3
-    // WARP #2, WARP #3
+    ${comment(portalEnd(3))}
+    ${comment(warp(2), warp(3))}
 }
-// /PORTAL #fibonnaci
+${comment(portalEnd('fibonnaci'))}
 
 fibonnaci(5) // = 15
 
 
-// WARP #fibonnaci
+${comment(warp('fibonnaci'))}
 
 html\`
 <grid columns="3">
@@ -36,12 +57,12 @@ html\`
         <img src="mauricette.jpg" />
         <h2>Mauricette</h2>
     </card>
-    // PORTAL #card
+    ${comment(portalStart('card'))}
     <card>
         <img src="albert.jpg" />
         <h2>Albert</h2>
     </card>
-    // /PORTAL #card
+    ${comment(portalEnd('card'))}
 </grid>
 \`
 `,
