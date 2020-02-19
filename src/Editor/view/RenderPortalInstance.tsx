@@ -5,7 +5,6 @@ import { EditorContent } from './EditorContent'
 import { Selection } from 'monaco-editor'
 
 type PortaProps = CleanPortal & {
-  width: number
   movable: boolean
   namespace: string[]
   portals: Dict<CleanPortal>

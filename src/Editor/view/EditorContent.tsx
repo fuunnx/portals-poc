@@ -1,4 +1,4 @@
-import { Symbol } from 'src/lang'
+import { Symbol, Destination, BoundingRect } from 'src/lang'
 import { CleanContext } from 'src/lang/parse/cleanupContent'
 import { RenderPortalInstance } from './RenderPortalInstance'
 import { Selection } from 'monaco-editor'
@@ -27,15 +27,32 @@ export function EditorContent(props: EditorContentProps) {
     selection,
   } = props
 
-  const children = content.map(line => {
-    let x = 0
-    let y = 0
-    return line.map((element, index) => {
-      const { width, portal } = EditorChild(x, element, index)
-      x += width
-      return portal
+  const destinations = content.map(line => {
+    return line.filter(
+      x => x.type === 'destination' && portals[x.for],
+    ) as Destination[]
+  })
+
+  const children = destinations.map(line => {
+    return line.map((element: Destination, index) => {
+      return EditorChild(element, index)
     })
   })
+
+  const holes = destinations.map(line => {
+    return line.map(
+      (element: Destination): BoundingRect => {
+        const portalBounds = portals[element.for].boundingRect
+        const portalHeight = portalBounds.lineEnd - portalBounds.lineStart
+        return {
+          ...portalBounds,
+          lineStart: element.position.line,
+          lineEnd: element.position.line + portalHeight,
+        }
+      },
+    )
+  })
+  console.log(holes)
 
   return (
     <div className="editor">
@@ -52,34 +69,15 @@ export function EditorContent(props: EditorContentProps) {
     </div>
   )
 
-  function EditorChild(offsetLeft: number, symbol: Symbol, index: number) {
-    if (symbol.type !== 'destination') {
-      return { width: 0 }
-    }
-
-    const matchingPortal = portals[symbol.for]
-    if (!matchingPortal) {
-      return { width: 0 }
-    }
-
-    const width = Math.max(
-      symbol.boundingRect.columnEnd - symbol.boundingRect.columnStart,
-      matchingPortal.boundingRect.columnEnd -
-        matchingPortal.boundingRect.columnStart,
-    )
-
-    return {
-      width,
-      portal: RenderPortalInstance(index, symbol, {
-        ...matchingPortal,
-        width,
-        movable,
-        namespace,
-        buffer,
-        portals,
-        targetted,
-        selection,
-      }),
-    }
+  function EditorChild(symbol: Destination, index: number) {
+    return RenderPortalInstance(index, symbol, {
+      ...portals[symbol.for],
+      movable,
+      namespace,
+      buffer,
+      portals,
+      targetted,
+      selection,
+    })
   }
 }
