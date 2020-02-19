@@ -32,7 +32,7 @@ export function view(state$: Stream<State>): Stream<VNode> {
             <input
               type="checkbox"
               attrs-action="toggle-preview"
-              checked={!state.disabled}
+              checked={state.disabled}
             />
             <div className="background" />
             <div className="button" />

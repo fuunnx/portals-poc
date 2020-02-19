@@ -9,5 +9,5 @@ export const verbs = {
 export const shortcuts = {
   duplicateModeOn: 'Alt',
   moveModeOn: 'Meta',
-  previewModeToggle: 'Control+Alt+KeyG',
+  previewModeToggle: 'Meta+Alt+KeyG',
 }

@@ -1,5 +1,4 @@
 import xs, { Stream, MemoryStream } from 'xstream'
-import dropRepeats from 'xstream/extra/dropRepeats'
 import { Sources } from '../index'
 import { shortcuts } from 'src/config'
 
@@ -47,6 +46,5 @@ export function intent(sources: Sources): Intents {
           .mapTo(false),
       )
       .startWith(false)
-      .compose(dropRepeats())
   }
 }
