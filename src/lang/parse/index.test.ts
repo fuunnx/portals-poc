@@ -4,6 +4,8 @@ import { parse } from './index'
 import { cleanupContext, to2dArray } from './cleanupContent'
 import { Token, Context, Symbol, Content } from '../types'
 import { map } from 'ramda'
+import { comment, portalStart, portalEnd, warp } from '../helpers'
+import { verbs } from 'src/config'
 
 function cleanup(context: Context): any {
   return cleanupContext(context, symbol => {
@@ -13,11 +15,6 @@ function cleanup(context: Context): any {
     return symbol
   })
 }
-
-// TODO use this util for better tests, currently left, right etc. make lot of noise in my tests
-const mapContent = <T = any>(mapper: (sym: Symbol) => T) => (
-  content: Content,
-) => map(map(mapper))
 
 test('empty text', () => {
   expect(cleanup(parse(''))).toEqual({
@@ -45,9 +42,9 @@ test('simple', () => {
   expect(
     cleanup(
       parse(`
-// PORTAL #1
+${comment(portalStart(1))}
 Hello guys
-// /PORTAL #1
+${comment(portalEnd(1))}
 
 How are you ?
 `),
@@ -62,14 +59,14 @@ test('with target', () => {
   expect(
     cleanup(
       parse(`
-// PORTAL #1
+${comment(portalStart(1))}
 Hello guys
 Tadaa
 Multiline
-// /PORTAL #1
+${comment(portalEnd(1))}
 
 How are you ?
-// WARP #1
+${comment(warp(1))}
 Hum
 `),
     ),
@@ -102,11 +99,11 @@ test('malformed', () => {
   expect(
     cleanup(
       parse(`
-// PORTAL #1
+${comment(portalStart(1))}
 Hello guys
 
 How are you ?
-// WARP #1
+${comment(warp(1))}
 `),
     ),
   ).toEqual({
@@ -119,16 +116,16 @@ test('nested', () => {
   expect(
     cleanup(
       parse(`
-// PORTAL #1
+${comment(portalStart(1))}
 Hello
-// PORTAL #2
+${comment(portalStart(2))}
 guys
-// /PORTAL #2
-// /PORTAL #1
+${comment(portalEnd(2))}
+${comment(portalEnd(1))}
 
 How are you ?
-// WARP #1
-// WARP #2
+${comment(warp(1))}
+${comment(warp(2))}
 `),
     ),
   ).toEqual({
@@ -354,11 +351,11 @@ test('move simple tokens bottom', () => {
 
 test('move complex tokens bottom', () => {
   const result = parse(
-    `// PORTAL #1
+    `${comment(portalStart(1))}
 1
-// /PORTAL #1
+${comment(portalEnd(1))}
 2
-// WARP #1
+${comment(warp(1))}
 3
 4`,
     { move: { id: '4', lineIndex: 7, columnIndex: 0 } },
@@ -401,11 +398,14 @@ test('move complex tokens bottom', () => {
 
 test('multiple tokens per line', () => {
   expect(
-    cleanupContext(parse(`// PORTAL #1, /PORTAL #1, WARP #1`), (x: Symbol) => {
-      delete x.id
-      delete x.position
-      return x
-    }).content,
+    cleanupContext(
+      parse(`${comment(portalStart(1), portalEnd(1), warp(1))}`),
+      (x: Symbol) => {
+        delete x.id
+        delete x.position
+        return x
+      },
+    ).content,
   ).toEqual([
     [
       {
@@ -414,7 +414,7 @@ test('multiple tokens per line', () => {
           lineStart: 0,
           lineEnd: 0,
           columnStart: 0,
-          columnEnd: 12,
+          columnEnd: comment('').length + portalStart(1).length,
         },
         for: '1',
       },
@@ -423,8 +423,13 @@ test('multiple tokens per line', () => {
         boundingRect: {
           lineStart: 0,
           lineEnd: 0,
-          columnStart: 13,
-          columnEnd: 24,
+          columnStart: comment('').length + portalStart(1).length + 1,
+          columnEnd:
+            comment('').length +
+            portalStart(1).length +
+            1 +
+            portalEnd(1).length +
+            1,
         },
         for: '1',
       },
@@ -433,8 +438,20 @@ test('multiple tokens per line', () => {
         boundingRect: {
           lineStart: 0,
           lineEnd: 0,
-          columnStart: 24,
-          columnEnd: 32,
+          columnStart:
+            comment('').length +
+            portalStart(1).length +
+            1 +
+            portalEnd(1).length +
+            1,
+          columnEnd:
+            comment('').length +
+            portalStart(1).length +
+            1 +
+            portalEnd(1).length +
+            1 +
+            warp(1).length +
+            1,
         },
         for: '1',
       },
@@ -445,7 +462,7 @@ test('multiple tokens per line', () => {
 test('move tokens right', () => {
   expect(
     cleanup(
-      parse(`// PORTAL #1, /PORTAL #1, WARP #1`, {
+      parse(`${comment(portalStart(1), portalEnd(1), warp(1))}`, {
         move: { id: '0', lineIndex: 0, columnIndex: 2 },
       }),
     ).content,

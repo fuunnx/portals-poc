@@ -1,25 +1,5 @@
 import { State } from './index'
-import { verbs } from 'src/config'
-
-function id(name: string | number) {
-  return `${verbs.id}${name}`
-}
-
-function comment(...children: string[]) {
-  return `${verbs.comment} ${children.filter(Boolean).join(', ')}`
-}
-
-function portalStart(name: string | number) {
-  return `${verbs.portalStart} ${id(name)}`
-}
-
-function portalEnd(name: string | number) {
-  return `${verbs.portalEnd} ${id(name)}`
-}
-
-function warp(name: string | number) {
-  return `${verbs.warp} ${id(name)}`
-}
+import { comment, portalStart, portalEnd, warp } from '../lang'
 
 export const initialState: State = {
   movable: false,
