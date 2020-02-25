@@ -1,10 +1,16 @@
 import './buffer.scss'
 import { VNodeStyle } from 'snabbdom/modules/style'
-import { editor as mEditor, Selection } from 'monaco-editor'
+import {
+  editor as mEditor,
+  Selection,
+  languages,
+  CancellationToken,
+} from 'monaco-editor'
 import { makeSnabbdomElement, Dict } from 'cycle-element/src'
 import { VNode, h } from '@cycle/dom'
 import { patch } from 'src/drivers'
 import merge from 'snabbdom-merge'
+import { BoundingRect } from 'src/lang'
 
 interface BufferElement {
   id?: string | number
@@ -19,6 +25,8 @@ interface BufferElement {
   width?: number
   namespace: string[]
   selection?: Selection
+  voids: BoundingRect[]
+  cuts: BoundingRect[]
 }
 
 type CodeEditorProps = {
@@ -27,6 +35,8 @@ type CodeEditorProps = {
   start: number
   left: number
   children?: VNode[]
+  voids: BoundingRect[]
+  cuts: BoundingRect[]
 } & Dict
 
 let model: mEditor.ITextModel
@@ -109,6 +119,18 @@ export const CodeEditor = makeSnabbdomElement<CodeEditorProps>(
         //   vtree = newVtree
         // })
 
+        // == view zones
+        editor.changeViewZones(accessor => {
+          props.voids.forEach(voidEl => {
+            let zoneId = accessor.addZone({
+              domNode: document.createElement('div'),
+              afterLineNumber: voidEl.lineStart + 1,
+              afterColumn: voidEl.columnStart,
+              heightInLines: voidEl.lineEnd - voidEl.lineStart + 1,
+            })
+          })
+        })
+
         // == end
         prevProps = props
       },
@@ -136,6 +158,8 @@ export function Buffer(props: BufferElement) {
     id,
     namespace,
     selection,
+    voids,
+    cuts,
   } = props
   const height = end - start + 1
 
@@ -146,6 +170,8 @@ export function Buffer(props: BufferElement) {
       value={value}
       left={left}
       start={start}
+      voids={voids}
+      cuts={cuts}
       data={{
         buffer: true,
         draggable: movable,

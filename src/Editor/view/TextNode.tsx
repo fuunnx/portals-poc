@@ -1,6 +1,7 @@
 import { isNil } from 'ramda'
 import { Buffer } from './Buffer'
 import { Selection } from 'monaco-editor'
+import { BoundingRect } from 'src/lang'
 
 type TextNodeProps = {
   id: string
@@ -11,6 +12,8 @@ type TextNodeProps = {
   right?: number
   width?: number
   movable: boolean
+  voids: BoundingRect[]
+  cuts: BoundingRect[]
   namespace: string[]
   buffer: string
   selection?: Selection
@@ -29,6 +32,8 @@ export function TextNode(x: TextNodeProps) {
       end={x.end}
       width={x.width}
       left={x.left}
+      voids={x.voids}
+      cuts={x.cuts}
       movable={x.movable && x.type !== 'text'}
       namespace={x.namespace}
       selection={x.selection}

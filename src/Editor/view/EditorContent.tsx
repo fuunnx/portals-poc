@@ -39,20 +39,31 @@ export function EditorContent(props: EditorContentProps) {
     })
   })
 
-  const holes = destinations.map(line => {
-    return line.map(
-      (element: Destination): BoundingRect => {
-        const portalBounds = portals[element.for].boundingRect
-        const portalHeight = portalBounds.lineEnd - portalBounds.lineStart
+  const voids = destinations
+    .map(line => {
+      const voidsInLine = line.map(
+        (element: Destination): BoundingRect => {
+          const portalBounds = portals[element.for].boundingRect
+          const portalHeight = portalBounds.lineEnd - portalBounds.lineStart
+          return {
+            ...portalBounds,
+            lineStart: element.position.line,
+            lineEnd: element.position.line + portalHeight,
+          }
+        },
+      )
+      return fold((max, bound) => {
         return {
-          ...portalBounds,
-          lineStart: element.position.line,
-          lineEnd: element.position.line + portalHeight,
+          columnStart: Math.min(max.columnStart, bound.columnStart),
+          columnEnd: Math.max(max.columnEnd, bound.columnEnd),
+          lineStart: Math.min(max.lineStart, bound.lineStart),
+          lineEnd: Math.max(max.lineEnd, bound.lineEnd),
         }
-      },
-    )
-  })
-  console.log(holes)
+      }, voidsInLine)
+    })
+    .filter(Boolean) as BoundingRect[]
+
+  const cuts = Object.values(portals).map(x => x.boundingRect)
 
   return (
     <div className="editor">
@@ -64,6 +75,8 @@ export function EditorContent(props: EditorContentProps) {
         movable={false}
         namespace={namespace}
         selection={selection}
+        voids={voids}
+        cuts={cuts}
       />
       {children}
     </div>
@@ -80,4 +93,10 @@ export function EditorContent(props: EditorContentProps) {
       selection,
     })
   }
+}
+function fold<T>(func: (acc: T, x: T) => T, array: T[]): T | undefined {
+  if (array.length <= 1) {
+    return array[0]
+  }
+  return array.slice(1).reduce(func, array[0])
 }
