@@ -44,10 +44,10 @@ export function Editor(sources: Sources): Sinks {
   const status = Status(sources)
 
   const update$ = updates(intent(sources))
+
+  const { state, time } = sources
   return {
-    DOM: view(
-      sources.state.stream.compose(dropRepeats(equals)) as MemoryStream<State>,
-    ),
+    DOM: view(state.stream.compose(time.throttleAnimation)),
     state: xs.merge(
       update$,
       portalManagement.state,
