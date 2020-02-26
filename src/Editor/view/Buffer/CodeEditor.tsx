@@ -19,6 +19,7 @@ type Zone = {
   afterColumn: number
   heightInLines: number
   id?: string
+  domNode?: HTMLElement
 }
 
 let model: mEditor.ITextModel
@@ -62,11 +63,10 @@ export const CodeEditor = makeSnabbdomElement<CodeEditorProps>(
     editor.onDidChangeModelContent(e => {
       emit(elm, 'monaco-changemodelcontent', model)
     })
-
+    let prevZones: Zone[] = []
     return {
       update(props) {
         const { selection, value, start, left, zones } = props
-
         // == diff selection
         diffSelection(editor, prevProps.selection, selection)
 
@@ -84,7 +84,7 @@ export const CodeEditor = makeSnabbdomElement<CodeEditorProps>(
         }
 
         // == diff zones
-        props.zones = diffZones(editor, prevProps.zones, zones)
+        prevZones = props.zones = diffZones(editor, prevZones, zones)
 
         // == end
         prevProps = props
@@ -112,16 +112,13 @@ function diffZones(
   }, {} as { [height: string]: Zone[] })
 
   let newZones: Zone[] = []
-
   editor.changeViewZones(accessor => {
     newZones = (zones || []).map(zone => {
       let height = zone.heightInLines
       const isNew = !indexedByHeight[height]?.length
       if (isNew) {
-        zone.id = accessor.addZone({
-          domNode: document.createElement('div'),
-          ...zone,
-        })
+        zone.domNode = zone.domNode || document.createElement('div')
+        zone.id = accessor.addZone(zone as mEditor.IViewZone)
         return zone
       }
 

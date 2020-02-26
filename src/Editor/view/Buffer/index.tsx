@@ -51,9 +51,9 @@ export function Buffer(props: BufferElement) {
       start={start}
       zones={voids.map(zone => {
         return {
-          afterLineNumber: zone.lineStart + 1,
-          afterColumn: zone.columnStart,
-          heightInLines: zone.lineEnd - zone.lineStart + 1,
+          afterLineNumber: Math.round(zone.lineStart + 1),
+          afterColumn: Math.round(zone.columnStart),
+          heightInLines: Math.round(zone.lineEnd - zone.lineStart + 1),
         }
       })}
       cuts={cuts}
