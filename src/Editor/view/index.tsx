@@ -23,7 +23,6 @@ export function view(state$: Stream<State>): Stream<VNode> {
 
       return (
         <div
-          key="editor-wrapper" // wtf double render
           class={{
             'editor-wrapper': true,
             '-movable': Boolean(state.movable || state.targetted),

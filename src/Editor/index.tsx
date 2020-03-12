@@ -45,9 +45,9 @@ export function Editor(sources: Sources): Sinks {
 
   const update$ = updates(intent(sources))
 
-  const { state, time } = sources
+  const { state } = sources
   return {
-    DOM: view(state.stream.compose(time.throttleAnimation)),
+    DOM: view(state.stream),
     state: xs.merge(
       update$,
       portalManagement.state,
