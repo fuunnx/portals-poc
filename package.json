@@ -48,7 +48,7 @@
     "prettier": "^1.15.3",
     "progress-bar-webpack-plugin": "^1.12.1",
     "rimraf": "^2.6.2",
-    "serialize-javascript": "^2.1.2",
+    "serialize-javascript": "^3.1.0",
     "simplytyped": "^3.2.3",
     "snabbdom-to-html": "^5.1.1",
     "ts-jest": "^24.0.2",
